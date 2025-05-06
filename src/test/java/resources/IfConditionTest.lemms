@@ -1,0 +1,7 @@
+x = 9 + 27;
+if(x > 18) 
+{
+    print("Line1");
+    print("Line2");
+    print("Line3");
+}
