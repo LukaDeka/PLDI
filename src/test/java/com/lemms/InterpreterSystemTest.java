@@ -13,7 +13,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mockStatic;
 
-class MainTest {
+class InterpreterSystemTest {
 
     @Test
     void helloWorldTest() {
