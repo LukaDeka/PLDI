@@ -1,0 +1,20 @@
+x = 9 + 27;
+if(x > 18) 
+{
+    print("Line1");
+    
+    if(x < 36) 
+    {
+        print("A");
+    }
+    else 
+    {
+        print("B");
+    }
+    
+    print("Gamma");
+}
+else 
+{
+    print("C");
+}
