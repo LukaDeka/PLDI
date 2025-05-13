@@ -1,23 +1,60 @@
 package com.lemms;
 
 public class Token {
-    int line;
-    String value;
-    String type;
+    private Type type;
+    private String value;
+    private int lineNum;
 
-    public Token(String value, int line, String type) {
+    public String getValue() {
+        return value;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public Type getLineNum() {
+        return lineNum;
+    }
+
+    public enum Type {
+        INT,
+        STRING,
+        BOOL,
+
+        ADDITION,
+        SUBTRACTION,
+        MULTIPLICATION,
+        DIVISION,
+        MODULO,
+
+        EQ,
+        NEQ,
+        GEQ,
+        LEQ,
+        GT,
+        LT,
+
+        AND,
+        OR,
+        NOT,
+
+        BRACKET_OPEN,
+        BRACKET_CLOSED,
+        CURLY_OPEN,
+        CURLY_CLOSED,
+
+        SEMICOLON,
+    }
+
+    public Token(Type type, String value, int line) {
         this.value = value;
         this.line = line;
         this.type = type;
     }
 
-    public static String determineType(){
-        return "?"; //typed not defined yet
-    }
-
     @Override
-   public String toString() {
-        //return String.format("(%s: %s (%s))",type, value, line);
-        return String.format("(%s)", value);
+    public String toString() {
+        return String.format("%s ", value);
     }
 }
