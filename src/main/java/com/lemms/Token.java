@@ -16,8 +16,8 @@ public class Token {
     }
 
     @Override
-    public String toString() {
-        return String.format("(%s: %s (%s))",type, value, line);
-
+   public String toString() {
+        //return String.format("(%s: %s (%s))",type, value, line);
+        return String.format("(%s)", value);
     }
 }

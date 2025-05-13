@@ -5,7 +5,7 @@ public class Parser {
 
     public Parser(Token[] tokens) {
         // Split based on semicolons
-        for (Token token in tokens) {
+        for (Token token : tokens) {
 
         }
     }
