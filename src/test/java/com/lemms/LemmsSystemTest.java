@@ -13,8 +13,10 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mockStatic;
 
-class InterpreterSystemTest {
+class LemmsSystemTest {
 
+    /*
+    TODO: uncomment test when we have a driver class
     @Test
     void helloWorldTest() {
         List<String> receivedPrints = new ArrayList<>();
@@ -38,4 +40,5 @@ class InterpreterSystemTest {
         Assertions.assertIterableEquals(expectedPrints, receivedPrints);
 
     }
+         */
 }

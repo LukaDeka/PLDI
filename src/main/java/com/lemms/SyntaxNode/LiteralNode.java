@@ -2,11 +2,11 @@ package com.lemms.SyntaxNode;
 
 import com.lemms.interpreter.ValueVisitor;
 
-public class VariableNode extends ValueNode {
+public class LiteralNode extends ValueNode {
 
     @Override
     public Object accept(ValueVisitor visitor) {
-        return visitor.visitVariableValue(this);
+        return visitor.visitLiteralValue(this);
     }
     
 }

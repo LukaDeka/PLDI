@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.Mockito.mockStatic;
 
 // filepath: src/test/java/com/lemms/MainTest.java
-class MainTest {
+class CompilationSmokeTest {
 
     @Test
     void testMain() {
