@@ -4,15 +4,18 @@ import com.lemms.SyntaxNode.*;
 
 public class Interpreter implements StatementVisitor, ValueVisitor {
     public Environment environment;
-    
-    public void interpret(StatementNode statementNode) {        
+
+    public void interpret(StatementNode statementNode) {
         statementNode.accept(this);
     }
 
     @Override
     public void visitIfStatement(IfNode ifNode) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'visitIfStatement'");
+        if (isTrue(ifNode.condition.accept(this))) {
+            ifNode.statement.accept(this);
+        } else {
+            ifNode.elseStatement.accept(this);
+        }
     }
 
     @Override
@@ -57,4 +60,11 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
         throw new UnsupportedOperationException("Unimplemented method 'visitOperatorValue'");
     }
 
+    private boolean isTrue(Object object) {
+        if (object == null)
+            return false;
+        if (object instanceof Boolean)
+            return (boolean) object;
+        return true;
+    }
 }
