@@ -9,7 +9,6 @@ public class BlockNode extends StatementNode {
 
     @Override
     public void accept(StatementVisitor visitor) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'accept'");
+        visitor.visitBlockStatement(this);
     }
 }

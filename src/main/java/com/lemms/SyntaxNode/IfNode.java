@@ -8,7 +8,6 @@ public class IfNode extends StatementNode {
     public StatementNode elseStatement;
     @Override
     public void accept(StatementVisitor visitor) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'accept'");
+        visitor.visitIfStatement(this);
     }
 }

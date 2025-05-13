@@ -7,7 +7,6 @@ public class PrintNode extends StatementNode {
 
     @Override
     public void accept(StatementVisitor visitor) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'accept'");
+        visitor.visitPrintStatement(this);
     }
 }

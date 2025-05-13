@@ -7,7 +7,6 @@ public class WhileNode extends StatementNode {
     public StatementNode statement;
     @Override
     public void accept(StatementVisitor visitor) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'accept'");
+        visitor.visitWhileStatement(this);
     }
 }

@@ -7,7 +7,6 @@ public class AssignmentNode extends StatementNode {
     ValueNode rightHandSide;
     @Override
     public void accept(StatementVisitor visitor) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'accept'");
+        visitor.visitAssignmentNode(this);
     }
 }
