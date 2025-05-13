@@ -4,24 +4,51 @@ import java.util.Scanner;
 
 public class Tokenizer {
 
-    private void readFile(String filename) {
-        try {
-            File file = new File(filename);
-            Scanner scanner = new Scanner(file);
-            while (scanner.hasNextLine()) {
-                String line = scanner.nextLine();
-                String[] tokens = line.split(" ");
-                for (String token : tokens) {
-                    System.out.println(token);
-                }
-            }
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+    private static Token[] tokens;
+
+    public static Token[] getTokens() {
+        return tokens;
+    }
+
+    public enum Type {
+        INT,
+        STRING,
+        BOOL,
+
+        ADDITION,
+        SUBTRACTION,
+        MULTIPLICATION,
+        DIVISION,
+        MODULO,
+
+        EQ,
+        NEQ,
+        GEQ,
+        LEQ,
+        GT,
+        LT,
+
+        AND,
+        OR,
+        NOT,
+
+        BRACKET_OPEN,
+        BRACKET_CLOSED,
+        CURLY_OPEN,
+        CURLY_CLOSED,
+
+        SEMICOLON,
+    }
+
+    public class Token {
+        public Type type;
+        public String value;
+    }
+
+    private void getNextToken(String file) {
     }
 
     public Tokenizer(File file) {
-
     }
 
     public static void main(String[] args) {
