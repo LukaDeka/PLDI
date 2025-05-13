@@ -2,7 +2,7 @@ package com.lemms.SyntaxNode;
 
 import com.lemms.interpreter.ValueVisitor;
 
-public class VariableNode extends ValueNode {
+public class LiteralNode extends ValueNode {
 
     @Override
     public void accept(ValueVisitor visitor) {

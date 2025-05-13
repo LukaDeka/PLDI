@@ -1,16 +1,8 @@
 package com.lemms.interpreter;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.List;
-
 import com.lemms.SyntaxNode.*;
 
-public class Interpreter implements StatementVisitor {
+public class Interpreter implements StatementVisitor, ValueVisitor {
     public Environment environment;
     
     public void interpret(StatementNode statementNode) {        
@@ -45,6 +37,24 @@ public class Interpreter implements StatementVisitor {
     public void visitAssignmentNode(AssignmentNode assignmentNode) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'visitAssignmentNode'");
+    }
+
+    @Override
+    public Object visitVariableValue(VariableNode variableNode) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'visitVariableValue'");
+    }
+
+    @Override
+    public Object visitLiteralValue(LiteralNode literalNode) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'visitLiteralValue'");
+    }
+
+    @Override
+    public Object visitOperatorValue(OperatorNode literalNode) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'visitOperatorValue'");
     }
 
 }
