@@ -8,9 +8,9 @@ public class OperatorNode extends ValueNode {
     public Object operator;
     public ValueNode leftOperand;
     public ValueNode rightOperand;
+    
     @Override
-    public void accept(ValueVisitor visitor) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'accept'");
+    public Object accept(ValueVisitor visitor) {
+        return visitor.visitOperatorValue(this);
     }
 }
