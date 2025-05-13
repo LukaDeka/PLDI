@@ -10,28 +10,41 @@ import java.util.List;
 
 import com.lemms.SyntaxNode.*;
 
-public class Interpreter {
+public class Interpreter implements StatementVisitor {
     public Environment environment;
     
     public void interpret(StatementNode statementNode) {        
-        
+        statementNode.accept(this);
     }
 
-    public void visitStatement(StatementNode statementNode) 
-    {
-        if(statementNode instanceof WhileNode) {
-            visitWhileNode((WhileNode)statementNode);
-        }
+    @Override
+    public void visitIfStatement(IfNode ifNode) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'visitIfStatement'");
     }
 
-    public Object evaluateValueNode(ValueNode valueNode) {
-        return Boolean.TRUE;
+    @Override
+    public void visitWhileStatement(WhileNode whileNode) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'visitWhileStatement'");
     }
 
-    public void visitWhileNode(WhileNode whileNode) {        
-        while (evaluateValueNode(whileNode.condition) == Boolean.TRUE) {
-            visitStatement(whileNode.statement);
-        }
+    @Override
+    public void visitBlockStatement(BlockNode blockNode) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'visitBlockStatement'");
+    }
+
+    @Override
+    public void visitPrintStatement(PrintNode printNode) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'visitPrintStatement'");
+    }
+
+    @Override
+    public void visitAssignmentNode(AssignmentNode assignmentNode) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'visitAssignmentNode'");
     }
 
 }

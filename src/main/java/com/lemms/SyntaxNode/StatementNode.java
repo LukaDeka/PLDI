@@ -1,7 +1,7 @@
 package com.lemms.SyntaxNode;
 
-public class StatementNode extends Node {
-    public void VisitNode(Visitor visitor) {
-        
-    }
+import com.lemms.interpreter.StatementVisitor;
+
+public abstract class StatementNode extends Node {
+    public abstract void accept(StatementVisitor visitor);
 }
