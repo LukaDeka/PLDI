@@ -4,16 +4,22 @@ import java.util.Scanner;
 
 public class Tokenizer {
 
-    private static Token[] tokens;
+    private static ArrayList<Token> tokens;
+    private static File file;
 
-    public static Token[] getTokens() {
+    public static ArrayList<Token> getTokens() {
         return tokens;
+    }
+
+    private void addToken(Type type) {
+        // tokens.add(new Token(type, ));
     }
 
     private void getNextToken(String file) {
     }
 
     public Tokenizer(File file) {
+        this.file = file;
     }
 
     public static void main(String[] args) {
