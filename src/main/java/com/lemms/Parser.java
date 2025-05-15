@@ -9,11 +9,15 @@ public class Parser {
 
     private ArrayList<Node> rootNodes;
 
-    public Parser(Token[] tokens) {
+    public Parser(ArrayList<Token> tokens) {
         // Split based on semicolons
         for (Token token : tokens) {
-            String x = token.value;
+            String x = token.getValue();
         }
+    }
+
+    public ArrayList<Node> getAST() {
+        return rootNodes;
     }
 
     public static void main(String[] args) {

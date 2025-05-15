@@ -3,7 +3,7 @@ package com.lemms;
 public class Token {
     private Type type;
     private String value;
-    private int lineNum;
+    private int line;
 
     public String getValue() {
         return value;
@@ -13,10 +13,28 @@ public class Token {
         return type;
     }
 
-    public Type getLineNum() {
-        return lineNum;
+    public int getLine() {
+        return line;
     }
 
+    public Token(String value, int line, Type type) {
+        this.value = value;
+        this.line = line;
+        this.type = type;
+    }
+
+    public static Type determineType(String value){
+        //TODO: logic for determine Token-Type based on String value (strong recommendation Pattern Matching)
+        //TODO: reevaluate Type - determination needed? eventually redundant due to parser and specified nodes
+        return Type.UNDEFINED;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s(%s)", value, line);
+    }
+
+    //TODO: reevaluate Type - determination needed? eventually redundant due to parser and specified nodes
     public enum Type {
         INT,
         STRING,
@@ -45,16 +63,7 @@ public class Token {
         CURLY_CLOSED,
 
         SEMICOLON,
-    }
 
-    public Token(Type type, String value, int line) {
-        this.value = value;
-        this.line = line;
-        this.type = type;
-    }
-
-    @Override
-    public String toString() {
-        return String.format("%s ", value);
+        UNDEFINED
     }
 }

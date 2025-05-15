@@ -1,14 +1,24 @@
 package com.lemms;
 
+import com.lemms.SyntaxNode.Node;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Interpreter {
+
+    /**
+     * @param nodes the AST or top-level-nodes of it
+     */
+    public Interpreter(ArrayList<Node> nodes) {
+        //toDo
+    }
 
     public static void runFile(String path) throws IOException {
 
