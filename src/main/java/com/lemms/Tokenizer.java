@@ -33,7 +33,7 @@ public class Tokenizer {
 
 
     public Tokenizer(Path path) {
-        path = Paths.get("src/main/resources/exampleCode2.txt"); //Alternativ mit ClassLoader //delete line later
+        path = Paths.get("src/main/resources/HelloWorld.lemms"); //Alternativ mit ClassLoader //delete line later
         System.out.println("Path: " + path);
         tokenize(path);
     }
@@ -72,8 +72,8 @@ public class Tokenizer {
 
 
 
-            System.out.println("T-Size: " + tokens.size());
-            System.out.println("Tokens: " + tokens);
+            //System.out.println("T-Size: " + tokens.size());
+            //System.out.println("Tokens: " + tokens);
 
         } catch (IOException e) {
             throw new RuntimeException(e);
