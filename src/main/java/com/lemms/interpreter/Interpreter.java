@@ -1,6 +1,10 @@
 package com.lemms.interpreter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.lemms.SyntaxNode.*;
+import com.lemms.Token.TokenType;
 
 public class Interpreter implements StatementVisitor, ValueVisitor {
     public Environment environment;
@@ -54,20 +58,103 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
 
     @Override
     public Object visitVariableValue(VariableNode variableNode) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'visitVariableValue'");
+        return environment.get(variableNode.name);
     }
 
     @Override
     public Object visitLiteralValue(LiteralNode literalNode) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'visitLiteralValue'");
+
+        return literalNode.value;
     }
 
+    private static List<TokenType> numericOperators = List.of(TokenType.ADDITION,
+            TokenType.SUBTRACTION,
+            TokenType.MULTIPLICATION,
+            TokenType.DIVISION,
+            TokenType.MODULO);
+
+    private static List<TokenType> booleanOperators = List.of(TokenType.AND,
+            TokenType.OR);
+
+    private static List<TokenType> comparisonOperators = List.of(TokenType.EQ,
+            TokenType.NEQ,
+            TokenType.GEQ,
+            TokenType.LEQ,
+            TokenType.GT,
+            TokenType.LT);
+
     @Override
-    public Object visitOperatorValue(OperatorNode literalNode) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'visitOperatorValue'");
+    public Object visitOperatorValue(OperatorNode operatorNode) {
+        if (numericOperators.contains(operatorNode.operator)) {
+            return evaluateNumericOperator(operatorNode);
+        } else if (booleanOperators.contains(operatorNode.operator)) {
+            return evaluateBooleanOperator(operatorNode);
+        } else if (comparisonOperators.contains(operatorNode.operator)) {
+            return evaluateComparisonOperators(operatorNode);
+        } else {
+            throw new RuntimeException("Unknown operator: " + operatorNode.operator);
+        }
+    }
+
+    private Object evaluateComparisonOperators(OperatorNode operatorNode) {
+        Object leftValue = operatorNode.leftOperand.accept(this);
+        Object rightValue = operatorNode.rightOperand.accept(this);
+
+        switch (operatorNode.operator) {
+            case EQ:
+                return leftValue.equals(rightValue);
+            case NEQ:
+                return !leftValue.equals(rightValue);
+            case GT:
+                return ((Comparable<Object>) leftValue).compareTo(rightValue) > 0;
+            case LT:
+                return ((Comparable<Object>) leftValue).compareTo(rightValue) < 0;
+            case GEQ:
+                return ((Comparable<Object>) leftValue).compareTo(rightValue) >= 0;
+            case LEQ:
+                return ((Comparable<Object>) leftValue).compareTo(rightValue) <= 0;
+            default:
+                throw new RuntimeException("Unknown operator: " + operatorNode.operator);
+        }
+    }
+
+    private Object evaluateBooleanOperator(OperatorNode operatorNode) {
+        boolean leftValue = isTrue(operatorNode.leftOperand.accept(this));
+        boolean rightValue = isTrue(operatorNode.rightOperand.accept(this));
+        switch (operatorNode.operator) {
+            case AND:
+                return leftValue && rightValue;
+            case OR:
+                return leftValue || rightValue;
+            default:
+                throw new RuntimeException("Unknown operator: " + operatorNode.operator);
+        }
+    }
+
+    private Object evaluateNumericOperator(OperatorNode operatorNode) {
+        int leftValue = (int) operatorNode.leftOperand.accept(this);
+        int rightValue = (int) operatorNode.rightOperand.accept(this);
+        switch (operatorNode.operator) {
+            case ADDITION:
+                return leftValue + rightValue;
+            case SUBTRACTION:
+                return leftValue - rightValue;
+            case MULTIPLICATION:
+                return leftValue * rightValue;
+            case DIVISION:
+                if (rightValue == 0) {
+                    throw new RuntimeException("Division by zero");
+                }
+                return leftValue / rightValue;
+            case MODULO:
+                if (rightValue == 0) {
+                    throw new RuntimeException("Division by zero");
+                }
+                return leftValue % rightValue;
+            default:
+                throw new RuntimeException("Unknown operator: " + operatorNode.operator);
+
+        }
     }
 
     private boolean isTrue(Object object) {

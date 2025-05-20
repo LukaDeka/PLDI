@@ -1,7 +1,7 @@
 package com.lemms;
 
 public class Token {
-    private Type type;
+    private TokenType type;
     private String value;
     private int line;
 
@@ -9,7 +9,7 @@ public class Token {
         return value;
     }
 
-    public Type getType() {
+    public TokenType getType() {
         return type;
     }
 
@@ -17,16 +17,16 @@ public class Token {
         return line;
     }
 
-    public Token(String value, int line, Type type) {
+    public Token(String value, int line, TokenType type) {
         this.value = value;
         this.line = line;
         this.type = type;
     }
 
-    public static Type determineType(String value){
+    public static TokenType determineType(String value){
         //TODO: logic for determine Token-Type based on String value (strong recommendation Pattern Matching)
         //TODO: reevaluate Type - determination needed? eventually redundant due to parser and specified nodes
-        return Type.UNDEFINED;
+        return TokenType.UNDEFINED;
     }
 
     @Override
@@ -35,7 +35,7 @@ public class Token {
     }
 
     //TODO: reevaluate Type - determination needed? eventually redundant due to parser and specified nodes
-    public enum Type {
+    public enum TokenType {
         INT,
         STRING,
         BOOL,
