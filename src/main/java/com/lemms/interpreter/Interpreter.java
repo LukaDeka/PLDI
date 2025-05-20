@@ -20,20 +20,30 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
 
     @Override
     public void visitWhileStatement(WhileNode whileNode) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'visitWhileStatement'");
+        while (isTrue(whileNode.condition.accept(this))) {
+            whileNode.statement.accept(this);
+        }
     }
 
     @Override
     public void visitBlockStatement(BlockNode blockNode) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'visitBlockStatement'");
+        for (StatementNode statement : blockNode.statements) {
+            statement.accept(this);
+        }
     }
 
     @Override
     public void visitPrintStatement(PrintNode printNode) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'visitPrintStatement'");
+        Object value = printNode.printValue.accept(this);
+        if (value instanceof String) {
+            System.out.println((String) value);
+        } else if (value instanceof Integer) {
+            System.out.println((Integer) value);
+        } else if (value instanceof Boolean) {
+            System.out.println((Boolean) value);
+        } else {
+            System.out.println(value);
+        }
     }
 
     @Override
