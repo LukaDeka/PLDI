@@ -1,15 +1,23 @@
 package com.lemms;
 
 public class Token {
-    private Type type;
-    private String value;
+    private TokenType type;
+    private String value = null;
     private int line;
+
+    public Token(TokenType type) {
+        this.type = type;
+    }
+    public Token(TokenType type, String value) {
+        this.type = type;
+        this.value = value;
+    }
 
     public String getValue() {
         return value;
     }
 
-    public Type getType() {
+    public TokenType getType() {
         return type;
     }
 
@@ -17,53 +25,53 @@ public class Token {
         return line;
     }
 
-    public Token(String value, int line, Type type) {
+    public Token(String value, int line, TokenType type) {
         this.value = value;
         this.line = line;
         this.type = type;
     }
 
-    public static Type determineType(String value){
-        //TODO: logic for determine Token-Type based on String value (strong recommendation Pattern Matching)
-        //TODO: reevaluate Type - determination needed? eventually redundant due to parser and specified nodes
-        return Type.UNDEFINED;
-    }
-
     @Override
     public String toString() {
-        return String.format("%s(%s)", value, line);
+        return String.format("\n%s(%s)", type, value);
     }
 
-    //TODO: reevaluate Type - determination needed? eventually redundant due to parser and specified nodes
-    public enum Type {
-        INT,
-        STRING,
-        BOOL,
+}
 
-        ADDITION,
-        SUBTRACTION,
-        MULTIPLICATION,
-        DIVISION,
-        MODULO,
+enum TokenType {
+    INT,
+    STRING,
+    BOOL,
 
-        EQ,
-        NEQ,
-        GEQ,
-        LEQ,
-        GT,
-        LT,
+    IDENTIFIER,
 
-        AND,
-        OR,
-        NOT,
+    PLUS,
+    MINUS,
+    MULTIPLICATION,
+    DIVISION,
+    MODULO,
 
-        BRACKET_OPEN,
-        BRACKET_CLOSED,
-        CURLY_OPEN,
-        CURLY_CLOSED,
+    ASSIGNMENT,
 
-        SEMICOLON,
+    EQ,
+    NEQ,
+    GEQ,
+    LEQ,
+    GT,
+    LT,
 
-        UNDEFINED
-    }
+    AND,
+    OR,
+    NOT,
+
+    BRACKET_OPEN,
+    BRACKET_CLOSED,
+    CURLY_OPEN,
+    CURLY_CLOSED,
+
+    SEMICOLON,
+    WHILE,
+    IF,
+    ELIF,
+    ELSE,
 }
