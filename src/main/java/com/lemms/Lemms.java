@@ -1,5 +1,7 @@
 package com.lemms;
 
+import com.lemms.interpreter.Interpreter;
+
 /*
      * Phases of Interpreter
      * 1. Lexing (Tokenizing)

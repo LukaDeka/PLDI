@@ -1,5 +1,6 @@
 package com.lemms.interpreter;
 
+import java.lang.Thread.State;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,11 +9,14 @@ import com.lemms.Token.TokenType;
 
 public class Interpreter implements StatementVisitor, ValueVisitor {
     public Environment environment;
-
-    public void interpret(StatementNode statementNode) {
+    public StatementNode program;
+    public Interpreter(StatementNode program) {
+        this.program = program;
+    }
+    public void interpret() {
         Environment globalEnvironment = new Environment();
         environment = globalEnvironment;
-        statementNode.accept(this);
+        program.accept(this);
     }
 
     @Override

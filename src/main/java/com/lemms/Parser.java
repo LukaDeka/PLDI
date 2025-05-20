@@ -1,5 +1,7 @@
 package com.lemms;
+import com.lemms.SyntaxNode.BlockNode;
 import com.lemms.SyntaxNode.Node;
+import com.lemms.SyntaxNode.StatementNode;
 
 import java.io.*;
 import java.lang.reflect.Array;
@@ -7,7 +9,7 @@ import java.util.ArrayList;
 
 public class Parser {
 
-    private ArrayList<Node> rootNodes;
+    private ArrayList<StatementNode> rootNodes;
 
     public Parser(ArrayList<Token> tokens) {
         // Split based on semicolons
@@ -16,8 +18,10 @@ public class Parser {
         }
     }
 
-    public ArrayList<Node> getAST() {
-        return rootNodes;
+    public StatementNode getAST() {
+        BlockNode blockNode = new BlockNode();
+        blockNode.statements = rootNodes;
+        return blockNode;
     }
 
     public static void main(String[] args) {
