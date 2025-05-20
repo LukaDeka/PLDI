@@ -35,6 +35,7 @@ public class Lemms {
         try {
             //String sourcePath = args[0];
             String sourcePath = "foo/bar/sourcePath.example (später mit command-line-args ersetzen)";
+            sourcePath = "src/main/resources/example1.txt";
 
             Tokenizer t = new Tokenizer(sourcePath);
             Parser p = new Parser(t.getTokens());

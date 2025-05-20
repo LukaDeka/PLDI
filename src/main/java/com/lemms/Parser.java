@@ -5,6 +5,7 @@ import com.lemms.SyntaxNode.WhileNode;
 import java.io.*;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class Parser {
 
@@ -36,8 +37,48 @@ public class Parser {
 
     private ArrayList<Node> rootNodes;
 
+
+    public void getStatement(ArrayList<Token> tokens){
+
+        Iterator<Token> iterator = tokens.iterator();
+        ArrayList<Token> result = new ArrayList<>();
+        Token current = iterator.next();
+
+        switch (current.getType()) {
+            case WHILE -> {}
+            case IF -> {}
+            case ELSE -> {}
+            case CURLY_OPEN -> {}
+            default -> {
+
+                while (current.getType()!=TokenType.SEMICOLON) {
+
+                    result.add(current);
+                    current = iterator.next();
+
+                }
+
+
+                current = iterator.next();
+                result.add(current);
+
+                System.out.println(result);
+
+            }
+        }
+
+
+
+    }
+
     public Parser(ArrayList<Token> fileTokens) {
         // Split based on semicolons
+
+
+        while (true) {
+            getStatement(fileTokens);  //Iterator<Token> iterator = tokens.iterator();
+        }
+
         int currentLine = 0;
         ArrayList<Token> line_tokens ;
 
@@ -48,7 +89,7 @@ public class Parser {
 
             if (line_tokens.isEmpty()) continue; // here an empty tree should be added
 
-            System.out.println(line_tokens);
+            //System.out.println(line_tokens);
 
             parseLine();
         }
