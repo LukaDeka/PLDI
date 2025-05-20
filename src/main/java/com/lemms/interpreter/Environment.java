@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class Environment {
     private final Map<String, Object> values = new HashMap<>();
-    private final Environment enclosing;
+    public final Environment enclosing;
 
     // Default constructor for global scope
     public Environment() {
@@ -30,7 +30,7 @@ public class Environment {
 
     public void assign(String name, Object value) {
         Environment env = findVariableEnv(name);
-
+        
         if (env == null) {
             values.put(name, value);
         } else {

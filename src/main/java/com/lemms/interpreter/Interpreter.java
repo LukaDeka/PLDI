@@ -10,30 +10,45 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
     public Environment environment;
 
     public void interpret(StatementNode statementNode) {
+        Environment globalEnvironment = new Environment();
+        environment = globalEnvironment;
         statementNode.accept(this);
     }
 
     @Override
     public void visitIfStatement(IfNode ifNode) {
+
         if (isTrue(ifNode.condition.accept(this))) {
+            environment = new Environment(environment);
             ifNode.statement.accept(this);
-        } else {
+            environment = environment.enclosing;
+        } else if (ifNode.elseStatement != null) {
+            environment = new Environment(environment);
             ifNode.elseStatement.accept(this);
+            environment = environment.enclosing;
         }
+        
+
     }
 
     @Override
     public void visitWhileStatement(WhileNode whileNode) {
+        
         while (isTrue(whileNode.condition.accept(this))) {
+            environment = new Environment(environment);
             whileNode.statement.accept(this);
+            environment = environment.enclosing;
         }
+        
     }
 
     @Override
     public void visitBlockStatement(BlockNode blockNode) {
+        environment = new Environment(environment);
         for (StatementNode statement : blockNode.statements) {
             statement.accept(this);
         }
+        environment = environment.enclosing;
     }
 
     @Override
