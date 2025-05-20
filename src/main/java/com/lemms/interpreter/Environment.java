@@ -17,17 +17,24 @@ public class Environment {
         this.enclosing = enclosing;
     }
 
-    private void define(String name, Object value) {
-        values.put(name, value);
+    private Environment findVariableEnv(String name) {
+        if (values.containsKey(name)) {
+            return this;
+        } else if (enclosing != null) {
+            Environment envFound = enclosing.findVariableEnv(name);
+            return envFound;
+        } else {
+            return null;
+        }
     }
 
     public void assign(String name, Object value) {
-        if (values.containsKey(name)) {
+        Environment env = findVariableEnv(name);
+
+        if (env == null) {
             values.put(name, value);
-        } else if (enclosing != null) {
-            enclosing.assign(name, value);
         } else {
-            // define(name, value);
+            env.values.put(name, value);
         }
     }
 
