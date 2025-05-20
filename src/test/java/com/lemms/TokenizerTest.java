@@ -1,6 +1,8 @@
 package com.lemms;
 import org.junit.Test;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
+
 import static org.testng.AssertJUnit.assertEquals;
 
 public class TokenizerTest {
@@ -50,7 +52,17 @@ IDENTIFIER(string____test_____),
 ASSIGNMENT(null), 
 STRING("")]
 """;
+        String normalizedExpected = normalize(expected);
+        String normalizedActual = normalize(tokens.toString());
+        assertEquals(normalizedExpected, normalizedActual);
+    }
 
-        assertEquals(expected, tokens.toString());
+    private String normalize(String input) {
+        return input
+                .replace("\r\n", "\n") // normalize Windows line endings
+                .lines()
+                .map(String::stripTrailing)
+                .collect(Collectors.joining("\n"))
+                .strip(); // remove leading/trailing newlines or spaces
     }
 }
