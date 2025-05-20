@@ -48,8 +48,8 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
 
     @Override
     public void visitAssignmentNode(AssignmentNode assignmentNode) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'visitAssignmentNode'");
+        Object value = assignmentNode.rightHandSide.accept(this);
+        environment.assign(assignmentNode.leftHandSide.name, value);
     }
 
     @Override
