@@ -1,5 +1,11 @@
 package com.lemms.SyntaxNode;
 
-public class ValueNode extends Node {
-    
+import com.lemms.Token;
+
+public class ValueNode extends ExpressionNode {
+
+    public ValueNode(Token valueToken) {
+        super();
+    }
+
 }

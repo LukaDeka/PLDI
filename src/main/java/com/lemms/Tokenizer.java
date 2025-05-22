@@ -171,7 +171,7 @@ public class Tokenizer {
     }
 
 //    public Tokenizer(Path path) {
-//        // path = Paths.get("src/main/resources/exampleCode2.txt"); //Alternativ mit ClassLoader //delete line later
+//        // path = Paths.get("src/main/resources/example2.txt"); //Alternativ mit ClassLoader //delete line later
 //        while (index < input_file.length()) {
 //            scanToken();
 //        }

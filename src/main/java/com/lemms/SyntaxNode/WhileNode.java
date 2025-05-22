@@ -1,6 +1,6 @@
 package com.lemms.SyntaxNode;
 
 public class WhileNode extends StatementNode {
-    ValueNode condition;
+    ExpressionNode condition;
     StatementNode statement;
 }
