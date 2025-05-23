@@ -1,6 +1,7 @@
 package com.lemms;
 
 import com.lemms.SyntaxNode.Node;
+import com.lemms.SyntaxNode.StatementNode;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,7 +17,7 @@ public class Interpreter {
     /**
      * @param nodes the AST or top-level-nodes of it
      */
-    public Interpreter(ArrayList<Node> nodes) {
+    public Interpreter(ArrayList<StatementNode> nodes) {
         //toDo
     }
 

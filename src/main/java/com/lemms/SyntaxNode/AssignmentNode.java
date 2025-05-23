@@ -17,12 +17,15 @@ public class AssignmentNode extends StatementNode {
     }
 
     public AssignmentNode(ArrayList<Token> tokens) {
-        checkTokenList(tokens,size-> size <= 3, TokenType.IDENTIFIER, TokenType.EQ);
+        //checkTokenList(tokens,size-> size >= 3, TokenType.IDENTIFIER, TokenType.ASSIGNMENT);
 
+        logger.info(tokens + "\n----- ASSIGNMENT -----");
         Token identifier = tokens.get(0);
         List<Token> expressionTokens = tokens.subList(2, tokens.size());
 
+        logger.info(identifier + "\n----- VARIABLE -----");
         VariableNode variableNode = new VariableNode(identifier);
+        logger.info(expressionTokens + "\n----- EXPRESSION -----");
         ExpressionNode expressionNode = ExpressionNode.parse(expressionTokens); //toDo: important! parsing a list of Tokens --> OperatorNode or ValueNode
 
         AssignmentNode assignmentNode = new AssignmentNode(variableNode, expressionNode);

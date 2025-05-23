@@ -1,11 +1,7 @@
 package com.lemms;
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.stream.Stream;
 
 import static com.lemms.TokenType.*;
 import static java.lang.Character.isAlphabetic;
@@ -23,7 +19,7 @@ public class Tokenizer {
     private void addToken(TokenType type, String text) {
         switch (type) {
             case PLUS, MINUS, MULTIPLICATION, DIVISION, MODULO, GT, LT, NOT,
-                 BRACKET_OPEN, BRACKET_CLOSED, CURLY_OPEN, CURLY_CLOSED, SEMICOLON, ASSIGNMENT:
+                 BRACKET_OPEN, BRACKET_CLOSED, BRACES_OPEN, BRACES_CLOSED, SEMICOLON, ASSIGNMENT:
                 index++;
                 break;
             case GEQ, LEQ, NEQ, EQ, AND, OR:
@@ -45,8 +41,8 @@ public class Tokenizer {
         switch (ch) {
             case '(': addToken(BRACKET_OPEN, null); return;
             case ')': addToken(BRACKET_CLOSED, null); return;
-            case '{': addToken(CURLY_OPEN, null); return;
-            case '}': addToken(CURLY_CLOSED, null); return;
+            case '{': addToken(BRACES_OPEN, null); return;
+            case '}': addToken(BRACES_CLOSED, null); return;
             case '-': addToken(MINUS, null); return;
             case '+': addToken(PLUS, null); return;
             case ';': addToken(SEMICOLON, null); return;

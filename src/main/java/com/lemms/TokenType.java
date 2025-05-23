@@ -28,12 +28,13 @@ public enum TokenType {
 
     BRACKET_OPEN,
     BRACKET_CLOSED,
-    CURLY_OPEN,
-    CURLY_CLOSED,
+    BRACES_OPEN,
+    BRACES_CLOSED,
 
     SEMICOLON,
     WHILE,
     IF,
     ELIF,
     ELSE,
+
 }

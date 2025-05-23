@@ -30,15 +30,24 @@ package com.lemms;
      *
      */
 
+import com.lemms.SyntaxNode.StatementNode;
+
+import java.util.ArrayList;
+
 public class Lemms {
     public static void main(String[] args) {
         try {
             //String sourcePath = args[0];
             String sourcePath = "foo/bar/sourcePath.example (später mit command-line-args ersetzen)";
-            sourcePath = "src/main/resources/example1.txt";
+            sourcePath = "src/main/resources/example1.1.txt";
 
             Tokenizer t = new Tokenizer(sourcePath);
             Parser p = new Parser(t.getTokens());
+            p.parseStatements();
+            ArrayList<StatementNode> x = p.getAST();
+
+            System.out.println(p.getAST().toString());
+
             Interpreter i = new Interpreter(p.getAST());
 
         } catch (ArrayIndexOutOfBoundsException e) {
