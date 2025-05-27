@@ -23,7 +23,7 @@ class InterpreterTest {
     
         assignmentNode.rightHandSide = new LiteralNode(value);
 
-        Interpreter interpreter = new Interpreter(assignmentNode);
+        Interpreter interpreter = new Interpreter(List.of(assignmentNode));
         interpreter.interpret();        
 
         assertEquals(interpreter.environment.get(variableName), value);
@@ -35,15 +35,14 @@ class InterpreterTest {
         int value1 = 9;
         int value2 = 18;
         AssignmentNode assignmentNode = new AssignmentNode();
-        assignmentNode.leftHandSide = new VariableNode();
-        assignmentNode.leftHandSide.name = variableName;        
+        assignmentNode.leftHandSide = new VariableNode(variableName);        
         OperatorNode operatorNode = new OperatorNode();
-        operatorNode.operator = TokenType.ADDITION;
+        operatorNode.operator = TokenType.PLUS;
         operatorNode.leftOperand = new LiteralNode(value1);
         operatorNode.rightOperand = new LiteralNode(value2);
         assignmentNode.rightHandSide = operatorNode;
 
-        Interpreter interpreter = new Interpreter(assignmentNode);
+        Interpreter interpreter = new Interpreter(List.of(assignmentNode));
         interpreter.interpret();        
 
         assertEquals(interpreter.environment.get(variableName), value1 + value2);
@@ -56,19 +55,19 @@ class InterpreterTest {
         int value = 27;
         
         AssignmentNode assignmentNode = new AssignmentNode();
-        assignmentNode.leftHandSide = new VariableNode();
+        assignmentNode.leftHandSide = new VariableNode(variableName1);
         assignmentNode.leftHandSide.name = variableName1;        
         assignmentNode.rightHandSide = new LiteralNode(value);
 
         AssignmentNode assignmentNode2 = new AssignmentNode();
-        assignmentNode2.leftHandSide = new VariableNode();
+        assignmentNode2.leftHandSide = new VariableNode(variableName2);
         assignmentNode2.leftHandSide.name = variableName2;        
         assignmentNode2.rightHandSide = assignmentNode.leftHandSide;
 
         BlockNode blockNode = new BlockNode();
         blockNode.statements = List.of(assignmentNode, assignmentNode2);
 
-        Interpreter interpreter = new Interpreter(blockNode);
+        Interpreter interpreter = new Interpreter(List.of(blockNode));
         interpreter.interpret();        
 
         assertEquals(interpreter.environment.get(variableName1), interpreter.environment.get(variableName2));

@@ -8,8 +8,8 @@ import com.lemms.TokenType;
 
 public class Interpreter implements StatementVisitor, ValueVisitor {
     public Environment environment;
-    public ArrayList<StatementNode> program;
-    public Interpreter(ArrayList<StatementNode> program) {
+    public List<StatementNode> program;
+    public Interpreter(List<StatementNode> program) {
         this.program = program;
     }
     public void interpret() {
