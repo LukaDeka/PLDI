@@ -7,7 +7,7 @@ import com.lemms.interpreter.Interpreter;
 import static org.junit.jupiter.api.Assertions.fail;
 
 // filepath: src/test/java/com/lemms/MainTest.java
-class CompilationSmokeTest {
+class interpreterTests {
 
     @Test
     void testMain() {

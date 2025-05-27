@@ -38,7 +38,7 @@ public class Lemms {
 
             Tokenizer t = new Tokenizer(sourcePath);
             Parser p = new Parser(t.getTokens());
-            Interpreter i = new Interpreter(p.getAST());
+            // Interpreter i = new Interpreter(p.getAST());
 
         } catch (ArrayIndexOutOfBoundsException e) {
             System.out.println("no path given");
