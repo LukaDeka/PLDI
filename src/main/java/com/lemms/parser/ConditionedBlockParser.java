@@ -30,7 +30,7 @@ public abstract class ConditionedBlockParser extends Node {
         // TODO PARSE CONDITION
         // ExpressionNode condition = ExpressionNode.parse(conditionTokens);
         logger.info(thenTokens + "\n----- THEN BLOCK -----");
-        BlockNode thenBlock = new BlockNode(thenTokens);
+        BlockNode thenBlock = new BlockNode();
 
         IfNode ifNode = new IfNode();
         ifNode.condition = null;
