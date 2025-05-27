@@ -9,13 +9,17 @@ import com.lemms.TokenType;
 public class Interpreter implements StatementVisitor, ValueVisitor {
     public Environment environment;
     public List<StatementNode> program;
+
     public Interpreter(List<StatementNode> program) {
         this.program = program;
     }
+
     public void interpret() {
         Environment globalEnvironment = new Environment();
         environment = globalEnvironment;
-        for (StatementNode i : program) {i.accept(this);}
+        for (StatementNode i : program) {
+            i.accept(this);
+        }
 
     }
 
@@ -31,19 +35,18 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
             ifNode.elseStatement.accept(this);
             environment = environment.enclosing;
         }
-        
 
     }
 
     @Override
     public void visitWhileStatement(WhileNode whileNode) {
-        
+
         while (isTrue(whileNode.condition.accept(this))) {
             environment = new Environment(environment);
             whileNode.statement.accept(this);
             environment = environment.enclosing;
         }
-        
+
     }
 
     @Override
