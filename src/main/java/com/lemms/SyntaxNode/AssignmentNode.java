@@ -30,7 +30,7 @@ public class AssignmentNode extends StatementNode {
         List<Token> expressionTokens = tokens.subList(2, tokens.size());
 
         logger.info(identifier + "\n----- VARIABLE -----");
-        VariableNode variableNode = new VariableNode(identifier);
+        VariableNode variableNode = new VariableNode(identifier.getValue());
         logger.info(expressionTokens + "\n----- EXPRESSION -----");
         ExpressionNode expressionNode = ExpressionNode.parse(expressionTokens); //toDo: important! parsing a list of Tokens --> OperatorNode or ValueNode
 
