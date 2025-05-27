@@ -58,7 +58,7 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
         environment = environment.enclosing;
     }
     
-    private void visitPrintStatement(FunctionNode printNode) {
+    private void visitPrintStatement(FunctionCallNode printNode) {
         Object value = printNode.params.get(0).accept(this);
         if (value instanceof String) {
             System.out.println((String) value);
@@ -187,7 +187,7 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
     }
 
     @Override
-    public Object visitFunctionValue(FunctionNode functionNode) {
+    public Object visitFunctionCallValue(FunctionCallNode functionNode) {
         if(functionNode.functionName.equals("print")) {
             visitPrintStatement(functionNode);
             return null; // print does not return a value
