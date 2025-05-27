@@ -33,45 +33,16 @@ public class Token {
 
     @Override
     public String toString() {
+
+        if (value == null)
+            return String.format("\n%s", type);
         return String.format("\n%s(%s)", type, value);
     }
 
-}
+    public String toString2() {
+        if (value == null)
+            return String.format("%s", type);
+        return String.format("%s(%s)", type, value);
+    }
 
-enum TokenType {
-    INT,
-    STRING,
-    BOOL,
-
-    IDENTIFIER,
-
-    PLUS,
-    MINUS,
-    MULTIPLICATION,
-    DIVISION,
-    MODULO,
-
-    ASSIGNMENT,
-
-    EQ,
-    NEQ,
-    GEQ,
-    LEQ,
-    GT,
-    LT,
-
-    AND,
-    OR,
-    NOT,
-
-    BRACKET_OPEN,
-    BRACKET_CLOSED,
-    CURLY_OPEN,
-    CURLY_CLOSED,
-
-    SEMICOLON,
-    WHILE,
-    IF,
-    ELIF,
-    ELSE,
 }
