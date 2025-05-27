@@ -63,11 +63,10 @@ class InterpreterTest {
         assignmentNode2.leftHandSide = new VariableNode(variableName2);
         assignmentNode2.leftHandSide.name = variableName2;        
         assignmentNode2.rightHandSide = assignmentNode.leftHandSide;
+        
+        List<StatementNode> program = List.of(assignmentNode, assignmentNode2);
 
-        BlockNode blockNode = new BlockNode();
-        blockNode.statements = List.of(assignmentNode, assignmentNode2);
-
-        Interpreter interpreter = new Interpreter(List.of(blockNode));
+        Interpreter interpreter = new Interpreter(program);
         interpreter.interpret();        
 
         assertEquals(interpreter.environment.get(variableName1), interpreter.environment.get(variableName2));
