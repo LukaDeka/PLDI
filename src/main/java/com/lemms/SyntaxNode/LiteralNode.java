@@ -2,7 +2,7 @@ package com.lemms.SyntaxNode;
 
 import com.lemms.interpreter.ValueVisitor;
 
-public class LiteralNode extends ValueNode {
+public class LiteralNode extends ExpressionNode {
 
     public final Object value;
     

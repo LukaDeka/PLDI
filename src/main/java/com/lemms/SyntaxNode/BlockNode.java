@@ -35,6 +35,5 @@ public class BlockNode extends StatementNode {
         Parser subTreeParser = new Parser(tokens);
         subTreeParser.parseStatements();
         this.statements = subTreeParser.getAST();
->>>>>>> parser
     }
 }
