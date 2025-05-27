@@ -99,7 +99,6 @@ public class Tokenizer {
                     addToken(OR, null);
                     return;
                 }
-                throw new Error("Illegal '|' in token");
         }
 
         // Identifier or keyword
@@ -107,9 +106,11 @@ public class Tokenizer {
             // Read until alphanumerics or underscores end
             int begin_index = index;
             char next_char = ch;
-            while (isAlphabetic(next_char) ||
-                        isDigit(next_char) ||
-                        next_char == '_') {
+            while (index < input_file.length() &&
+                    (isAlphabetic(next_char) ||
+                     isDigit(next_char) ||
+                     next_char == '_')
+            ) {
                 next_char = input_file.charAt(index + 1);
                 index++;
             }
@@ -155,8 +156,10 @@ public class Tokenizer {
         // Handle numbers
         if (isDigit(ch)) {
             int begin_index = index;
-            while (isDigit(input_file.charAt(index)) ||
-                    input_file.charAt(index) == '_') { // Allow formats like 1_000_000 for readability
+            while (index < input_file.length() &&
+                    (isDigit(input_file.charAt(index)) ||
+                     input_file.charAt(index) == '_')
+            ) { // Allow formats like 1_000_000 for readability
                 index++;
             }
             String new_token = input_file.substring(begin_index, index);
@@ -174,10 +177,19 @@ public class Tokenizer {
     }
 
 
-    public Tokenizer(String path) {
-        // this(Paths.get(path)); //Alternativ funktioniert auch mit ClassLoader
+
+    // For REPL
+    public Tokenizer(String program) {
+        input_file = program;
+        while (index < input_file.length()) {
+            scanToken();
+        }
+    }
+
+    // For reading files
+    public Tokenizer(File file) {
         try {
-            input_file = new Scanner(new File(path)).useDelimiter("\\Z").next();
+            input_file = new Scanner(file).useDelimiter("\\Z").next();
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -191,9 +203,8 @@ public class Tokenizer {
     }
 
     public static void main(String[] args) {
-        Tokenizer tokenizer = new Tokenizer("src/main/resources/example1.txt");
+        Tokenizer tokenizer = new Tokenizer(new File("src/main/resources/example1.txt"));
         ArrayList<Token> tokens = tokenizer.getTokens();
         System.out.println(tokens);
     }
-
 }
