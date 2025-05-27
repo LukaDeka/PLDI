@@ -1,6 +1,7 @@
 package com.lemms;
 import com.lemms.SyntaxNode.BlockNode;
 import com.lemms.SyntaxNode.Node;
+
 import com.lemms.SyntaxNode.StatementNode;
 import com.lemms.Exceptions.MissingTokenException;
 import com.lemms.Exceptions.UnexpectedToken;
@@ -15,6 +16,7 @@ import java.util.logging.SimpleFormatter;
 
 public class Parser {
     private static final Logger logger = Logger.getLogger(Parser.class.getName());
+
 
     static {
         ConsoleHandler handler = new ConsoleHandler();
@@ -114,6 +116,7 @@ public class Parser {
             logger.warning(e.getMessage());
         } finally {
             logger.info("END OF PARSER");
+
         }
     }
 

@@ -7,9 +7,14 @@ import static com.lemms.TokenType.*;
 import static java.lang.Character.isAlphabetic;
 import static java.lang.Character.isDigit;
 
+import static com.lemms.TokenType.*;
+import static java.lang.Character.isAlphabetic;
+import static java.lang.Character.isDigit;
+
 public class Tokenizer {
 
     private int index = 0;
+  
 
     private String input_file;
 
@@ -41,8 +46,10 @@ public class Tokenizer {
         switch (ch) {
             case '(': addToken(BRACKET_OPEN, null); return;
             case ')': addToken(BRACKET_CLOSED, null); return;
+
             case '{': addToken(BRACES_OPEN, null); return;
             case '}': addToken(BRACES_CLOSED, null); return;
+
             case '-': addToken(MINUS, null); return;
             case '+': addToken(PLUS, null); return;
             case ';': addToken(SEMICOLON, null); return;
@@ -166,12 +173,6 @@ public class Tokenizer {
         throw new Error("Illegal character in token: " + ch);
     }
 
-//    public Tokenizer(Path path) {
-//        // path = Paths.get("src/main/resources/example2.txt"); //Alternativ mit ClassLoader //delete line later
-//        while (index < input_file.length()) {
-//            scanToken();
-//        }
-//    }
 
     public Tokenizer(String path) {
         // this(Paths.get(path)); //Alternativ funktioniert auch mit ClassLoader

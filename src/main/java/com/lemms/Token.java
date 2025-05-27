@@ -33,6 +33,7 @@ public class Token {
 
     @Override
     public String toString() {
+
         if (value == null)
             return String.format("\n%s", type);
         return String.format("\n%s(%s)", type, value);
@@ -43,4 +44,5 @@ public class Token {
             return String.format("%s", type);
         return String.format("%s(%s)", type, value);
     }
+
 }
