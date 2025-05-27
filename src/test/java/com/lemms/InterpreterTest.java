@@ -2,7 +2,7 @@ package com.lemms;
 
 import org.junit.jupiter.api.Test;
 
-import com.lemms.Token.TokenType;
+import com.lemms.TokenType;
 import com.lemms.SyntaxNode.*;
 import com.lemms.interpreter.Interpreter;
 
@@ -19,8 +19,8 @@ class InterpreterTest {
         String variableName = "meaningOfLife";
         int value = 9;
         AssignmentNode assignmentNode = new AssignmentNode();
-        assignmentNode.leftHandSide = new VariableNode();
-        assignmentNode.leftHandSide.name = variableName;        
+        assignmentNode.leftHandSide = new VariableNode(variableName);
+    
         assignmentNode.rightHandSide = new LiteralNode(value);
 
         Interpreter interpreter = new Interpreter(assignmentNode);
