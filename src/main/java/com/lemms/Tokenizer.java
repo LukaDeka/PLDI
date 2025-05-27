@@ -1,11 +1,11 @@
 package com.lemms;
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.stream.Stream;
+
+import static com.lemms.TokenType.*;
+import static java.lang.Character.isAlphabetic;
+import static java.lang.Character.isDigit;
 
 import static com.lemms.TokenType.*;
 import static java.lang.Character.isAlphabetic;
@@ -14,15 +14,17 @@ import static java.lang.Character.isDigit;
 public class Tokenizer {
 
     private int index = 0;
+  
 
     private String input_file;
 
     private ArrayList<Token> tokens = new ArrayList<>();
 
+
     private void addToken(TokenType type, String text) {
         switch (type) {
             case PLUS, MINUS, MULTIPLICATION, DIVISION, MODULO, GT, LT, NOT,
-                 BRACKET_OPEN, BRACKET_CLOSED, CURLY_OPEN, CURLY_CLOSED, SEMICOLON, ASSIGNMENT:
+                 BRACKET_OPEN, BRACKET_CLOSED, BRACES_OPEN, BRACES_CLOSED, SEMICOLON, ASSIGNMENT:
                 index++;
                 break;
             case GEQ, LEQ, NEQ, EQ, AND, OR:
@@ -34,6 +36,7 @@ public class Tokenizer {
                 throw new Error("Forgot to implement token type: " + type);
         }
         tokens.add(new Token(type, text));
+
     }
 
     private void scanToken() {
@@ -43,8 +46,10 @@ public class Tokenizer {
         switch (ch) {
             case '(': addToken(BRACKET_OPEN, null); return;
             case ')': addToken(BRACKET_CLOSED, null); return;
-            case '{': addToken(CURLY_OPEN, null); return;
-            case '}': addToken(CURLY_CLOSED, null); return;
+
+            case '{': addToken(BRACES_OPEN, null); return;
+            case '}': addToken(BRACES_CLOSED, null); return;
+
             case '-': addToken(MINUS, null); return;
             case '+': addToken(PLUS, null); return;
             case ';': addToken(SEMICOLON, null); return;
@@ -168,12 +173,6 @@ public class Tokenizer {
         throw new Error("Illegal character in token: " + ch);
     }
 
-//    public Tokenizer(Path path) {
-//        // path = Paths.get("src/main/resources/exampleCode2.txt"); //Alternativ mit ClassLoader //delete line later
-//        while (index < input_file.length()) {
-//            scanToken();
-//        }
-//    }
 
     public Tokenizer(String path) {
         // this(Paths.get(path)); //Alternativ funktioniert auch mit ClassLoader

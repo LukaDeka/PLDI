@@ -1,16 +1,24 @@
 package com.lemms.SyntaxNode;
 
+import com.lemms.Token;
+import java.util.List;
 import com.lemms.interpreter.ValueVisitor;
 
-public class OperatorNode extends ValueNode {    
+public class OperatorNode extends ExpressionNode {
     
-    // TODO: What is the type of the operator?
-    public Object operator;
-    public ValueNode leftOperand;
-    public ValueNode rightOperand;
     
+    public com.lemms.TokenType operator;
+    public ExpressionNode leftOperand;
+    public ExpressionNode rightOperand;
+
     @Override
     public Object accept(ValueVisitor visitor) {
         return visitor.visitOperatorValue(this);
+    }
+
+    public OperatorNode() {}
+
+    public OperatorNode(ExpressionNode left, Token operator, ExpressionNode right) {
+        super();
     }
 }
