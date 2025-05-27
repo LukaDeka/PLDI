@@ -2,8 +2,16 @@ package com.lemms;
 
 public class Token {
     private TokenType type;
-    private String value;
+    private String value = null;
     private int line;
+
+    public Token(TokenType type) {
+        this.type = type;
+    }
+    public Token(TokenType type, String value) {
+        this.type = type;
+        this.value = value;
+    }
 
     public String getValue() {
         return value;
@@ -23,47 +31,16 @@ public class Token {
         this.type = type;
     }
 
-    public static TokenType determineType(String value){
-        //TODO: logic for determine Token-Type based on String value (strong recommendation Pattern Matching)
-        //TODO: reevaluate Type - determination needed? eventually redundant due to parser and specified nodes
-        return TokenType.UNDEFINED;
-    }
-
     @Override
     public String toString() {
-        return String.format("%s(%s)", value, line);
+        if (value == null)
+            return String.format("\n%s", type);
+        return String.format("\n%s(%s)", type, value);
     }
 
-    //TODO: reevaluate Type - determination needed? eventually redundant due to parser and specified nodes
-    public enum TokenType {
-        INT,
-        STRING,
-        BOOL,
-
-        ADDITION,
-        SUBTRACTION,
-        MULTIPLICATION,
-        DIVISION,
-        MODULO,
-
-        EQ,
-        NEQ,
-        GEQ,
-        LEQ,
-        GT,
-        LT,
-
-        AND,
-        OR,
-        NOT,
-
-        BRACKET_OPEN,
-        BRACKET_CLOSED,
-        CURLY_OPEN,
-        CURLY_CLOSED,
-
-        SEMICOLON,
-
-        UNDEFINED
+    public String toString2() {
+        if (value == null)
+            return String.format("%s", type);
+        return String.format("%s(%s)", type, value);
     }
 }

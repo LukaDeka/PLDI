@@ -1,0 +1,26 @@
+funny_var1=100_100_134;funny_var = "epic string\"string";
+{x = 1; x=2;}
+if(funny_var2!=100100134){x = 2;}
+;;;
+        whiletrue=true;whilefalse=false;
+
+string____test_____        =          "";
+
+
+{x = 1;
+x = 2;
+x = 3;
+x = 4;}
+
+while(something) { x == 5 ; x=1 ;;}
+while(funny_var2!=100100134){x = 2;}
+
+if(abc) { def } else { gef }
+if(abc) { def } elif ( 123 ){ pdf } else { gef }
+
+{x=1;
+x=2;
+{{x=3;x=4;x=5;}x=6;x=7;}}
+
+
+
