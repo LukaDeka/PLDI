@@ -72,12 +72,12 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
     @Override
     public void visitAssignmentNode(AssignmentNode assignmentNode) {
         Object value = assignmentNode.rightHandSide.accept(this);
-        environment.assign(assignmentNode.leftHandSide.name, value);
+        environment.assign(assignmentNode.leftHandSide.name.toString(), value);
     }
 
     @Override
     public Object visitVariableValue(VariableNode variableNode) {
-        return environment.get(variableNode.name);
+        return environment.get(variableNode.name.toString());
     }
 
     @Override

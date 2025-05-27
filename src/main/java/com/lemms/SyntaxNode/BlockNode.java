@@ -10,7 +10,7 @@ import static com.lemms.TokenType.*;
 import com.lemms.interpreter.StatementVisitor;
 
 public class BlockNode extends StatementNode {
-    List<? extends StatementNode> statements;
+    public List<? extends StatementNode> statements;
 
     @Override
     public void accept(StatementVisitor visitor) {
