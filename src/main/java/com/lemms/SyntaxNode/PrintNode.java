@@ -3,7 +3,7 @@ package com.lemms.SyntaxNode;
 import com.lemms.interpreter.StatementVisitor;
 
 public class PrintNode extends StatementNode {
-    public ValueNode printValue;
+    public ExpressionNode printValue;
 
     @Override
     public void accept(StatementVisitor visitor) {

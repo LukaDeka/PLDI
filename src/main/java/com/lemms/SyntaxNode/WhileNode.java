@@ -5,7 +5,7 @@ import com.lemms.Token;
 import java.util.ArrayList;
 
 public class WhileNode extends ConditionedBlock {
-    public ValueNode condition;
+    public ExpressionNode condition;
     public StatementNode statement;
     @Override
     public void accept(StatementVisitor visitor) {
