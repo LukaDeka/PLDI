@@ -2,13 +2,12 @@ package com.lemms.SyntaxNode;
 
 import com.lemms.Token;
 import java.util.List;
-import com.lemms.Token.TokenType;
 import com.lemms.interpreter.ValueVisitor;
 
 public class OperatorNode extends ExpressionNode {
     
     
-    public Object operator;
+    public com.lemms.TokenType operator;
     public ExpressionNode leftOperand;
     public ExpressionNode rightOperand;
 

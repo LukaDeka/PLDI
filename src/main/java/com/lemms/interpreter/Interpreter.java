@@ -1,5 +1,12 @@
 package com.lemms.interpreter;
 
+import static com.lemms.TokenType.EQ;
+import static com.lemms.TokenType.GEQ;
+import static com.lemms.TokenType.GT;
+import static com.lemms.TokenType.LEQ;
+import static com.lemms.TokenType.LT;
+import static com.lemms.TokenType.NEQ;
+
 import java.lang.Thread.State;
 import java.util.ArrayList;
 import java.util.List;
@@ -86,8 +93,8 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
         return literalNode.value;
     }
 
-    private static List<TokenType> numericOperators = List.of(TokenType.ADDITION,
-            TokenType.SUBTRACTION,
+    private static List<TokenType> numericOperators = List.of(TokenType.PLUS,
+            TokenType.MINUS,
             TokenType.MULTIPLICATION,
             TokenType.DIVISION,
             TokenType.MODULO);
@@ -154,9 +161,9 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
         int leftValue = (int) operatorNode.leftOperand.accept(this);
         int rightValue = (int) operatorNode.rightOperand.accept(this);
         switch (operatorNode.operator) {
-            case ADDITION:
+            case PLUS:
                 return leftValue + rightValue;
-            case SUBTRACTION:
+            case MINUS:
                 return leftValue - rightValue;
             case MULTIPLICATION:
                 return leftValue * rightValue;
