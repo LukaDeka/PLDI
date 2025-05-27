@@ -57,10 +57,9 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
         }
         environment = environment.enclosing;
     }
-
-    @Override
-    public void visitPrintStatement(PrintNode printNode) {
-        Object value = printNode.printValue.accept(this);
+    
+    private void visitPrintStatement(FunctionNode printNode) {
+        Object value = printNode.params.get(0).accept(this);
         if (value instanceof String) {
             System.out.println((String) value);
         } else if (value instanceof Integer) {
@@ -185,5 +184,14 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
         if (object instanceof Boolean)
             return (boolean) object;
         return true;
+    }
+
+    @Override
+    public Object visitFunctionValue(FunctionNode functionNode) {
+        if(functionNode.functionName.equals("print")) {
+            visitPrintStatement(functionNode);
+            return null; // print does not return a value
+        }
+        throw new RuntimeException("Unknown function: " + functionNode.functionName);
     }
 }
