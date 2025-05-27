@@ -1,13 +1,5 @@
 package com.lemms.interpreter;
 
-import static com.lemms.TokenType.EQ;
-import static com.lemms.TokenType.GEQ;
-import static com.lemms.TokenType.GT;
-import static com.lemms.TokenType.LEQ;
-import static com.lemms.TokenType.LT;
-import static com.lemms.TokenType.NEQ;
-
-import java.lang.Thread.State;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,14 +8,15 @@ import com.lemms.TokenType;
 
 public class Interpreter implements StatementVisitor, ValueVisitor {
     public Environment environment;
-    public StatementNode program;
-    public Interpreter(StatementNode program) {
+    public ArrayList<StatementNode> program;
+    public Interpreter(ArrayList<StatementNode> program) {
         this.program = program;
     }
     public void interpret() {
         Environment globalEnvironment = new Environment();
         environment = globalEnvironment;
-        program.accept(this);
+        for (StatementNode i : program) {i.accept(this);}
+
     }
 
     @Override
