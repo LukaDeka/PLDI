@@ -58,27 +58,21 @@ public class Parser {
                     case IF -> {
                         ArrayList<Token> ifTokens = addAllTokensUntil(TokenType.BRACES_CLOSED); //what about nested blocks??
                         logger.info(ifTokens + "\n----- CREATE IF BLOCK -----");
-                        rootNodes.add(new IfNode(ifTokens));
-                    }
 
-                    case ELIF -> {
-                        ArrayList<Token> elifTokens = addAllTokensUntil(TokenType.BRACES_CLOSED); //what about nested blocks??
-                        Node lastNode = rootNodes.get(rootNodes.size() -1 );
-                        if (lastNode instanceof IfNode ifNode) {
-                            logger.info(elifTokens + "\n----- CREATE ELIF BLOCK -----");
-                            ElifNode elifNode = new ElifNode(elifTokens);
-                            ifNode.addElif(elifNode);
-                        } else {
-                            throw new UnexpectedToken("ElifNode must have corresponding IfNode");
-                        }
+                        // TODO create the ifnode
+                        rootNodes.add(new IfNode());
                     }
+                    
 
                     case ELSE -> {
                         ArrayList<Token> elseToken = addAllTokensUntil(TokenType.BRACES_CLOSED); //what about nested blocks??
                         Node lastNode = rootNodes.get(rootNodes.size() -1 );
                         if (lastNode instanceof IfNode ifNode) {
                             logger.info(elseToken + "\n----- CREATE ELSE BLOCK -----");
-                            ElseNode elseNode = new ElseNode(elseToken);
+
+                            // TODO : create ElseNode
+                            StatementNode elseNode = null;
+
                             ifNode.addElseNode(elseNode);
                         } else {
                             throw new UnexpectedToken("ElseNode must have corresponding IfNode");
@@ -88,13 +82,16 @@ public class Parser {
                     case WHILE -> {
                         ArrayList<Token> whileTokens = addAllTokensUntil(TokenType.BRACES_CLOSED); //what about nested blocks??
                         logger.info(whileTokens + "\n----- CREATE WHILE BLOCK -----");
-                        rootNodes.add(new WhileNode(whileTokens));
+                        // todo create the whilenode
+                        rootNodes.add(new WhileNode());
                     }
 
                     case BRACES_OPEN -> {
                         ArrayList<Token> blockTokens = addAllTokensUntil(TokenType.BRACES_CLOSED); //ToDo: implementing logic to ignore other nested blocks! in addAllTokensUntil
                         logger.info(blockTokens + "\n----- CREATE BLOCK -----");
-                        rootNodes.add(new BlockNode(blockTokens));
+
+                        // TODO create the block node
+                        rootNodes.add(new BlockNode());
                     }
 
                     default -> {
@@ -105,7 +102,9 @@ public class Parser {
                             continue;
                         }
                         logger.info(assignmentNodes + "\n----- CREATE ASSIGNMENT NODE -----");
-                        rootNodes.add(new AssignmentNode(assignmentNodes));
+
+                        // TODO create the assignment node
+                        rootNodes.add(new AssignmentNode());
 
                     }
 

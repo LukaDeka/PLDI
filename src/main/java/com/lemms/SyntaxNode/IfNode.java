@@ -8,24 +8,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class IfNode extends ConditionedBlock {
+public class IfNode extends StatementNode {
 
     public ExpressionNode condition;
     public StatementNode statement;
-    private List<ElifNode> elifNodes = new ArrayList<>();
     public StatementNode elseStatement;
 
     @Override
     public void accept(StatementVisitor visitor) {
         visitor.visitIfStatement(this);
-    }
-
-    public IfNode(ArrayList<Token> tokens) {
-        super(tokens);
-    }
-
-    public void addElif(ElifNode elifNode) {
-        this.elifNodes.add(elifNode);
     }
 
     public void addElseNode(StatementNode elseStatement) {
