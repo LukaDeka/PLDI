@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AssignmentNode extends StatementNode {
-    VariableNode leftHandSide;
-    ExpressionNode rightHandSide;
+    public VariableNode leftHandSide;
+    public ExpressionNode rightHandSide;
 
     @Override
     public void accept(StatementVisitor visitor) {

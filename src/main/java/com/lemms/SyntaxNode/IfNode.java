@@ -10,10 +10,10 @@ import java.util.List;
 
 public class IfNode extends ConditionedBlock {
 
-    private ExpressionNode condition;
-    private StatementNode statement;
+    public ExpressionNode condition;
+    public StatementNode statement;
     private List<ElifNode> elifNodes = new ArrayList<>();
-    private StatementNode elseStatement;
+    public StatementNode elseStatement;
 
     @Override
     public void accept(StatementVisitor visitor) {

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.lemms.SyntaxNode.*;
-import com.lemms.Token.TokenType;
+import com.lemms.TokenType;
 
 public class Interpreter implements StatementVisitor, ValueVisitor {
     public Environment environment;
