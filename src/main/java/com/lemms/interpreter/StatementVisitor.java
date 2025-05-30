@@ -7,5 +7,6 @@ public interface StatementVisitor {
     public void visitWhileStatement(WhileNode whileNode);
     public void visitBlockStatement(BlockNode blockNode);
     public void visitAssignmentNode(AssignmentNode assignmentNode);
+    public void visitFunctionCallStatement(FunctionCallStatementNode functionCallStatementNode);
 
 }

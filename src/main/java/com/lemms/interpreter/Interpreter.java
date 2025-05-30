@@ -194,4 +194,9 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
         }
         throw new RuntimeException("Unknown function: " + functionNode.functionName);
     }
+
+    @Override
+    public void visitFunctionCallStatement(FunctionCallStatementNode functionNode) {
+        functionNode.functionCall.accept(this);        
+    }
 }
