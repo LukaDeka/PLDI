@@ -8,14 +8,18 @@ import com.lemms.TokenType;
 
 public class Interpreter implements StatementVisitor, ValueVisitor {
     public Environment environment;
-    public ArrayList<StatementNode> program;
-    public Interpreter(ArrayList<StatementNode> program) {
+    public List<StatementNode> program;
+
+    public Interpreter(List<StatementNode> program) {
         this.program = program;
     }
+
     public void interpret() {
         Environment globalEnvironment = new Environment();
         environment = globalEnvironment;
-        for (StatementNode i : program) {i.accept(this);}
+        for (StatementNode i : program) {
+            i.accept(this);
+        }
 
     }
 
@@ -31,19 +35,18 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
             ifNode.elseStatement.accept(this);
             environment = environment.enclosing;
         }
-        
 
     }
 
     @Override
     public void visitWhileStatement(WhileNode whileNode) {
-        
+
         while (isTrue(whileNode.condition.accept(this))) {
             environment = new Environment(environment);
             whileNode.statement.accept(this);
             environment = environment.enclosing;
         }
-        
+
     }
 
     @Override
@@ -54,10 +57,9 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
         }
         environment = environment.enclosing;
     }
-
-    @Override
-    public void visitPrintStatement(PrintNode printNode) {
-        Object value = printNode.printValue.accept(this);
+    
+    private void visitPrintStatement(FunctionCallNode printNode) {
+        Object value = printNode.params.get(0).accept(this);
         if (value instanceof String) {
             System.out.println((String) value);
         } else if (value instanceof Integer) {
@@ -182,5 +184,19 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
         if (object instanceof Boolean)
             return (boolean) object;
         return true;
+    }
+
+    @Override
+    public Object visitFunctionCallValue(FunctionCallNode functionNode) {
+        if(functionNode.functionName.equals("print")) {
+            visitPrintStatement(functionNode);
+            return null; // print does not return a value
+        }
+        throw new RuntimeException("Unknown function: " + functionNode.functionName);
+    }
+
+    @Override
+    public void visitFunctionCallStatement(FunctionCallStatementNode functionNode) {
+        functionNode.functionCall.accept(this);        
     }
 }

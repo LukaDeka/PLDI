@@ -29,7 +29,7 @@ public abstract class Node {
     }
 
     //Helper function
-    static void checkTokenList(List<Token> tokens, IntPredicate sizeCondition, TokenType... expectedTypes) {
+    public static void checkTokenList(List<Token> tokens, IntPredicate sizeCondition, TokenType... expectedTypes) {
         List<String> errors = new ArrayList<>();
 
         if (!sizeCondition.test(tokens.size())) {

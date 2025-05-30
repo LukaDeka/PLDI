@@ -30,7 +30,7 @@ public class Tokenizer {
             case GEQ, LEQ, NEQ, EQ, AND, OR:
                 index += 2;
                 break;
-            case IDENTIFIER, STRING, INT, BOOL, IF, ELIF, ELSE, WHILE: // Incrementation happens while reading
+            case IDENTIFIER, STRING, INT, BOOL, IF, ELSE, WHILE: // Incrementation happens while reading
                 break;
             default:
                 throw new Error("Forgot to implement token type: " + type);
@@ -121,8 +121,7 @@ public class Tokenizer {
             // Check against known keywords: true, false, if, elif, else, while
             switch (new_token) {
                 case "true", "false": addToken(BOOL, new_token); return;
-                case "if": addToken(IF, null); return;
-                case "elif": addToken(ELIF, null); return;
+                case "if": addToken(IF, null); return;                
                 case "else": addToken(ELSE, null); return;
                 case "while": addToken(WHILE, null); return;
             }
