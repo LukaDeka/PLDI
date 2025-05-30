@@ -9,6 +9,7 @@ import com.lemms.interpreter.Interpreter;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.util.ArrayList;
 import java.util.List;
 
 // filepath: src/test/java/com/lemms/MainTest.java
