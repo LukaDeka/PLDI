@@ -2,6 +2,7 @@ package com.lemms;
 import com.lemms.Exceptions.MissingTokenException;
 import com.lemms.Exceptions.UnexpectedToken;
 import com.lemms.SyntaxNode.*;
+import com.lemms.parser.ExpressionParser;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -38,7 +39,7 @@ public class Parser {
     public Parser(ArrayList<Token> tokens) {
         iterator = tokens.iterator(); //Iterator is like a HEAD or POINTER going through the Tokens, starting from Token the very first Token
     }
-
+    
     public void parseStatements() throws MissingTokenException {
         logger.info("BEGIN OF PARSER");
 
@@ -53,7 +54,8 @@ public class Parser {
                     case IF -> {
                         ArrayList<Token> ifTokens = addAllTokensUntil(TokenType.BRACES_CLOSED); //what about nested blocks??
                         logger.info(ifTokens + "\n----- CREATE IF BLOCK -----");
-                        rootNodes.add(new IfNode(ifTokens));
+                        IfNode ifNode = new IfNode(ifTokens);
+                        rootNodes.add(ifNode);
                     }
 
                     case ELIF -> {
@@ -87,7 +89,7 @@ public class Parser {
                     }
 
                     case BRACES_OPEN -> {
-                        ArrayList<Token> blockTokens = addAllTokensUntil(TokenType.BRACES_CLOSED); //ToDo: implementing logic to ignore other nested blocks! in addAllTokensUntil
+                        ArrayList<Token> blockTokens = addAllTokensUntil(TokenType.BRACES_CLOSED);
                         logger.info(blockTokens + "\n----- CREATE BLOCK -----");
                         rootNodes.add(new BlockNode(blockTokens));
                     }
@@ -193,10 +195,10 @@ public class Parser {
         //(Lukas Tokenizer funktioniert noch nicht ganz)
         //der folgende Code ist aber an sich nicht relevant
         ArrayList<Token> tokens = new ArrayList<>();
-        tokens.add(new Token("funny_var1", 1, TokenType.IDENTIFIER));
-        tokens.add(new Token(null, 1, TokenType.ASSIGNMENT));
-        tokens.add(new Token("100100134", 1, TokenType.INT));
-        tokens.add(new Token(null, 1, TokenType.SEMICOLON));
+//        tokens.add(new Token("funny_var1", 1, TokenType.IDENTIFIER));
+//        tokens.add(new Token(null, 1, TokenType.ASSIGNMENT));
+//        tokens.add(new Token("100100134", 1, TokenType.INT));
+//        tokens.add(new Token(null, 1, TokenType.SEMICOLON));
 
 //        tokens.add(new Token("funny_var", 1, TokenType.IDENTIFIER));
 //        tokens.add(new Token(null, 1, TokenType.ASSIGNMENT));

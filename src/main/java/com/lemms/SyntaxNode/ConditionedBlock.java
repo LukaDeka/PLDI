@@ -4,12 +4,13 @@ import java.util.ArrayList;
 import com.lemms.Parser;
 import com.lemms.Token;
 import com.lemms.TokenType;
+import com.lemms.parser.ExpressionParser;
 
 import static com.lemms.TokenType.*;
 
 abstract public class ConditionedBlock extends StatementNode{
-    ExpressionNode condition;
-    StatementNode thenBlock;
+    public ExpressionNode condition;
+    public StatementNode thenBlock;
 
     public ConditionedBlock(ArrayList<Token> tokens) {
         TokenType typeOfConditionedBlock = tokens.get(0).getType();
@@ -27,7 +28,7 @@ abstract public class ConditionedBlock extends StatementNode{
         ArrayList<Token> thenTokens = subTreeParser.addAllTokensUntil(BRACES_CLOSED);
 
         logger.info(conditionTokens + "\n----- CONDITION -----");
-        ExpressionNode condition = ExpressionNode.parse(conditionTokens);
+        ExpressionNode condition = new ExpressionParser(conditionTokens).parseExpression();
         logger.info(thenTokens + "\n----- THEN BLOCK -----");
         BlockNode thenBlock = new BlockNode(thenTokens);
 

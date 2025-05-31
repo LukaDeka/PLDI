@@ -31,14 +31,14 @@ public class Token {
         this.type = type;
     }
 
-    @Override
-    public String toString() {
+
+    public String toString2() {
         if (value == null)
             return String.format("\n%s", type);
         return String.format("\n%s(%s)", type, value);
     }
-
-    public String toString2() {
+    @Override
+    public String toString() {
         if (value == null)
             return String.format("%s", type);
         return String.format("%s(%s)", type, value);

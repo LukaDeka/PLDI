@@ -103,7 +103,7 @@ public abstract class Node {
 
     public String toIndentedString(int indent) {
         StringBuilder result = new StringBuilder();
-        String indentStr = " ".repeat(indent * 2); // z.B. 2 Leerzeichen pro Ebene
+        String indentStr = " ".repeat(indent * 5); // z.B. 2 Leerzeichen pro Ebene
 
         result.append(indentStr).append(this.getClass().getSimpleName()).append(" {\n");
         Field[] fields = this.getClass().getDeclaredFields();

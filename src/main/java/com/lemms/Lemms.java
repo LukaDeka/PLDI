@@ -30,6 +30,8 @@ package com.lemms;
      *
      */
 
+import com.lemms.SyntaxNode.AssignmentNode;
+import com.lemms.SyntaxNode.Node;
 import com.lemms.SyntaxNode.StatementNode;
 
 import java.util.ArrayList;
@@ -43,9 +45,9 @@ public class Lemms {
 
             Tokenizer t = new Tokenizer(sourcePath);
             Parser p = new Parser(t.getTokens());
+
             p.parseStatements();
             ArrayList<StatementNode> x = p.getAST();
-
             System.out.println(p.getAST().toString());
 
             Interpreter i = new Interpreter(p.getAST());
