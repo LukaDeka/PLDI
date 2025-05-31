@@ -34,7 +34,7 @@ public enum TokenType {
     SEMICOLON,
     WHILE,
     IF,
-    
+    ELIF,
     ELSE,
 
 }

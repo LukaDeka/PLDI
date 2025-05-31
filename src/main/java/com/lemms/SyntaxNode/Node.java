@@ -5,6 +5,8 @@ import com.lemms.TokenType;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.IntPredicate;
 import java.util.logging.ConsoleHandler;
@@ -95,56 +97,168 @@ public abstract class Node {
     }
 
 
+//
+//    @Override
+//    public String toString() {
+//        return toIndentedString(0);
+//    }
+//
+//    public String toIndentedString(int indent) {
+//        StringBuilder result = new StringBuilder();
+//        String indentStr = " ".repeat(indent * 5); // z.B. 2 Leerzeichen pro Ebene
+//
+//        result.append(indentStr).append(this.getClass().getSimpleName()).append(" {\n");
+//        Field[] fields = this.getClass().getDeclaredFields();
+//
+//        for (Field field : fields) {
+//            field.setAccessible(true);
+//            try {
+//                Object value = field.get(this);
+//                result.append(indentStr).append("  ").append(field.getName()).append(": ");
+//                if (value == null) {
+//                    result.append("null\n");
+//                } else if (value instanceof List<?> list) {
+//                    result.append("[\n");
+//                    int i = 0;
+//                    for (Object item : list) {
+//                        if (item instanceof Node) {
+//                            result.append(((Node) item).toIndentedString(indent + 2).stripTrailing());
+//                        } else {
+//                            result.append(" ".repeat((indent + 2) * 2)).append(item);
+//                        }
+//                        if (i < list.size() - 1) {
+//                            result.append(" ,\n");
+//                        } else {
+//                            result.append("\n");
+//                        }
+//                        i++;
+//                    }
+//                    result.append(indentStr).append("  ]\n");
+//
+//                } else if (value instanceof Node node) {
+//                    result.append("\n").append(node.toIndentedString(indent + 1));
+//                } else {
+//                    result.append(value).append("\n");
+//                }
+//            } catch (IllegalAccessException e) {
+//                result.append(indentStr).append("  ").append(field.getName()).append(": Zugriff nicht möglich\n");
+//            }
+//        }
+//        result.append(indentStr).append("}\n");
+//        return result.toString();
+//    }
 
     @Override
-    public String toString() {
-        return toIndentedString(0);
+    public final String toString() {
+        StringBuilder sb = new StringBuilder();
+        // Start mit einer leeren Einrückung für das oberste Objekt.
+        // Die buildStringRecursive Methode fügt dann den Klassennamen und öffnende Klammer hinzu.
+        buildStringRecursive(sb, "", this, true); // true für isTopLevelOrListItem
+        return sb.toString();
     }
 
-    public String toIndentedString(int indent) {
-        StringBuilder result = new StringBuilder();
-        String indentStr = " ".repeat(indent * 2); // z.B. 2 Leerzeichen pro Ebene
+    // Neuer Parameter: isTopLevelOrListItem - um zu steuern, ob der Klassenname und die Klammern
+    // direkt ohne vorherige Einrückung der Zeile geschrieben werden sollen.
+    private void buildStringRecursive(StringBuilder sb, String baseIndent, Object obj, boolean isFirstElementInLine) {
+        if (obj == null) {
+            if (!isFirstElementInLine) sb.append(baseIndent); // Nur einrücken, wenn nicht schon am Zeilenanfang
+            sb.append("null\n");
+            return;
+        }
 
-        result.append(indentStr).append(this.getClass().getSimpleName()).append(" {\n");
-        Field[] fields = this.getClass().getDeclaredFields();
+        // Für primitive Typen, Strings oder bekannte Klassen (wie Token) direkt deren toString() verwenden
+        if (obj.getClass().isPrimitive() || obj instanceof String || obj instanceof Number || obj instanceof Boolean || obj instanceof Token) {
+            if (!isFirstElementInLine) sb.append(baseIndent);
+            sb.append(String.valueOf(obj).replace("\n", "\n" + baseIndent)).append("\n");
+            return;
+        }
+
+        // Für Listen
+        if (obj instanceof List) {
+            List<?> list = (List<?>) obj;
+            if (!isFirstElementInLine) sb.append(baseIndent); // Einrückung für die öffnende Klammer der Liste
+
+            if (list.isEmpty()) {
+                sb.append("[]\n");
+            } else {
+                sb.append("[\n");
+                String listItemIndent = baseIndent + "  "; // Einrückung für jedes Listenelement
+                for (Object item : list) {
+                    // Jedes Listenelement startet auf einer neuen Zeile und ist eingerückt.
+                    // 'true' für isFirstElementInLine, da buildStringRecursive sich um die Einrückung kümmert.
+                    buildStringRecursive(sb, listItemIndent, item, true);
+                }
+                sb.append(baseIndent).append("]\n"); // Schließende Klammer der Liste
+            }
+            return;
+        }
+
+        // Nur für unsere Node-Subklassen die detaillierte Feldauflistung
+        if (!(obj instanceof Node)) {
+            if (!isFirstElementInLine) sb.append(baseIndent);
+            sb.append(String.valueOf(obj).replace("\n", "\n" + baseIndent)).append("\n");
+            return;
+        }
+
+        // Für Node-Instanzen: Klassennamen und Felder
+        if (isFirstElementInLine) { // Wenn es das erste Element in der Zeile ist (oberste Ebene oder Listenelement)
+            sb.append(baseIndent); // Die Basis-Einrückung für den Klassennamen anwenden
+        }
+        sb.append(obj.getClass().getSimpleName()).append(" {\n");
+
+        String fieldIndent = baseIndent + "  "; // Einrückung für die Felder dieses Nodes
+
+        List<Field> fields = getAllFields(new ArrayList<>(), obj.getClass());
+        // Optional: Felder nach Namen sortieren für konsistente Ausgabe
+        fields.sort(Comparator.comparing(Field::getName));
+
 
         for (Field field : fields) {
-            field.setAccessible(true);
-            try {
-                Object value = field.get(this);
-                result.append(indentStr).append("  ").append(field.getName()).append(": ");
-                if (value == null) {
-                    result.append("null\n");
-                } else if (value instanceof List<?> list) {
-                    result.append("[\n");
-                    int i = 0;
-                    for (Object item : list) {
-                        if (item instanceof Node) {
-                            result.append(((Node) item).toIndentedString(indent + 2).stripTrailing());
-                        } else {
-                            result.append(" ".repeat((indent + 2) * 2)).append(item);
-                        }
-                        if (i < list.size() - 1) {
-                            result.append(" ,\n");
-                        } else {
-                            result.append("\n");
-                        }
-                        i++;
-                    }
-                    result.append(indentStr).append("  ]\n");
+            // Bestimmte Felder ignorieren, falls nötig (z.B. interne Felder der Reflection-toString selbst)
+            if (field.getName().equals("this$0")) continue; // Internes Feld für innere Klassen
 
-                } else if (value instanceof Node node) {
-                    result.append("\n").append(node.toIndentedString(indent + 1));
+            try {
+                field.setAccessible(true);
+                Object value = field.get(obj);
+
+                sb.append(fieldIndent).append(field.getName()).append(": ");
+
+                if (value == null) {
+                    sb.append("null\n");
+                } else if (value instanceof Node || value instanceof List) {
+                    // Für Nodes oder Listen eine neue Zeile *vor* dem Wert,
+                    // und der rekursive Aufruf kümmert sich um die Einrückung des Werts.
+                    sb.append("\n");
+                    // 'true' für isFirstElementInLine, da der Wert des Feldes auf einer neuen Zeile beginnt
+                    // und seine eigene Einrückung (fieldIndent) erhält.
+                    buildStringRecursive(sb, fieldIndent, value, true);
                 } else {
-                    result.append(value).append("\n");
+                    // Für einfache Werte direkt anhängen, Einrückung wird durch baseIndent der Zeile erledigt.
+                    // Keine neue Zeile vor dem Wert, da es auf derselben Zeile wie der Feldname steht.
+                    sb.append(String.valueOf(value).replace("\n", "\n" + fieldIndent)).append("\n");
                 }
             } catch (IllegalAccessException e) {
-                result.append(indentStr).append("  ").append(field.getName()).append(": Zugriff nicht möglich\n");
+                sb.append(fieldIndent).append(field.getName()).append(": <inaccessible>\n");
             }
         }
-        result.append(indentStr).append("}\n");
-        return result.toString();
+        sb.append(baseIndent).append("}\n"); // Schließende Klammer des Nodes auf der Basis-Einrückungsebene
     }
+
+    private static List<Field> getAllFields(List<Field> fields, Class<?> type) {
+        // Nur Felder hinzufügen, die nicht statisch sind, da statische Felder nicht zum Zustand einer Instanz gehören
+        for (Field field : type.getDeclaredFields()) {
+            if (!java.lang.reflect.Modifier.isStatic(field.getModifiers())) {
+                fields.add(field);
+            }
+        }
+
+        if (type.getSuperclass() != null && type.getSuperclass() != Node.class && type.getSuperclass() != Object.class) {
+            getAllFields(fields, type.getSuperclass());
+        }
+        return fields;
+    }
+
+
 
 
 

@@ -1,16 +1,11 @@
 package com.lemms;
 
 import org.junit.jupiter.api.Test;
-
-import com.lemms.TokenType;
 import com.lemms.SyntaxNode.*;
 import com.lemms.interpreter.Interpreter;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
-
-import java.util.ArrayList;
-import java.util.List;
 
 // filepath: src/test/java/com/lemms/MainTest.java
 class InterpreterTest {
@@ -20,10 +15,10 @@ class InterpreterTest {
     void testAssignment() {
         String variableName = "meaningOfLife";
         int value = 9;
-        AssignmentNode assignmentNode = new AssignmentNode();
-        assignmentNode.leftHandSide = new VariableNode(variableName);
-    
-        assignmentNode.rightHandSide = new LiteralNode(value);
+        //meaningOfLife = 0
+        VariableNode variableNode = new VariableNode(variableName);
+        ExpressionNode expressionNode = new LiteralNode(value);
+        AssignmentNode assignmentNode = new AssignmentNode(variableNode, expressionNode);
 
         Interpreter interpreter = new Interpreter(List.of(assignmentNode));
         interpreter.interpret();        
@@ -36,13 +31,16 @@ class InterpreterTest {
         String variableName = "sum";
         int value1 = 9;
         int value2 = 18;
-        AssignmentNode assignmentNode = new AssignmentNode();
-        assignmentNode.leftHandSide = new VariableNode(variableName);        
-        OperatorNode operatorNode = new OperatorNode();
-        operatorNode.operator = TokenType.PLUS;
-        operatorNode.leftOperand = new LiteralNode(value1);
-        operatorNode.rightOperand = new LiteralNode(value2);
-        assignmentNode.rightHandSide = operatorNode;
+
+
+        Token operator = new Token(TokenType.PLUS);
+        ExpressionNode leftOperand = new LiteralNode(value1);
+        ExpressionNode rightOperand = new LiteralNode(value2);
+
+        ExpressionNode expressionNode = new OperatorNode(leftOperand, operator, rightOperand);
+        VariableNode variableNode= new VariableNode(variableName);
+        AssignmentNode assignmentNode = new AssignmentNode(variableNode, expressionNode);
+
 
         Interpreter interpreter = new Interpreter(List.of(assignmentNode));
         interpreter.interpret();        
@@ -56,15 +54,17 @@ class InterpreterTest {
         String variableName2 = "var2";
         int value = 27;
         
-        AssignmentNode assignmentNode = new AssignmentNode();
-        assignmentNode.leftHandSide = new VariableNode(variableName1);
-        assignmentNode.leftHandSide.name = variableName1;        
-        assignmentNode.rightHandSide = new LiteralNode(value);
 
-        AssignmentNode assignmentNode2 = new AssignmentNode();
-        assignmentNode2.leftHandSide = new VariableNode(variableName2);
-        assignmentNode2.leftHandSide.name = variableName2;        
-        assignmentNode2.rightHandSide = assignmentNode.leftHandSide;
+
+        VariableNode variableNode = new VariableNode(variableName1);
+        ExpressionNode expressionNode = new LiteralNode(value);
+        AssignmentNode assignmentNode = new AssignmentNode(variableNode,expressionNode);
+
+
+        VariableNode variableNode2 = new VariableNode(variableName2);
+        ExpressionNode expressionNode2 = new LiteralNode(value);
+        AssignmentNode assignmentNode2 = new AssignmentNode(variableNode,expressionNode);
+
         
         List<StatementNode> program = List.of(assignmentNode, assignmentNode2);
 
@@ -85,62 +85,66 @@ class InterpreterTest {
         int value1 = 0;
         int value2 = 1;
         
-        // n = 10
-        AssignmentNode assignmentNodeN = new AssignmentNode();
-        assignmentNodeN.leftHandSide = new VariableNode(variableNameN);         
-        assignmentNodeN.rightHandSide = new LiteralNode(n);
+        // n = 20
+        VariableNode n1 = new VariableNode(variableNameN);
+        ExpressionNode number20 = new LiteralNode(n);
+        AssignmentNode assignmentNodeN = new AssignmentNode(n1, number20);
 
         // a = 0
-        AssignmentNode assignmentNode = new AssignmentNode();
-        assignmentNode.leftHandSide = new VariableNode(variableName1);        
-        assignmentNode.rightHandSide = new LiteralNode(value1);
+        VariableNode a0  = new VariableNode(variableName1);
+        ExpressionNode nummber0  = new LiteralNode(value1);
+        AssignmentNode assignmentNode1 = new AssignmentNode(a0, nummber0);
 
         // b = 1
-        AssignmentNode assignmentNode2 = new AssignmentNode();
-        assignmentNode2.leftHandSide = new VariableNode(variableName2);        
-        assignmentNode2.rightHandSide = new LiteralNode(value2);
+        VariableNode b0  = new VariableNode(variableName2);
+        ExpressionNode number1 = new LiteralNode(value2);
+        AssignmentNode assignmentNode2 = new AssignmentNode(b0, number1);
         
         // while n >= 1
-        WhileNode whileNode = new WhileNode();
-        OperatorNode operatorNode = new OperatorNode();
-        whileNode.condition = operatorNode;
-        operatorNode.operator = TokenType.GEQ;
-        operatorNode.leftOperand = new VariableNode(variableNameN);
-        operatorNode.rightOperand = new LiteralNode(1);
+        VariableNode n2 = new VariableNode(variableNameN);
+        ExpressionNode number2 = new LiteralNode(1);
+        OperatorNode condition = new OperatorNode(n2, new Token(TokenType.GEQ), number2);
+
+        StatementNode statementNode = null; //optional
+        WhileNode whileNode = new WhileNode(condition, statementNode);
+
 
         // temp = a + b
-        AssignmentNode assignmentNodeTemp = new AssignmentNode();
-        assignmentNodeTemp.leftHandSide = new VariableNode("temp");        
-        OperatorNode operatorNode2 = new OperatorNode();
-        assignmentNodeTemp.rightHandSide = operatorNode2;
-        operatorNode2.operator = TokenType.PLUS;
-        operatorNode2.leftOperand = new VariableNode(variableName1);
-        operatorNode2.rightOperand = new VariableNode(variableName2);
+        VariableNode temp1 = new VariableNode("temp");
+
+        Token plus  = new Token(TokenType.PLUS);
+        VariableNode a1 = new VariableNode(variableName1);
+        VariableNode b1 = new VariableNode(variableName2);
+        ExpressionNode expressionNode3 = new OperatorNode(a1, plus, b1);
+
+        AssignmentNode assignmentNodeTemp = new AssignmentNode(temp1,expressionNode3);
+
 
         // a = b
-        AssignmentNode assignmentNode3 = new AssignmentNode();
-        assignmentNode3.leftHandSide = new VariableNode(variableName1);
-        assignmentNode3.rightHandSide = new VariableNode(variableName2);
+        VariableNode a2 = new VariableNode(variableName1);
+        VariableNode b2 = new VariableNode(variableName2);
+        AssignmentNode assignmentNode3 = new AssignmentNode(a2,b2);
+
         
         // b = temp
-        AssignmentNode assignmentNode4 = new AssignmentNode();
-        assignmentNode4.leftHandSide = new VariableNode(variableName2);
-        assignmentNode4.rightHandSide = new VariableNode("temp");
+        VariableNode b3 = new VariableNode(variableName2);
+        VariableNode temp3 = new VariableNode("temp");
+        AssignmentNode assignmentNode4 = new AssignmentNode(b3,temp3);
 
         // n = n - 1
-        AssignmentNode assignmentNode5 = new AssignmentNode();
-        assignmentNode5.leftHandSide = new VariableNode(variableNameN);
-        OperatorNode decrementN = new OperatorNode();
-        assignmentNode5.rightHandSide = decrementN;
-        decrementN.operator = TokenType.MINUS;
-        decrementN.leftOperand = new VariableNode(variableNameN);
-        decrementN.rightOperand = new LiteralNode(1);
 
-        BlockNode whileBlock = new BlockNode();
-        whileBlock.statements = List.of(assignmentNodeTemp, assignmentNode3, assignmentNode4, assignmentNode5);
-        whileNode.statement = whileBlock;
 
-        Interpreter interpreter = new Interpreter(List.of(assignmentNodeN, assignmentNode, assignmentNode2, whileNode));
+
+        VariableNode n5 = new VariableNode(variableNameN);
+        ExpressionNode expressionNode5 = new LiteralNode(1);
+        OperatorNode decrementN = new OperatorNode(n5, new Token(TokenType.MINUS), expressionNode5);
+        VariableNode n4 = new VariableNode(variableNameN);
+        AssignmentNode assignmentNode5 = new AssignmentNode(n4,decrementN);
+
+        BlockNode blockNode = new BlockNode(List.of(assignmentNodeTemp, assignmentNode3, assignmentNode4, assignmentNode5));
+        WhileNode whileBlock = new WhileNode(condition, blockNode);
+
+        Interpreter interpreter = new Interpreter(List.of(assignmentNodeN, assignmentNode1, assignmentNode2, whileNode));
 
         interpreter.interpret();        
 

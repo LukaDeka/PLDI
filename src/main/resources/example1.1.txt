@@ -1,6 +1,7 @@
 funny_var1=100_100_134;funny_var = "epic string\"string";
 {x = 1; x=2;}
 if(funny_var2!=100100134){x = 2;}
+if(funny_var2!=100100134){x = 2;} else {x = 3;}
 ;;;
         whiletrue=true;whilefalse=false;
 

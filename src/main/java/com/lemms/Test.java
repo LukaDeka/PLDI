@@ -30,7 +30,7 @@ public class Test {
                     System.out.println("Currently using "+ file.getName());
                     Tokenizer t = new Tokenizer(file);
                     Parser p = new Parser(t.getTokens());
-                    p.parseStatements();
+                    p.parse();
                     ArrayList<StatementNode> x = p.getAST();
 
                     System.out.println(p.getAST().toString());

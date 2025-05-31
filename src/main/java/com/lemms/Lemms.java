@@ -34,23 +34,21 @@ import com.lemms.interpreter.Interpreter;
 
 import com.lemms.SyntaxNode.StatementNode;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public class Lemms {
     public static void main(String[] args) {
         try {
-            //String sourcePath = args[0];
-            String sourcePath = "foo/bar/sourcePath.example (später mit command-line-args ersetzen)";
-            sourcePath = "src/main/resources/example1.1.txt";
+            String sourcePath = "foo/bar/sourcePath.example (später mit command-line-args ersetzen)"; sourcePath = "src/main/resources/example1.1.txt";  //String sourcePath = args[0];
+            File sourceFile = new File(sourcePath);
 
-            Tokenizer t = new Tokenizer(sourcePath);
+            //Verknüpfung: Tokenizer + Parser + Interpreter
+            Tokenizer t = new Tokenizer(sourceFile);
             Parser p = new Parser(t.getTokens());
-            p.parseStatements();
-            ArrayList<StatementNode> x = p.getAST();
+            Interpreter i = new Interpreter(p.parse());
 
-            System.out.println(p.getAST().toString());
-
-            Interpreter i = new Interpreter(p.getAST());
+            System.out.println(p.getAST());
 
         } catch (ArrayIndexOutOfBoundsException e) {
             System.out.println("no path given");

@@ -12,6 +12,10 @@ import com.lemms.interpreter.StatementVisitor;
 public class BlockNode extends StatementNode {
     public List<? extends StatementNode> statements;
 
+    public BlockNode(List<? extends StatementNode> statements) {
+        this.statements = statements;
+    }
+
     @Override
     public void accept(StatementVisitor visitor) {
         visitor.visitBlockStatement(this);

@@ -1,10 +1,11 @@
 package com.lemms.interpreter;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.lemms.SyntaxNode.*;
 import com.lemms.TokenType;
+
+import static com.lemms.TokenType.*;
 
 public class Interpreter implements StatementVisitor, ValueVisitor {
     public Environment environment;
@@ -74,12 +75,12 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
     @Override
     public void visitAssignmentNode(AssignmentNode assignmentNode) {
         Object value = assignmentNode.rightHandSide.accept(this);
-        environment.assign(assignmentNode.leftHandSide.name.toString(), value);
+        environment.assign(assignmentNode.leftHandSide.name, value);
     }
 
     @Override
     public Object visitVariableValue(VariableNode variableNode) {
-        return environment.get(variableNode.name.toString());
+        return environment.get(variableNode.name);
     }
 
     @Override
@@ -98,7 +99,7 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
             TokenType.OR);
 
     private static List<TokenType> comparisonOperators = List.of(TokenType.EQ,
-            TokenType.NEQ,
+            NEQ,
             TokenType.GEQ,
             TokenType.LEQ,
             TokenType.GT,
@@ -106,11 +107,11 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
 
     @Override
     public Object visitOperatorValue(OperatorNode operatorNode) {
-        if (numericOperators.contains(operatorNode.operator)) {
+        if (numericOperators.contains(operatorNode.operator.getType())) {
             return evaluateNumericOperator(operatorNode);
-        } else if (booleanOperators.contains(operatorNode.operator)) {
+        } else if (booleanOperators.contains(operatorNode.operator.getType())) {
             return evaluateBooleanOperator(operatorNode);
-        } else if (comparisonOperators.contains(operatorNode.operator)) {
+        } else if (comparisonOperators.contains(operatorNode.operator.getType())) {
             return evaluateComparisonOperators(operatorNode);
         } else {
             throw new RuntimeException("Unknown operator: " + operatorNode.operator);
@@ -121,7 +122,7 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
         Object leftValue = operatorNode.leftOperand.accept(this);
         Object rightValue = operatorNode.rightOperand.accept(this);
 
-        switch (operatorNode.operator) {
+        switch (operatorNode.operator.getType()) {
             case EQ:
                 return leftValue.equals(rightValue);
             case NEQ:
@@ -142,7 +143,7 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
     private Object evaluateBooleanOperator(OperatorNode operatorNode) {
         boolean leftValue = isTrue(operatorNode.leftOperand.accept(this));
         boolean rightValue = isTrue(operatorNode.rightOperand.accept(this));
-        switch (operatorNode.operator) {
+        switch (operatorNode.operator.getType()) {
             case AND:
                 return leftValue && rightValue;
             case OR:
@@ -155,7 +156,7 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
     private Object evaluateNumericOperator(OperatorNode operatorNode) {
         int leftValue = (int) operatorNode.leftOperand.accept(this);
         int rightValue = (int) operatorNode.rightOperand.accept(this);
-        switch (operatorNode.operator) {
+        switch (operatorNode.operator.getType()) {
             case PLUS:
                 return leftValue + rightValue;
             case MINUS:
