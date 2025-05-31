@@ -14,10 +14,10 @@ public class IfNode extends ConditionedBlock {
     private List<ElifNode> elifNodes = new ArrayList<>();
     private ElseNode elseNode;
 
-
-    public IfNode(ArrayList<Token> tokens) {
-        super(tokens);
+    public IfNode(ExpressionNode condition, StatementNode thenBlock){
+        super(condition, thenBlock);
     }
+
 
     public void addElif(ElifNode elifNode) {
         this.elifNodes.add(elifNode);
@@ -31,21 +31,13 @@ public class IfNode extends ConditionedBlock {
         }
     }
 
+
+
 //    @Override
 //    public String toString() {
-//        String result = "";
-//        result += "condition: " + this.condition;
-//        result += "elifNodes: " + this.elifNodes;
-//        result += "elseNode: " + this.elseNode;
+//        String result = "IfNode { \ncondition: " + condition +",\nelifNodes= " + elifNodes + ",\nelseNode=" + elseNode + "}";
+//
 //        return result;
 //    }
-
-
-    @Override
-    public String toString() {
-        String result = "IfNode { \ncondition: " + condition +",\nelifNodes= " + elifNodes + ",\nelseNode=" + elseNode + "}";
-
-        return result;
-    }
 }
 

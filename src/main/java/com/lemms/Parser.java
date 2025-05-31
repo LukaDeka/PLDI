@@ -3,30 +3,48 @@ import com.lemms.Exceptions.MissingTokenException;
 import com.lemms.Exceptions.UnexpectedToken;
 import com.lemms.SyntaxNode.*;
 import com.lemms.parser.ExpressionParser;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.LogRecord;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
+import java.util.logging.*;
+
+import static com.lemms.TokenType.*;
+import static com.lemms.TokenType.BRACES_CLOSED;
+
 
 public class Parser {
     private static final Logger logger = Logger.getLogger(Parser.class.getName());
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(Parser.class);
 
     static {
         ConsoleHandler handler = new ConsoleHandler();
         handler.setFormatter(new SimpleFormatter() {
             @Override
             public synchronized String format(LogRecord record) {
-                String blue = "\u001B[34m";
+                String color = "\u001B[34m";
                 String reset = "\u001B[0m";
-                return blue + record.getMessage() + reset+ "\n"; // z.B. nur die Nachricht ausgeben
+
+                switch (record.getLevel().getName()) {
+                    case "INFO":
+                        color = "\u001B[34m"; // Blau
+                        break;
+                    case "SEVERE":
+                        color = "\u001B[36m"; // Cyan
+                        break;
+                    default:
+                        //color = "\u001B[31m"; // Rot
+                        color = "\u001B[33m"; // Gelb für andere Levels
+                        //color = "\u001B[32m"; // Grün
+                }
+                return color + record.getMessage() + reset+ "\n"; // z.B. nur die Nachricht ausgeben
             }
+
         });
         logger.setUseParentHandlers(false); // verhindert doppelte Logs
         logger.addHandler(handler);
     }
+
 
     private final ArrayList<StatementNode> rootNodes = new ArrayList<>();
     private Token current;
@@ -39,7 +57,83 @@ public class Parser {
     public Parser(ArrayList<Token> tokens) {
         iterator = tokens.iterator(); //Iterator is like a HEAD or POINTER going through the Tokens, starting from Token the very first Token
     }
-    
+
+    private AssignmentNode parseAssignment(ArrayList<Token> tokens) {
+        //checkTokenList(tokens,size-> size >= 3, TokenType.IDENTIFIER, TokenType.ASSIGNMENT);
+
+        logger.severe(tokens + "\n----- ASSIGNMENT -----");
+        Token identifier = tokens.get(0);
+        ArrayList<Token> expressionTokens = new ArrayList<>(tokens.subList(2, tokens.size()));
+
+        logger.severe(identifier + "\n----- VARIABLE -----");
+        VariableNode variableNode = new VariableNode(identifier);
+
+        logger.severe(expressionTokens + "\n----- EXPRESSION -----");
+        ExpressionNode expressionNode = new ExpressionParser(expressionTokens).parseExpression();
+
+        return new AssignmentNode(variableNode, expressionNode);
+    }
+
+
+    private BlockNode parseBlock(ArrayList<Token> tokens, String blockType){
+        //checkTokenList(tokens,size -> size >= 3, BRACES_OPEN, null, BRACES_CLOSED);
+        logger.severe(String.format("%s \n----- %s BLOCK -----",tokens, blockType));
+
+        //removing braces
+        tokens.remove(0);
+        tokens.remove(tokens.size()-1);
+
+        Parser subTreeParser = new Parser(tokens);
+        subTreeParser.parseStatements();
+
+        switch (blockType){
+            case "" -> {return new BlockNode(subTreeParser.getAST());}
+            case "ELSE" -> {return new ElseNode(subTreeParser.getAST());}
+
+        }
+        return new BlockNode(subTreeParser.getAST());
+    }
+
+    private BlockNode parseBlock(ArrayList<Token> tokens){
+        return parseBlock(tokens,"");
+    }
+
+    private ElseNode parseElse(ArrayList<Token> tokens){
+
+        ArrayList<Token> blockTokens = new ArrayList<>(tokens.subList(1,tokens.size()));
+        String blockType = tokens.get(0).getType().toString();
+        return (ElseNode) parseBlock(blockTokens, blockType);
+    }
+
+    private ConditionedBlock parseConditionedBlock(ArrayList<Token> tokens){
+        TokenType typeOfConditionedBlock = tokens.get(0).getType();
+
+//        checkTokenList(
+//                tokens,
+//                size -> size >= (1+3+3),
+//                typeOfConditionedBlock, BRACKET_OPEN, null, BRACKET_CLOSED, BRACES_OPEN, null, BRACES_CLOSED);
+
+        logger.severe(String.format("%s\n----- %s BLOCK -----",tokens,typeOfConditionedBlock));
+        TokenType blockOpenerKeyword = tokens.remove(0).getType();
+        Parser subTreeParser = new Parser(tokens);
+        ArrayList<Token> conditionTokens = subTreeParser.addAllTokensUntil(BRACKET_CLOSED);
+        subTreeParser.advance();
+        ArrayList<Token> thenTokens = subTreeParser.addAllTokensUntil(BRACES_CLOSED);
+
+        logger.severe(conditionTokens + "\n----- CONDITION -----");
+        ExpressionNode condition = new ExpressionParser(conditionTokens).parseExpression();
+        logger.severe(thenTokens + "\n----- THEN BLOCK -----");
+        BlockNode thenBlock = parseBlock(thenTokens);
+
+        switch (blockOpenerKeyword) {
+            case WHILE -> {return new WhileNode(condition, thenBlock);}
+            case IF -> {return new IfNode(condition, thenBlock);}
+            case ELIF -> {return new ElifNode(condition, thenBlock);}
+            default -> throw new UnexpectedToken("undefined block type???: " + blockOpenerKeyword);
+        }
+    }
+
+
     public void parseStatements() throws MissingTokenException {
         logger.info("BEGIN OF PARSER");
 
@@ -54,7 +148,7 @@ public class Parser {
                     case IF -> {
                         ArrayList<Token> ifTokens = addAllTokensUntil(TokenType.BRACES_CLOSED); //what about nested blocks??
                         logger.info(ifTokens + "\n----- CREATE IF BLOCK -----");
-                        IfNode ifNode = new IfNode(ifTokens);
+                        IfNode ifNode = (IfNode) parseConditionedBlock(ifTokens);
                         rootNodes.add(ifNode);
                     }
 
@@ -63,7 +157,7 @@ public class Parser {
                         Node lastNode = rootNodes.get(rootNodes.size() -1 );
                         if (lastNode instanceof IfNode ifNode) {
                             logger.info(elifTokens + "\n----- CREATE ELIF BLOCK -----");
-                            ElifNode elifNode = new ElifNode(elifTokens);
+                            ElifNode elifNode = (ElifNode) parseConditionedBlock(elifTokens);
                             ifNode.addElif(elifNode);
                         } else {
                             throw new UnexpectedToken("ElifNode must have corresponding IfNode");
@@ -75,7 +169,9 @@ public class Parser {
                         Node lastNode = rootNodes.get(rootNodes.size() -1 );
                         if (lastNode instanceof IfNode ifNode) {
                             logger.info(elseToken + "\n----- CREATE ELSE BLOCK -----");
-                            ElseNode elseNode = new ElseNode(elseToken);
+                            ElseNode elseNode = parseElse(elseToken);
+
+
                             ifNode.addElseNode(elseNode);
                         } else {
                             throw new UnexpectedToken("ElseNode must have corresponding IfNode");
@@ -85,13 +181,14 @@ public class Parser {
                     case WHILE -> {
                         ArrayList<Token> whileTokens = addAllTokensUntil(TokenType.BRACES_CLOSED); //what about nested blocks??
                         logger.info(whileTokens + "\n----- CREATE WHILE BLOCK -----");
-                        rootNodes.add(new WhileNode(whileTokens));
+                        WhileNode whileNode = (WhileNode) parseConditionedBlock(whileTokens);
+                        rootNodes.add(whileNode);
                     }
 
                     case BRACES_OPEN -> {
                         ArrayList<Token> blockTokens = addAllTokensUntil(TokenType.BRACES_CLOSED);
                         logger.info(blockTokens + "\n----- CREATE BLOCK -----");
-                        rootNodes.add(new BlockNode(blockTokens));
+                        rootNodes.add(parseBlock(blockTokens));
                     }
 
                     default -> {
@@ -102,7 +199,7 @@ public class Parser {
                             continue;
                         }
                         logger.info(assignmentNodes + "\n----- CREATE ASSIGNMENT NODE -----");
-                        rootNodes.add(new AssignmentNode(assignmentNodes));
+                        rootNodes.add(parseAssignment(assignmentNodes));
 
                     }
 

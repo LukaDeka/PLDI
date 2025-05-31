@@ -12,27 +12,33 @@ abstract public class ConditionedBlock extends StatementNode{
     public ExpressionNode condition;
     public StatementNode thenBlock;
 
-    public ConditionedBlock(ArrayList<Token> tokens) {
-        TokenType typeOfConditionedBlock = tokens.get(0).getType();
-
-        checkTokenList(
-                tokens,
-                size -> size >= (1+3+3),
-                typeOfConditionedBlock, BRACKET_OPEN, null, BRACKET_CLOSED, BRACES_OPEN, null, BRACES_CLOSED);
-
-        logger.info(String.format("%s\n----- %s BLOCK -----",tokens,typeOfConditionedBlock));
-        TokenType blockOpenerKeyword = tokens.remove(0).getType();
-        Parser subTreeParser = new Parser(tokens);
-        ArrayList<Token> conditionTokens = subTreeParser.addAllTokensUntil(BRACKET_CLOSED);
-        subTreeParser.advance();
-        ArrayList<Token> thenTokens = subTreeParser.addAllTokensUntil(BRACES_CLOSED);
-
-        logger.info(conditionTokens + "\n----- CONDITION -----");
-        ExpressionNode condition = new ExpressionParser(conditionTokens).parseExpression();
-        logger.info(thenTokens + "\n----- THEN BLOCK -----");
-        BlockNode thenBlock = new BlockNode(thenTokens);
-
+    public ConditionedBlock(ExpressionNode condition, StatementNode thenBlock){
         this.condition = condition;
         this.thenBlock = thenBlock;
     }
+
+
+//    public ConditionedBlock(ArrayList<Token> tokens) {
+//        TokenType typeOfConditionedBlock = tokens.get(0).getType();
+//
+//        checkTokenList(
+//                tokens,
+//                size -> size >= (1+3+3),
+//                typeOfConditionedBlock, BRACKET_OPEN, null, BRACKET_CLOSED, BRACES_OPEN, null, BRACES_CLOSED);
+//
+//        logger.info(String.format("%s\n----- %s BLOCK -----",tokens,typeOfConditionedBlock));
+//        TokenType blockOpenerKeyword = tokens.remove(0).getType();
+//        Parser subTreeParser = new Parser(tokens);
+//        ArrayList<Token> conditionTokens = subTreeParser.addAllTokensUntil(BRACKET_CLOSED);
+//        subTreeParser.advance();
+//        ArrayList<Token> thenTokens = subTreeParser.addAllTokensUntil(BRACES_CLOSED);
+//
+//        logger.info(conditionTokens + "\n----- CONDITION -----");
+//        ExpressionNode condition = new ExpressionParser(conditionTokens).parseExpression();
+//        logger.info(thenTokens + "\n----- THEN BLOCK -----");
+//        BlockNode thenBlock = new BlockNode(thenTokens);
+//
+//        this.condition = condition;
+//        this.thenBlock = thenBlock;
+//    }
 }

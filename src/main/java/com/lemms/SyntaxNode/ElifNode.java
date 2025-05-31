@@ -5,7 +5,7 @@ import com.lemms.Token;
 import java.util.ArrayList;
 
 public class ElifNode extends ConditionedBlock {
-    public ElifNode(ArrayList<Token> tokens) {
-        super(tokens);
+    public ElifNode(ExpressionNode condition, StatementNode thenBlock) {
+        super(condition, thenBlock);
     }
 }
