@@ -6,6 +6,9 @@ import java.util.Map;
 
 import com.lemms.SyntaxNode.*;
 import com.lemms.api.NativeFunction;
+
+import ch.qos.logback.core.subst.Token;
+
 import com.lemms.TokenType;
 
 import static com.lemms.TokenType.*;
@@ -114,7 +117,7 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
             TokenType.MODULO);
 
     private static List<TokenType> booleanOperators = List.of(TokenType.AND,
-            TokenType.OR);
+            TokenType.OR, TokenType.NOT);
 
     private static List<TokenType> comparisonOperators = List.of(TokenType.EQ,
             NEQ,
@@ -166,6 +169,8 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
                 return leftValue && rightValue;
             case OR:
                 return leftValue || rightValue;
+            case NOT:
+                return !rightValue;
             default:
                 throw new RuntimeException("Unknown operator: " + operatorNode.operator);
         }
@@ -214,7 +219,7 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
                     .toList();
             return nativeFunction.apply(args);
         }
-        
+
         throw new RuntimeException("Unknown function: " + functionNode.functionName);
     }
 
