@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 
+import com.lemms.SyntaxNode.StatementNode;
 import com.lemms.interpreter.Interpreter;
 
 public class LemmsAPI {
@@ -21,7 +22,8 @@ public class LemmsAPI {
     }
 
     public void interpret() {
-        Interpreter interpreter = new Interpreter(nativeFunctions);
+        List<StatementNode> program = null;
+        Interpreter interpreter = new Interpreter(program, nativeFunctions);
         interpreter.interpret();
     }
     public LemmsAPI() {

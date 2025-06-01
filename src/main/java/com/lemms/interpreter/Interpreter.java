@@ -1,20 +1,38 @@
 package com.lemms.interpreter;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.lemms.SyntaxNode.*;
+import com.lemms.api.NativeFunction;
 import com.lemms.TokenType;
 
 import static com.lemms.TokenType.*;
 
 public class Interpreter implements StatementVisitor, ValueVisitor {
     public Environment environment;
-    public List<StatementNode> program;
+    public List<StatementNode> program;    
+    private final Map<String, NativeFunction> nativeFunctions;
 
     public Interpreter(List<StatementNode> program) {
         this.program = program;
+        nativeFunctions = new HashMap<>();
+        addPredefinedFunctions();   
     }
 
+    public Interpreter(List<StatementNode> program, Map<String, NativeFunction> nativeFunctions) {
+        this.program = program;
+        this.nativeFunctions = nativeFunctions;
+        addPredefinedFunctions();   
+    }
+
+    private void addPredefinedFunctions() {
+        var predefinedFunctions = PredefinedFunctionLibrary.getPredefinedFunctions();
+        for (Map.Entry<String, NativeFunction> entry : predefinedFunctions.entrySet()) {
+            nativeFunctions.put(entry.getKey(), entry.getValue());
+        }
+    }
     public void interpret() {
         Environment globalEnvironment = new Environment();
         environment = globalEnvironment;
@@ -189,10 +207,14 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
 
     @Override
     public Object visitFunctionCallValue(FunctionCallNode functionNode) {
-        if(functionNode.functionName.equals("print")) {
-            visitPrintStatement(functionNode);
-            return null; // print does not return a value
+        if(nativeFunctions.containsKey((functionNode.functionName)))  {
+            NativeFunction nativeFunction = nativeFunctions.get(functionNode.functionName);
+            List<Object> args = functionNode.params.stream()
+                    .map(param -> param.accept(this))
+                    .toList();
+            return nativeFunction.apply(args);
         }
+        
         throw new RuntimeException("Unknown function: " + functionNode.functionName);
     }
 
