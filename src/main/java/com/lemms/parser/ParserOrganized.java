@@ -1,8 +1,9 @@
-package com.lemms;
+package com.lemms.parser;
+import com.lemms.Parser;
 import com.lemms.Exceptions.MissingTokenException;
 import com.lemms.Exceptions.UnexpectedToken;
 import com.lemms.SyntaxNode.*;
-import com.lemms.parser.ExpressionParser;
+
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;

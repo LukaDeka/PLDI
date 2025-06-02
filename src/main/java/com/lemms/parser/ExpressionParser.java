@@ -12,6 +12,7 @@ import com.lemms.TokenType;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
@@ -36,9 +37,9 @@ public class ExpressionParser {
     }
 
     private int pos = 0;
-    private final ArrayList<Token> tokens;
+    private final List<Token> tokens;
 
-    public ExpressionParser(ArrayList<Token> tokens) {
+    public ExpressionParser(List<Token> tokens) {
         this.tokens = tokens;
     }
 
