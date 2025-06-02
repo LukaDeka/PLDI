@@ -10,6 +10,8 @@ import com.lemms.SyntaxNode.*;
 
 import org.slf4j.LoggerFactory;
 
+import static java.lang.Character.reverseBytes;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -85,6 +87,29 @@ public class ParserOrganized {
             exprTokens.add(advance());
         }
         return new ExpressionParser(exprTokens).parseExpression();
+    }
+
+    private BlockNode parseBlock() {
+        List<StatementNode> statements = new ArrayList<>();
+        while (!isAtEnd() && !check(TokenType.BRACES_CLOSED)) {
+            statements.add(parseStatement());
+        }
+        return new BlockNode(statements);
+    }
+
+    private WhileNode parseWhileStatement() {
+        // 'while' already matched
+        consume(TokenType.BRACKET_OPEN, "Expected '(' after 'while'.");
+        ExpressionNode condition = parseExpression();
+        consume(TokenType.BRACKET_CLOSED, "Expected ')' after while condition.");
+        consume(TokenType.BRACES_OPEN, "Expected '{' to start while block.");
+        BlockNode body = parseBlock();
+        consume(TokenType.BRACES_CLOSED, "Expected '}' after while block.");
+
+        WhileNode whileNode = new WhileNode();
+        whileNode.condition = condition;
+        whileNode.whileBody = body;
+        return whileNode;
     }
 
     // Utility methods:
