@@ -4,7 +4,7 @@ import com.lemms.Token;
 import com.lemms.interpreter.ValueVisitor;
 
 public class LiteralNode extends ExpressionNode {
-    public final String value;
+    public final Object value;
 
     public LiteralNode(Token value) {
         this.value = value.getValue();
@@ -15,7 +15,7 @@ public class LiteralNode extends ExpressionNode {
     }
 
     public LiteralNode(int value) {
-        this.value = String.valueOf(value);
+        this.value = value;
     }
 
     @Override
