@@ -154,8 +154,8 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
     }
 
     private Object evaluateNumericOperator(OperatorNode operatorNode) {
-        int leftValue = (int) operatorNode.leftOperand.accept(this);
-        int rightValue = (int) operatorNode.rightOperand.accept(this);
+        int leftValue = Integer.parseInt((String)operatorNode.leftOperand.accept(this));
+        int rightValue = Integer.parseInt((String) operatorNode.rightOperand.accept(this));
         switch (operatorNode.operator.getType()) {
             case PLUS:
                 return leftValue + rightValue;
@@ -194,7 +194,7 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
             if (functionNode.printValue.substring(0,1).equals("\"")){
                 System.out.println(functionNode.printValue.substring(1,functionNode.printValue.length()-1));
             } else {
-                System.out.println(functionNode.printValue);
+                System.out.println(environment.get(functionNode.printValue));
             }
             return null; // print does not return a value
         }
