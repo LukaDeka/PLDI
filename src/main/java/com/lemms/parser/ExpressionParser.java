@@ -195,10 +195,15 @@ public class ExpressionParser {
                 logger.info("\n+++++ UNARY OPERATOR CREATED +++++\n" + operatorToken);
                 return parseUnaryFactor();
             }
-            case MINUS, NOT -> {
+            case NOT -> {
                 Token operatorToken = consume();
                 logger.info("\n+++++ UNARY OPERATOR CREATED +++++\n" + operatorToken);
                 return new OperatorNode(null, operatorToken, parseUnaryFactor());
+            }
+            case MINUS -> {
+                Token operatorToken = consume();
+                logger.info("\n+++++ UNARY OPERATOR CREATED +++++\n" + operatorToken);
+                return new OperatorNode(new LiteralNode(0), operatorToken, parseUnaryFactor());
             }
 
             //usual case: just a literalNode
