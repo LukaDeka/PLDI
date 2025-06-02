@@ -41,8 +41,12 @@ public class ParserOrganized {
             return parseIfStatement();
         if (match(TokenType.WHILE))
             return parseWhileStatement();
-        if (match(TokenType.IDENTIFIER) && peek().getType() == TokenType.ASSIGNMENT) {
-            return parseAssignment();
+        if (match(TokenType.IDENTIFIER)) {
+            if (peek().getType() == TokenType.ASSIGNMENT) {
+                return parseAssignment();
+            } else if (peek().getType() == TokenType.BRACKET_OPEN) {
+                return parseFunctionCall();
+            }
         }
         // ... other statement types ...
         throw error("Unexpected token: " + peek());
@@ -110,6 +114,27 @@ public class ParserOrganized {
         whileNode.condition = condition;
         whileNode.whileBody = body;
         return whileNode;
+    }
+
+    private FunctionCallStatementNode parseFunctionCall() {
+        Token identifier = previous(); // The function name (IDENTIFIER) was just matched
+        consume(TokenType.BRACKET_OPEN, "Expected '(' after function name.");
+        List<ExpressionNode> params = new ArrayList<>();
+        if (!check(TokenType.BRACKET_CLOSED)) {
+            do {
+                params.add(parseExpression());
+            } while (match(TokenType.COMMA));
+        }
+        consume(TokenType.BRACKET_CLOSED, "Expected ')' after function arguments.");
+        consume(TokenType.SEMICOLON, "Expected ';' after function call.");
+        FunctionCallNode functionCallNode = new FunctionCallNode();
+        
+        functionCallNode.functionName =identifier.getValue();
+        functionCallNode.params = params;
+        FunctionCallStatementNode functionCallStatementNode = new FunctionCallStatementNode();
+        functionCallStatementNode.functionCall = functionCallNode;
+
+        return functionCallStatementNode;
     }
 
     // Utility methods:
