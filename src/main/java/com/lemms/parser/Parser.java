@@ -1,6 +1,5 @@
 package com.lemms.parser;
 
-import com.lemms.Parser;
 import com.lemms.Token;
 import com.lemms.TokenType;
 import com.lemms.Exceptions.MissingTokenException;
@@ -19,12 +18,12 @@ import java.util.logging.*;
 
 import static com.lemms.TokenType.*;
 
-public class ParserOrganized {
+public class Parser {
 
     private final List<Token> tokens;
     private int position = 0;
 
-    public ParserOrganized(List<Token> tokens) {
+    public Parser(List<Token> tokens) {
         this.tokens = tokens;
     }
 

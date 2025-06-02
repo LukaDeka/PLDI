@@ -7,10 +7,11 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 
-import com.lemms.Parser;
+
 import com.lemms.Tokenizer;
 import com.lemms.SyntaxNode.StatementNode;
 import com.lemms.interpreter.Interpreter;
+import com.lemms.parser.Parser;
 
 public class LemmsAPI {
     private HashMap<String, NativeFunction> nativeFunctions;
