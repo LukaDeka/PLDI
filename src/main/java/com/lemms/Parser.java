@@ -200,7 +200,7 @@ public class Parser {
 
                     default -> {
 
-                        if (current.getType() == IDENTIFIER){
+                        if (current.getType() == IDENTIFIER && current.getValue().equals("print")){
 
                             switch (current.getValue()){
                                 case "print" ->{
@@ -212,12 +212,22 @@ public class Parser {
                                     if (current.getType() == BRACKET_OPEN){
                                         current = iterator.next();
 
-                                        t.printValue = current.getValue();
-                                        t.params = new ArrayList<>();
-                                        p.functionCall = t;
-                                        current = iterator.next();
-                                        if ( current.getType() == BRACKET_CLOSED){
-                                            rootNodes.add(p);
+                                        if (current.getValue().substring(0,1).equals("\"")){
+                                            t.printValue = current.getValue();
+                                            t.params = new ArrayList<>();
+                                            p.functionCall = t;
+                                            current = iterator.next();
+                                            if ( current.getType() == BRACKET_CLOSED){
+                                                rootNodes.add(p);
+                                            }
+                                        } else {
+                                            for (Node n:rootNodes ){
+                                                switch (n){
+                                                    case AssignmentNode.class ->{
+
+                                                    }
+                                                }
+                                            }
                                         }
                                     }
                                 }
