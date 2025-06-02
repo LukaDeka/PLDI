@@ -32,10 +32,10 @@ public class Test {
                     System.out.println("Currently using "+ file.getName());
                     Tokenizer t = new Tokenizer(file);
                     Parser p = new Parser(t.getTokens());
-                    p.parse();
+                    
                     List<StatementNode> programStatements = p.parse();
 
-                    System.out.println(programStatements.toString());
+                    // System.out.println(programStatements.toString());
 
                     Interpreter i = new Interpreter(programStatements);
                     i.interpret();

@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
@@ -34,6 +35,7 @@ public class ExpressionParser {
         });
         logger.setUseParentHandlers(false); // verhindert doppelte Logs
         logger.addHandler(handler);
+        logger.setLevel(Level.OFF);
     }
 
     private int pos = 0;
