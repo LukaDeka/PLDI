@@ -3,6 +3,8 @@ import com.lemms.SyntaxNode.BlockNode;
 import com.lemms.SyntaxNode.Node;
 
 import com.lemms.SyntaxNode.StatementNode;
+import com.lemms.SyntaxNode.FunctionCallStatementNode;
+import com.lemms.SyntaxNode.FunctionCallNode;
 import com.lemms.Exceptions.MissingTokenException;
 import com.lemms.Exceptions.UnexpectedToken;
 import com.lemms.SyntaxNode.*;
@@ -37,7 +39,7 @@ public class Parser {
                         color = "\u001B[36m"; // Cyan
                         break;
                     default:
-                        //color = "\u001B[31m"; // Rot
+                            //color = "\u001B[31m"; // Rot
                         color = "\u001B[33m"; // Gelb für andere Levels
                         //color = "\u001B[32m"; // Grün
                 }
@@ -197,15 +199,44 @@ public class Parser {
                     }
 
                     default -> {
-                        ArrayList<Token> assignmentNodes = addAllTokensUntil(TokenType.SEMICOLON);
 
-                        if (assignmentNodes.size() <= 1) { //ignore for empty statements like ";;;" | .empty() wenn ohne SEMICOLON Token
-                            logger.info("----- IGNORE EMPTY STATEMENT -----");
-                            continue;
+                        if (current.getType() == IDENTIFIER && current.getValue().equals("print")){
+
+                            switch (current.getValue()){
+                                case "print" ->{
+                                    FunctionCallStatementNode p = new FunctionCallStatementNode();
+                                    FunctionCallNode t = new FunctionCallNode();
+                                    t.functionName = current.getValue();
+                                    current = iterator.next();
+
+                                    if (current.getType() == BRACKET_OPEN){
+                                        current = iterator.next();
+
+                                        t.printValue = current.getValue();
+                                        t.params = new ArrayList<>();
+                                        p.functionCall = t;
+                                        current = iterator.next();
+                                        if ( current.getType() == BRACKET_CLOSED){
+                                            rootNodes.add(p);
+                                        }
+                                    }
+                                }
+
+                                default -> {
+                                    break;
+                                }
+                            }
+                        } else {
+                            ArrayList<Token> assignmentNodes = addAllTokensUntil(TokenType.SEMICOLON);
+
+                            if (assignmentNodes.size() <= 1) { //ignore for empty statements like ";;;" | .empty() wenn ohne SEMICOLON Token
+                                logger.info("----- IGNORE EMPTY STATEMENT -----");
+                                continue;
+                            }
+                            logger.info(assignmentNodes + "\n----- CREATE ASSIGNMENT NODE -----");
+                            AssignmentNode assignmentNode = parseAssignment(assignmentNodes);
+                            rootNodes.add(assignmentNode);
                         }
-                        logger.info(assignmentNodes + "\n----- CREATE ASSIGNMENT NODE -----");
-                        AssignmentNode assignmentNode = parseAssignment(assignmentNodes);
-                        rootNodes.add(assignmentNode);
 
                     }
 

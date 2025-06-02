@@ -1,0 +1,5 @@
+v1=10;
+str1="hi";
+print(str1);
+while(v1 > 5){ v1=v1-1; print(v1); }
+print(str1);

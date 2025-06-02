@@ -149,13 +149,13 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
             case NEQ:
                 return !leftValue.equals(rightValue);
             case GT:
-                return ((Comparable<Object>) leftValue).compareTo(rightValue) > 0;
+                return (leftValue.toString()).compareTo(rightValue.toString()) > 0;
             case LT:
-                return ((Comparable<Object>) leftValue).compareTo(rightValue) < 0;
+                return (leftValue.toString()).compareTo(rightValue.toString()) < 0;
             case GEQ:
-                return ((Comparable<Object>) leftValue).compareTo(rightValue) >= 0;
+                return (leftValue.toString()).compareTo(rightValue.toString()) >= 0;
             case LEQ:
-                return ((Comparable<Object>) leftValue).compareTo(rightValue) <= 0;
+                return (leftValue.toString()).compareTo(rightValue.toString()) <= 0;
             default:
                 throw new RuntimeException("Unknown operator: " + operatorNode.operator);
         }
@@ -177,8 +177,8 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
     }
 
     private Object evaluateNumericOperator(OperatorNode operatorNode) {
-        int leftValue = (int) operatorNode.leftOperand.accept(this);
-        int rightValue = (int) operatorNode.rightOperand.accept(this);
+        int leftValue = Integer.parseInt(operatorNode.leftOperand.accept(this).toString());
+        int rightValue = Integer.parseInt(operatorNode.rightOperand.accept(this).toString());
         switch (operatorNode.operator.getType()) {
             case PLUS:
                 return leftValue + rightValue;
@@ -212,6 +212,7 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
 
     @Override
     public Object visitFunctionCallValue(FunctionCallNode functionNode) {
+
         if(nativeFunctions.containsKey((functionNode.functionName)))  {
             NativeFunction nativeFunction = nativeFunctions.get(functionNode.functionName);
             List<Object> args = functionNode.params.stream()
