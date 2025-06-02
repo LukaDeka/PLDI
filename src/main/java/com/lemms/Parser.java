@@ -212,7 +212,7 @@ public class Parser {
                                     if (current.getType() == BRACKET_OPEN){
                                         current = iterator.next();
 
-                                        t.printValue = current.getValue();
+                                        // t.printValue = current.getValue();
                                         t.params = new ArrayList<>();
                                         p.functionCall = t;
                                         current = iterator.next();
