@@ -61,7 +61,7 @@ public class ParserOrganized {
             elseBlock = parseBlock();
             consume(TokenType.BRACES_CLOSED, "Expected '}' after else block.");
         }
-        
+
         IfNode ifNode = new IfNode();
         ifNode.condition = condition;
         ifNode.ifBody = ifBlock;
@@ -78,7 +78,14 @@ public class ParserOrganized {
         return new AssignmentNode(new VariableNode(identifier), expr);
     }
 
-    // ... parseIfStatement, parseWhileStatement, parseExpression, etc. ...
+    private ExpressionNode parseExpression() {
+        // Collect tokens for the expression (until a delimiter, e.g., ')', ';', etc.)
+        List<Token> exprTokens = new ArrayList<>();
+        while (!isAtEnd() && !isExpressionTerminator(peek())) {
+            exprTokens.add(advance());
+        }
+        return new ExpressionParser(exprTokens).parseExpression();
+    }
 
     // Utility methods:
     private boolean match(TokenType type) {
@@ -121,5 +128,11 @@ public class ParserOrganized {
         if (check(type))
             return advance();
         throw error(message);
+    }
+
+    private boolean isExpressionTerminator(Token token) {
+        return token.getType() == TokenType.BRACKET_CLOSED
+                || token.getType() == TokenType.SEMICOLON
+                || token.getType() == TokenType.BRACES_CLOSED;
     }
 }
