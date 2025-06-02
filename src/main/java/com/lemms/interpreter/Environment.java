@@ -17,6 +17,10 @@ public class Environment {
         this.enclosing = enclosing;
     }
 
+    public Map<String, Object> getValues() {
+        return values;
+    }
+
     private Environment findVariableEnv(String name) {
         if (values.containsKey(name)) {
             return this;

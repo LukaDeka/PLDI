@@ -200,7 +200,7 @@ public class Parser {
 
                     default -> {
 
-                        if (current.getType() == IDENTIFIER){
+                        if (current.getType() == IDENTIFIER && current.getValue().equals("print")){
 
                             switch (current.getValue()){
                                 case "print" ->{
