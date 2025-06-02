@@ -1,6 +1,10 @@
 package com.lemms.parser;
+
 import com.lemms.Parser;
+import com.lemms.Token;
+import com.lemms.TokenType;
 import com.lemms.Exceptions.MissingTokenException;
+import com.lemms.Exceptions.SyntaxException;
 import com.lemms.Exceptions.UnexpectedToken;
 import com.lemms.SyntaxNode.*;
 
@@ -13,60 +17,109 @@ import java.util.logging.*;
 
 import static com.lemms.TokenType.*;
 
-
 public class ParserOrganized {
-    private static final Logger logger = Logger.getLogger(Parser.class.getName());
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(Parser.class);
 
-    static {
-        ConsoleHandler handler = new ConsoleHandler();
-        handler.setFormatter(new SimpleFormatter() {
-            @Override
-            public synchronized String format(LogRecord record) {
-                String color = "\u001B[34m";
-                String reset = "\u001B[0m";
-
-                switch (record.getLevel().getName()) {
-                    case "INFO":
-                        color = "\u001B[34m"; // Blau
-                        break;
-                    case "SEVERE":
-                        color = "\u001B[36m"; // Cyan
-                        break;
-                    default:
-                            //color = "\u001B[31m"; // Rot
-                        color = "\u001B[33m"; // Gelb für andere Levels
-                        //color = "\u001B[32m"; // Grün
-                }
-                return color + record.getMessage() + reset+ "\n"; // z.B. nur die Nachricht ausgeben
-            }
-
-        });
-        logger.setUseParentHandlers(false); // verhindert doppelte Logs
-        logger.addHandler(handler);
-    }
-
-
-    private final ArrayList<StatementNode> rootNodes = new ArrayList<>();
-    private Token current;
     private final List<Token> tokens;
-
-    public ArrayList<StatementNode> getAST() {
-        return rootNodes;
-    }
+    private int position = 0;
 
     public ParserOrganized(List<Token> tokens) {
         this.tokens = tokens;
     }
 
-        private StatementNode parseStatement() {
-        if (match(TokenType.IF)) return parseIfStatement();
-        if (match(TokenType.WHILE)) return parseWhileStatement();
+    public List<StatementNode> parse() {
+        List<StatementNode> statements = new ArrayList<>();
+        while (!isAtEnd()) {
+            statements.add(parseStatement());
+        }
+        return statements;
+    }
+
+    private StatementNode parseStatement() {
+        if (match(TokenType.IF))
+            return parseIfStatement();
+        if (match(TokenType.WHILE))
+            return parseWhileStatement();
         if (match(TokenType.IDENTIFIER) && peek().getType() == TokenType.ASSIGNMENT) {
             return parseAssignment();
         }
         // ... other statement types ...
         throw error("Unexpected token: " + peek());
     }
-    
+
+    private IfNode parseIfStatement() {
+        // 'if' already matched
+        consume(TokenType.BRACKET_OPEN, "Expected '(' after 'if'.");
+        ExpressionNode condition = parseExpression();
+        consume(TokenType.BRACKET_CLOSED, "Expected ')' after if condition.");
+        consume(TokenType.BRACES_OPEN, "Expected '{' to start if block.");
+        BlockNode ifBlock = parseBlock();
+        consume(TokenType.BRACES_CLOSED, "Expected '}' after if block.");
+
+        BlockNode elseBlock = null;
+        if (match(TokenType.ELSE)) {
+            consume(TokenType.BRACES_OPEN, "Expected '{' to start else block.");
+            elseBlock = parseBlock();
+            consume(TokenType.BRACES_CLOSED, "Expected '}' after else block.");
+        }
+        
+        IfNode ifNode = new IfNode();
+        ifNode.condition = condition;
+        ifNode.ifBody = ifBlock;
+        ifNode.elseStatement = elseBlock;
+
+        return ifNode;
+    }
+
+    private AssignmentNode parseAssignment() {
+        Token identifier = previous();
+        consume(TokenType.ASSIGNMENT, "Expected '=' after identifier.");
+        ExpressionNode expr = parseExpression();
+        consume(TokenType.SEMICOLON, "Expected ';' after assignment.");
+        return new AssignmentNode(new VariableNode(identifier), expr);
+    }
+
+    // ... parseIfStatement, parseWhileStatement, parseExpression, etc. ...
+
+    // Utility methods:
+    private boolean match(TokenType type) {
+        if (check(type)) {
+            advance();
+            return true;
+        }
+        return false;
+    }
+
+    private boolean check(TokenType type) {
+        if (isAtEnd())
+            return false;
+        return tokens.get(position).getType() == type;
+    }
+
+    private Token advance() {
+        if (!isAtEnd())
+            position++;
+        return previous();
+    }
+
+    private Token peek() {
+        return tokens.get(position);
+    }
+
+    private Token previous() {
+        return tokens.get(position - 1);
+    }
+
+    private boolean isAtEnd() {
+        return position >= tokens.size();
+    }
+
+    private RuntimeException error(String message) {
+        return new RuntimeException(message);
+    }
+
+    private Token consume(TokenType type, String message) {
+        if (check(type))
+            return advance();
+        throw error(message);
+    }
 }

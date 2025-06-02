@@ -50,7 +50,7 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
 
         if (isTrue(ifNode.condition.accept(this))) {
             environment = new Environment(environment);
-            ifNode.statement.accept(this);
+            ifNode.ifBody.accept(this);
             environment = environment.enclosing;
         } else if (ifNode.elseStatement != null) {
             environment = new Environment(environment);
@@ -65,7 +65,7 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
 
         while (isTrue(whileNode.condition.accept(this))) {
             environment = new Environment(environment);
-            whileNode.statement.accept(this);
+            whileNode.whileBody.accept(this);
             environment = environment.enclosing;
         }
 
