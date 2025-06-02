@@ -12,7 +12,9 @@ import com.lemms.TokenType;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
@@ -33,12 +35,13 @@ public class ExpressionParser {
         });
         logger.setUseParentHandlers(false); // verhindert doppelte Logs
         logger.addHandler(handler);
+        logger.setLevel(Level.OFF);
     }
 
     private int pos = 0;
-    private final ArrayList<Token> tokens;
+    private final List<Token> tokens;
 
-    public ExpressionParser(ArrayList<Token> tokens) {
+    public ExpressionParser(List<Token> tokens) {
         this.tokens = tokens;
     }
 
@@ -192,10 +195,15 @@ public class ExpressionParser {
                 logger.info("\n+++++ UNARY OPERATOR CREATED +++++\n" + operatorToken);
                 return parseUnaryFactor();
             }
-            case MINUS, NOT -> {
+            case NOT -> {
                 Token operatorToken = consume();
                 logger.info("\n+++++ UNARY OPERATOR CREATED +++++\n" + operatorToken);
                 return new OperatorNode(null, operatorToken, parseUnaryFactor());
+            }
+            case MINUS -> {
+                Token operatorToken = consume();
+                logger.info("\n+++++ UNARY OPERATOR CREATED +++++\n" + operatorToken);
+                return new OperatorNode(new LiteralNode(0), operatorToken, parseUnaryFactor());
             }
 
             //usual case: just a literalNode

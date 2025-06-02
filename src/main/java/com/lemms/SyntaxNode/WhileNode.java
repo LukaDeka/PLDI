@@ -3,10 +3,10 @@ package com.lemms.SyntaxNode;
 import com.lemms.interpreter.StatementVisitor;
 
 
-public class WhileNode extends ConditionedBlock {
-    public WhileNode(ExpressionNode condition, StatementNode thenBlock) {
-        super(condition, thenBlock);
-    }
+public class WhileNode extends StatementNode {
+    
+    public ExpressionNode condition;
+    public StatementNode whileBody;
 
     @Override
     public void accept(StatementVisitor visitor) {

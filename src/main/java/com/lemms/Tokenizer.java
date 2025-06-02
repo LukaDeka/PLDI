@@ -55,6 +55,7 @@ public class Tokenizer {
             case ';': addToken(SEMICOLON, null); return;
             case '*': addToken(MULTIPLICATION, null); return;
             case '%': addToken(MODULO, null); return;
+            case ',': addToken(COMMA, null); return;
         }
 
         // Match multi-char tokens

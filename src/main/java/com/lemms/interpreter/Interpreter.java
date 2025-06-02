@@ -1,5 +1,8 @@
 package com.lemms.interpreter;
 
+import static java.lang.Character.reverseBytes;
+import static java.lang.Character.toChars;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +53,7 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
 
         if (isTrue(ifNode.condition.accept(this))) {
             environment = new Environment(environment);
-            ifNode.statement.accept(this);
+            ifNode.ifBody.accept(this);
             environment = environment.enclosing;
         } else if (ifNode.elseStatement != null) {
             environment = new Environment(environment);
@@ -65,7 +68,7 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
 
         while (isTrue(whileNode.condition.accept(this))) {
             environment = new Environment(environment);
-            whileNode.statement.accept(this);
+            whileNode.whileBody.accept(this);
             environment = environment.enclosing;
         }
 
@@ -139,7 +142,7 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
         }
     }
 
-    private Object evaluateComparisonOperators(OperatorNode operatorNode) {
+    private boolean evaluateComparisonOperators(OperatorNode operatorNode) {
         Object leftValue = operatorNode.leftOperand.accept(this);
         Object rightValue = operatorNode.rightOperand.accept(this);
 
@@ -148,17 +151,27 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
                 return leftValue.equals(rightValue);
             case NEQ:
                 return !leftValue.equals(rightValue);
-            case GT:
-                return (leftValue.toString()).compareTo(rightValue.toString()) > 0;
-            case LT:
-                return (leftValue.toString()).compareTo(rightValue.toString()) < 0;
-            case GEQ:
-                return (leftValue.toString()).compareTo(rightValue.toString()) >= 0;
-            case LEQ:
-                return (leftValue.toString()).compareTo(rightValue.toString()) <= 0;
             default:
-                throw new RuntimeException("Unknown operator: " + operatorNode.operator);
+                break;
         }
+        
+        int leftValueInt = Integer.parseInt(operatorNode.leftOperand.accept(this).toString());
+        int rightValueInt = Integer.parseInt(operatorNode.rightOperand.accept(this).toString());
+
+        switch (operatorNode.operator.getType()) {
+            case GT:
+                return leftValueInt > rightValueInt;
+            case LT:
+                return leftValueInt < rightValueInt;
+            case GEQ:
+                return leftValueInt >= rightValueInt;
+            case LEQ:
+                return leftValueInt <= rightValueInt;
+            default:
+                break;
+        }
+
+        throw new RuntimeException("Unknown comparison operator: " + operatorNode.operator);
     }
 
     private Object evaluateBooleanOperator(OperatorNode operatorNode) {

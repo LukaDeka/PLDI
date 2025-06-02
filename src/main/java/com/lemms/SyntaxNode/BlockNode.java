@@ -1,6 +1,5 @@
 package com.lemms.SyntaxNode;
 
-import com.lemms.Parser;
 import com.lemms.Token;
 
 import java.util.ArrayList;

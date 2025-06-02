@@ -8,8 +8,6 @@ public class FunctionCallNode extends ExpressionNode {
 
     public String functionName;
     public List<ExpressionNode> params;
-
-    public String printValue;
     
     @Override
     public Object accept(ValueVisitor visitor) {        
