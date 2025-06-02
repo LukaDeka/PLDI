@@ -190,7 +190,12 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
     @Override
     public Object visitFunctionCallValue(FunctionCallNode functionNode) {
         if(functionNode.functionName.equals("print")) {
-            visitPrintStatement(functionNode);
+            //visitPrintStatement(functionNode);
+            if (functionNode.printValue.substring(0,1).equals("\"")){
+                System.out.println(functionNode.printValue.substring(1,functionNode.printValue.length()-1));
+            } else {
+                System.out.println(functionNode.printValue);
+            }
             return null; // print does not return a value
         }
         throw new RuntimeException("Unknown function: " + functionNode.functionName);

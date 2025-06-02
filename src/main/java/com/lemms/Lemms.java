@@ -40,15 +40,16 @@ import java.util.ArrayList;
 public class Lemms {
     public static void main(String[] args) {
         try {
-            String sourcePath = "foo/bar/sourcePath.example (später mit command-line-args ersetzen)"; sourcePath = "src/main/resources/example1.1.txt";  //String sourcePath = args[0];
+            String sourcePath = "foo/bar/sourcePath.example (später mit command-line-args ersetzen)"; sourcePath = "src/main/resources/successTests/basicFunctions.lemms";  //String sourcePath = args[0];
             File sourceFile = new File(sourcePath);
 
             //Verknüpfung: Tokenizer + Parser + Interpreter
             Tokenizer t = new Tokenizer(sourceFile);
             Parser p = new Parser(t.getTokens());
             Interpreter i = new Interpreter(p.parse());
+            i.interpret();
 
-            System.out.println(p.getAST());
+            //System.out.println(p.getAST());
 
         } catch (ArrayIndexOutOfBoundsException e) {
             System.out.println("no path given");
