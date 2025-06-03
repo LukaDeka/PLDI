@@ -1,0 +1,7 @@
+y = false;
+
+if (y != false) {
+    print("something is fishy");
+} else {
+    print("nothing to see here");
+}
