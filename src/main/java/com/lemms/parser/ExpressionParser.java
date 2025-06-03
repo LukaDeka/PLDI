@@ -210,7 +210,16 @@ public class ExpressionParser {
             case INT, STRING, BOOL -> {
                 Token literalToken = consume();
                 logger.info(current + "\n----- LITERAL NODE CREATED -----");
-                return new LiteralNode(literalToken);
+                if(current.getType() == TokenType.INT) {
+                    return new LiteralNode(Integer.parseInt(literalToken.getValue()));
+                } else if (current.getType() == TokenType.BOOL) {
+                    return new LiteralNode(Boolean.parseBoolean(literalToken.getValue()));
+                }
+                else if (current.getType() == TokenType.STRING) {
+                    return new LiteralNode(literalToken.getValue());
+                }
+                
+                throw new UnexpectedToken("Unexpected Token: " + current.getType());
             }
 
             case IDENTIFIER -> {

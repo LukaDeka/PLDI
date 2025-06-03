@@ -4,17 +4,17 @@ import com.lemms.Token;
 import com.lemms.interpreter.ValueVisitor;
 
 public class LiteralNode extends ExpressionNode {
-    public final Object value;
-
-    public LiteralNode(Token value) {
-        this.value = value.getValue();
-    }
+    public final Object value;    
 
     public LiteralNode(String value) {
         this.value = value;
     }
 
     public LiteralNode(int value) {
+        this.value = value;
+    }
+
+    public LiteralNode(boolean value) {
         this.value = value;
     }
 
