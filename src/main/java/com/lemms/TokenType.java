@@ -8,6 +8,7 @@ public enum TokenType {
     IDENTIFIER,
 
     FUNCTION,
+    RETURN,
 
     PLUS,
     MINUS,

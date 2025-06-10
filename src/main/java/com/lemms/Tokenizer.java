@@ -126,6 +126,7 @@ public class Tokenizer {
                 case "else": addToken(ELSE, null); return;
                 case "while": addToken(WHILE, null); return;
                 case "function": addToken(FUNCTION, null); return;
+                case "return": addToken(RETURN, null); return;
             }
 
             // Else, it's an identifier
