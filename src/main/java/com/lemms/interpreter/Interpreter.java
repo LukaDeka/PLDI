@@ -257,7 +257,7 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
             environment = functionEnvironment;
 
             FlowSignal result = ((FunctionDeclarationNode) functionValue).functionBody.accept(this);
-            if (result.signal == SignalType.RETURN) {
+            if (result.signal == SignalType.RETURN || result.signal == SignalType.NORMAL) {
                 environment = previousEnvironment; // Restore the previous environment
                 return result.value;
             } else {
