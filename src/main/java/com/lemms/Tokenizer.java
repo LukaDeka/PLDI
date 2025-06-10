@@ -132,6 +132,7 @@ public class Tokenizer {
                 case "while": addToken(WHILE, null); return;
                 case "function": addToken(FUNCTION, null); return;
                 case "return": addToken(RETURN, null); return;
+                case "class": addToken(CLASS, null); return;
             }
 
             // Else, it's an identifier

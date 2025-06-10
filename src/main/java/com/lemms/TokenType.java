@@ -9,6 +9,7 @@ public enum TokenType {
 
     FUNCTION,
     RETURN,
+    CLASS,
 
     PLUS,
     MINUS,
