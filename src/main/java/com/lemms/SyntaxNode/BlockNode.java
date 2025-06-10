@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.lemms.TokenType.*;
+
+import com.lemms.interpreter.FlowSignal;
 import com.lemms.interpreter.StatementVisitor;
 
 public class BlockNode extends StatementNode {
@@ -16,7 +18,7 @@ public class BlockNode extends StatementNode {
     }
 
     @Override
-    public void accept(StatementVisitor visitor) {
-        visitor.visitBlockStatement(this);
+    public FlowSignal accept(StatementVisitor visitor) {
+        return visitor.visitBlockStatement(this);
     }
 }

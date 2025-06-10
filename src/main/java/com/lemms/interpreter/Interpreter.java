@@ -8,9 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Flow;
 
 import com.lemms.SyntaxNode.*;
 import com.lemms.api.NativeFunction;
+import com.lemms.interpreter.FlowSignal.SignalType;
 
 import ch.qos.logback.core.subst.Token;
 
@@ -53,57 +55,55 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
     }
 
     @Override
-    public void visitIfStatement(IfNode ifNode) {
+    public FlowSignal visitIfStatement(IfNode ifNode) {
 
         if (isTrue(ifNode.condition.accept(this))) {
             environment = new Environment(environment);
-            ifNode.ifBody.accept(this);
+            FlowSignal result = ifNode.ifBody.accept(this);
+            if (result != FlowSignal.NORMAL)
+                return result;
             environment = environment.enclosing;
         } else if (ifNode.elseStatement != null) {
             environment = new Environment(environment);
-            ifNode.elseStatement.accept(this);
+            FlowSignal result = ifNode.elseStatement.accept(this);
+            if (result != FlowSignal.NORMAL)
+                return result;
             environment = environment.enclosing;
         }
-
+        return FlowSignal.NORMAL;
     }
 
     @Override
-    public void visitWhileStatement(WhileNode whileNode) {
+    public FlowSignal visitWhileStatement(WhileNode whileNode) {
 
         while (isTrue(whileNode.condition.accept(this))) {
             environment = new Environment(environment);
-            whileNode.whileBody.accept(this);
+            FlowSignal result = whileNode.whileBody.accept(this);
+            if (result != FlowSignal.NORMAL)
+                return result;
             environment = environment.enclosing;
         }
+        return FlowSignal.NORMAL;
 
     }
 
     @Override
-    public void visitBlockStatement(BlockNode blockNode) {
+    public FlowSignal visitBlockStatement(BlockNode blockNode) {
         environment = new Environment(environment);
         for (StatementNode statement : blockNode.statements) {
-            statement.accept(this);
+            FlowSignal result = statement.accept(this);
+            if (result != FlowSignal.NORMAL)
+                return result;
         }
         environment = environment.enclosing;
-    }
-
-    private void visitPrintStatement(FunctionCallNode printNode) {
-        Object value = printNode.params.get(0).accept(this);
-        if (value instanceof String) {
-            System.out.println((String) value);
-        } else if (value instanceof Integer) {
-            System.out.println((Integer) value);
-        } else if (value instanceof Boolean) {
-            System.out.println((Boolean) value);
-        } else {
-            System.out.println(value);
-        }
+        return FlowSignal.NORMAL;
     }
 
     @Override
-    public void visitAssignmentNode(AssignmentNode assignmentNode) {
+    public FlowSignal visitAssignmentNode(AssignmentNode assignmentNode) {
         Object value = assignmentNode.rightHandSide.accept(this);
         environment.assign(assignmentNode.leftHandSide.name, value);
+        return FlowSignal.NORMAL;
     }
 
     @Override
@@ -243,33 +243,44 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
             List<Object> args = functionNode.params.stream()
                     .map(param -> param.accept(this))
                     .toList();
-        
+
             Environment functionEnvironment = new Environment(globalEnvironment);
-            for (int i  = 0; i < args.size(); i++) {
-                String argName = ((FunctionDeclarationNode)functionValue).paramNames.get(i);
+            for (int i = 0; i < args.size(); i++) {
+                String argName = ((FunctionDeclarationNode) functionValue).paramNames.get(i);
                 Object argValue = args.get(i);
                 functionEnvironment.assign(argName, argValue);
+            
             }
-
+            Environment previousEnvironment = environment;
             environment = functionEnvironment;
+
+            FlowSignal result = ((FunctionDeclarationNode) functionValue).functionBody.accept(this);
+            if (result.signal == SignalType.RETURN) {           
+                environment = previousEnvironment; // Restore the previous environment     
+                return result.value;
+            } else {
+                throw new RuntimeException("Function did not return a value: " + functionNode.functionName);
+            }            
         }
 
         throw new RuntimeException("Unknown function: " + functionNode.functionName);
     }
 
-    
-    Object visitReturnValue() {
-        return null;
-    }
-
     @Override
-    public void visitFunctionCallStatement(FunctionCallStatementNode functionNode) {
+    public FlowSignal visitFunctionCallStatement(FunctionCallStatementNode functionNode) {
         functionNode.functionCall.accept(this);
+        return FlowSignal.NORMAL;
     }
 
     @Override
     public void visitFunctionDeclarationStatement(FunctionDeclarationNode functionDeclarationNode) {
 
         environment.assign(functionDeclarationNode.functionName, functionDeclarationNode);
+    }
+
+    @Override
+    public FlowSignal visitReturnNode(ReturnNode returnNode) {
+        Object returnValue = returnNode.value.accept(this);
+        return FlowSignal.returned(returnValue);
     }
 }
