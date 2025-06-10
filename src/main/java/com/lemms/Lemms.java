@@ -42,7 +42,7 @@ public class Lemms {
     public static void main(String[] args) {
         try {
             String sourcePath = "foo/bar/sourcePath.example (später mit command-line-args ersetzen)";
-            sourcePath = "src/main/resources/successTests/commenttest.lemms";  //String sourcePath = args[0];
+            sourcePath = "src/main/resources/successTests/functionWithReturnValue.lemms";  //String sourcePath = args[0];
             File sourceFile = new File(sourcePath);
 
             //Verknüpfung: Tokenizer + Parser + Interpreter
