@@ -5,7 +5,3 @@ function printHello(x) {
     
 }
 
-
-
-
-printHello("inputstring___");
