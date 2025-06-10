@@ -10,7 +10,7 @@ public class FunctionDeclarationNode extends StatementNode {
     
     public String functionName;
     public List<String> paramNames;
-    public StatementNode functionBody;
+    public BlockNode functionBody;
 
     @Override
     public FlowSignal accept(StatementVisitor visitor) {

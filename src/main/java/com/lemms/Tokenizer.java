@@ -30,7 +30,7 @@ public class Tokenizer {
             case GEQ, LEQ, NEQ, EQ, AND, OR:
                 index += 2;
                 break;
-            case FUNCTION, IDENTIFIER, STRING, INT, BOOL, IF, ELSE, WHILE: // Incrementation happens while reading
+            case FUNCTION, IDENTIFIER, STRING, INT, BOOL, IF, ELSE, WHILE, RETURN: // Incrementation happens while reading
                 break;
             default:
                 throw new Error("Forgot to implement token type: " + type);
@@ -132,6 +132,7 @@ public class Tokenizer {
                 case "else": addToken(ELSE, null); return;
                 case "while": addToken(WHILE, null); return;
                 case "function": addToken(FUNCTION, null); return;
+                case "return": addToken(RETURN, null); return;
             }
 
             // Else, it's an identifier
