@@ -8,5 +8,6 @@ public interface StatementVisitor {
     public void visitBlockStatement(BlockNode blockNode);
     public void visitAssignmentNode(AssignmentNode assignmentNode);
     public void visitFunctionCallStatement(FunctionCallStatementNode functionCallStatementNode);
+    public void visitFunctionDeclarationStatement(FunctionDeclarationNode functionDeclarationNode);
 
 }

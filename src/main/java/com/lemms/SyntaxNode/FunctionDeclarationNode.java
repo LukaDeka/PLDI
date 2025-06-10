@@ -13,6 +13,6 @@ public class FunctionDeclarationNode extends StatementNode {
 
     @Override
     public void accept(StatementVisitor visitor) {
-        // visitor.visitWhileStatement(this);
+        visitor.visitFunctionDeclarationStatement(this);
     }
 }

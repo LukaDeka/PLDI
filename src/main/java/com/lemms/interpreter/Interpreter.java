@@ -6,6 +6,8 @@ import static java.lang.Character.toChars;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
+import java.util.concurrent.Callable;
 
 import com.lemms.SyntaxNode.*;
 import com.lemms.api.NativeFunction;
@@ -17,20 +19,21 @@ import com.lemms.TokenType;
 import static com.lemms.TokenType.*;
 
 public class Interpreter implements StatementVisitor, ValueVisitor {
+    public Environment globalEnvironment;
     public Environment environment;
-    public List<StatementNode> program;    
+    public List<StatementNode> program;
     private final Map<String, NativeFunction> nativeFunctions;
 
     public Interpreter(List<StatementNode> program) {
         this.program = program;
         nativeFunctions = new HashMap<>();
-        addPredefinedFunctions();   
+        addPredefinedFunctions();
     }
 
     public Interpreter(List<StatementNode> program, Map<String, NativeFunction> nativeFunctions) {
         this.program = program;
         this.nativeFunctions = nativeFunctions;
-        addPredefinedFunctions();   
+        addPredefinedFunctions();
     }
 
     private void addPredefinedFunctions() {
@@ -39,8 +42,9 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
             nativeFunctions.put(entry.getKey(), entry.getValue());
         }
     }
+
     public void interpret() {
-        Environment globalEnvironment = new Environment();
+        globalEnvironment = new Environment();
         environment = globalEnvironment;
         for (StatementNode i : program) {
             i.accept(this);
@@ -82,7 +86,7 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
         }
         environment = environment.enclosing;
     }
-    
+
     private void visitPrintStatement(FunctionCallNode printNode) {
         Object value = printNode.params.get(0).accept(this);
         if (value instanceof String) {
@@ -154,7 +158,7 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
             default:
                 break;
         }
-        
+
         int leftValueInt = Integer.parseInt(operatorNode.leftOperand.accept(this).toString());
         int rightValueInt = Integer.parseInt(operatorNode.rightOperand.accept(this).toString());
 
@@ -226,7 +230,7 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
     @Override
     public Object visitFunctionCallValue(FunctionCallNode functionNode) {
 
-        if(nativeFunctions.containsKey((functionNode.functionName)))  {
+        if (nativeFunctions.containsKey((functionNode.functionName))) {
             NativeFunction nativeFunction = nativeFunctions.get(functionNode.functionName);
             List<Object> args = functionNode.params.stream()
                     .map(param -> param.accept(this))
@@ -234,11 +238,38 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
             return nativeFunction.apply(args);
         }
 
+        Object functionValue = environment.get(functionNode.functionName);
+        if (functionValue instanceof FunctionDeclarationNode) {
+            List<Object> args = functionNode.params.stream()
+                    .map(param -> param.accept(this))
+                    .toList();
+        
+            Environment functionEnvironment = new Environment(globalEnvironment);
+            for (int i  = 0; i < args.size(); i++) {
+                String argName = ((FunctionDeclarationNode)functionValue).paramNames.get(i);
+                Object argValue = args.get(i);
+                functionEnvironment.assign(argName, argValue);
+            }
+
+            environment = functionEnvironment;
+        }
+
         throw new RuntimeException("Unknown function: " + functionNode.functionName);
+    }
+
+    
+    Object visitReturnValue() {
+        return null;
     }
 
     @Override
     public void visitFunctionCallStatement(FunctionCallStatementNode functionNode) {
-        functionNode.functionCall.accept(this);        
+        functionNode.functionCall.accept(this);
+    }
+
+    @Override
+    public void visitFunctionDeclarationStatement(FunctionDeclarationNode functionDeclarationNode) {
+
+        environment.assign(functionDeclarationNode.functionName, functionDeclarationNode);
     }
 }
