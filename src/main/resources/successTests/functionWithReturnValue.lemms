@@ -1,0 +1,8 @@
+function doubleNumber(x) {
+    return 2 * x;
+}
+
+
+x = 9;
+y = doubleNumber(x);
+print(y);

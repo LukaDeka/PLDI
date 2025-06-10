@@ -47,7 +47,7 @@ public class Parser {
             if (type == TokenType.ASSIGNMENT) {
                 return parseAssignment();
             } else if (type == TokenType.BRACKET_OPEN) {
-                return parseFunctionCall();
+                return parseFunctionCallStatement();
             }
         }
         if (match(FUNCTION)) {
@@ -160,25 +160,31 @@ public class Parser {
         return func;
     }
 
-    private FunctionCallStatementNode parseFunctionCall() {
-        Token identifier = previous(); // The function name (IDENTIFIER) was just matched
-        consume(TokenType.BRACKET_OPEN, "Expected '(' after function name.");
-        List<ExpressionNode> params = new ArrayList<>();
-        if (!check(TokenType.BRACKET_CLOSED)) {
-            do {
-                params.add(parseExpression());
-            } while (match(TokenType.COMMA));
-        }
-        consume(TokenType.BRACKET_CLOSED, "Expected ')' after function arguments.");
+    private FunctionCallStatementNode parseFunctionCallStatement() {
+        // The IDENTIFIER was just matched
+        List<Token> exprTokens = new ArrayList<>();
+        exprTokens.add(previous()); // Add the IDENTIFIER
+
+        // Collect tokens until we reach ')'
+        int parenDepth = 0;
+        do {
+            Token token = advance();
+            exprTokens.add(token);
+            if (token.getType() == TokenType.BRACKET_OPEN)
+                parenDepth++;
+            if (token.getType() == TokenType.BRACKET_CLOSED)
+                parenDepth--;
+        } while (parenDepth > 0 && !isAtEnd());
+
+        // Parse the function call as an expression
+        ExpressionNode expr = new ExpressionParser(exprTokens).parseExpression();
+
         consume(TokenType.SEMICOLON, "Expected ';' after function call.");
-        FunctionCallNode functionCallNode = new FunctionCallNode();
 
-        functionCallNode.functionName = identifier.getValue();
-        functionCallNode.params = params;
-        FunctionCallStatementNode functionCallStatementNode = new FunctionCallStatementNode();
-        functionCallStatementNode.functionCall = functionCallNode;
-
-        return functionCallStatementNode;
+        // Wrap in statement node
+        FunctionCallStatementNode stmt = new FunctionCallStatementNode();
+        stmt.functionCall = (FunctionCallNode) expr;
+        return stmt;
     }
 
     // Utility methods:
