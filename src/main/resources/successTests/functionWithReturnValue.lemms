@@ -1,8 +1,11 @@
-function doubleNumber(x) {
-    return 2 * x;
+
+
+function factorial(n) {
+    if(n <= 0) { 
+        return 1;
+    }
+    return n * factorial(n-1);
 }
 
 
-x = 9;
-y = doubleNumber(x);
-print(y);
+print(factorial(10));

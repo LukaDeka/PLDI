@@ -102,9 +102,20 @@ public class Parser {
     }
 
     private ExpressionNode parseExpression() {
-        // Collect tokens for the expression (until a delimiter, e.g., ')', ';', etc.)
         List<Token> exprTokens = new ArrayList<>();
-        while (!isAtEnd() && !isExpressionTerminator(peek())) {
+        int parenDepth = 0;
+        
+        while (!isAtEnd()) {
+            Token token = peek();
+            if (token.getType() == TokenType.BRACKET_OPEN) {
+                parenDepth++;
+            } else if (token.getType() == TokenType.BRACKET_CLOSED) {
+                if (parenDepth == 0)
+                    break; // This is the closing paren for the statement, not the expression
+                parenDepth--;
+            } else if (parenDepth == 0 && isExpressionTerminator(token)) {
+                break;
+            }
             exprTokens.add(advance());
         }
         return new ExpressionParser(exprTokens).parseExpression();
