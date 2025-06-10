@@ -60,15 +60,15 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
         if (isTrue(ifNode.condition.accept(this))) {
             environment = new Environment(environment);
             FlowSignal result = ifNode.ifBody.accept(this);
-            if (result != FlowSignal.NORMAL)
-                return result;
             environment = environment.enclosing;
+            if (result != FlowSignal.NORMAL)
+                return result;            
         } else if (ifNode.elseStatement != null) {
             environment = new Environment(environment);
             FlowSignal result = ifNode.elseStatement.accept(this);
-            if (result != FlowSignal.NORMAL)
-                return result;
             environment = environment.enclosing;
+            if (result != FlowSignal.NORMAL)
+                return result;            
         }
         return FlowSignal.NORMAL;
     }
@@ -79,9 +79,9 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
         while (isTrue(whileNode.condition.accept(this))) {
             environment = new Environment(environment);
             FlowSignal result = whileNode.whileBody.accept(this);
+            environment = environment.enclosing;
             if (result != FlowSignal.NORMAL)
                 return result;
-            environment = environment.enclosing;
         }
         return FlowSignal.NORMAL;
 
@@ -92,8 +92,10 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
         environment = new Environment(environment);
         for (StatementNode statement : blockNode.statements) {
             FlowSignal result = statement.accept(this);
-            if (result != FlowSignal.NORMAL)
+            if (result != FlowSignal.NORMAL) {
+                environment = environment.enclosing;
                 return result;
+            }
         }
         environment = environment.enclosing;
         return FlowSignal.NORMAL;
@@ -249,18 +251,18 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
                 String argName = ((FunctionDeclarationNode) functionValue).paramNames.get(i);
                 Object argValue = args.get(i);
                 functionEnvironment.assign(argName, argValue);
-            
+
             }
             Environment previousEnvironment = environment;
             environment = functionEnvironment;
 
             FlowSignal result = ((FunctionDeclarationNode) functionValue).functionBody.accept(this);
-            if (result.signal == SignalType.RETURN) {           
-                environment = previousEnvironment; // Restore the previous environment     
+            if (result.signal == SignalType.RETURN) {
+                environment = previousEnvironment; // Restore the previous environment
                 return result.value;
             } else {
                 throw new RuntimeException("Function did not return a value: " + functionNode.functionName);
-            }            
+            }
         }
 
         throw new RuntimeException("Unknown function: " + functionNode.functionName);
