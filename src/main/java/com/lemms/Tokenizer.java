@@ -56,6 +56,12 @@ public class Tokenizer {
             case '*': addToken(MULTIPLICATION, null); return;
             case '%': addToken(MODULO, null); return;
             case ',': addToken(COMMA, null); return;
+            case '#':
+                while (index + 1 < input_file.length() &&
+                        (ch = input_file.charAt(++index)) != '\n') {
+                    System.out.println("Skipping char...");
+                }
+                return;
         }
 
         // Match multi-char tokens
