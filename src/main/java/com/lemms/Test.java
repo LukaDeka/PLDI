@@ -4,8 +4,10 @@ import java.io.File;
 
 import com.lemms.SyntaxNode.StatementNode;
 import com.lemms.interpreter.Interpreter;
+import com.lemms.parser.Parser;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Test {
 
@@ -30,12 +32,13 @@ public class Test {
                     System.out.println("Currently using "+ file.getName());
                     Tokenizer t = new Tokenizer(file);
                     Parser p = new Parser(t.getTokens());
-                    p.parse();
-                    ArrayList<StatementNode> x = p.getAST();
+                    
+                    List<StatementNode> programStatements = p.parse();
 
-                    System.out.println(p.getAST().toString());
+                    // System.out.println(programStatements.toString());
 
-                    Interpreter i = new Interpreter(p.getAST());
+                    Interpreter i = new Interpreter(programStatements);
+                    i.interpret();
 
                 } catch (Exception e) {
                     System.out.println("Something went wrong in LEMMS");

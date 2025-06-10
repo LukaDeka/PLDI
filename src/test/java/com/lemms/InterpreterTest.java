@@ -106,7 +106,9 @@ class InterpreterTest {
         OperatorNode condition = new OperatorNode(n2, new Token(TokenType.GEQ), number2);
 
         StatementNode statementNode = null; //optional
-        WhileNode whileNode = new WhileNode(condition, statementNode);
+        WhileNode whileNode = new WhileNode();
+        whileNode.condition = condition;
+        whileNode.whileBody = statementNode; //optional, will be replaced later
 
 
         // temp = a + b
@@ -142,7 +144,9 @@ class InterpreterTest {
         AssignmentNode assignmentNode5 = new AssignmentNode(n4,decrementN);
 
         BlockNode blockNode = new BlockNode(List.of(assignmentNodeTemp, assignmentNode3, assignmentNode4, assignmentNode5));
-        WhileNode whileBlock = new WhileNode(condition, blockNode);
+        WhileNode whileBlock = new WhileNode();
+        whileBlock.condition = condition;
+        whileBlock.whileBody = blockNode;
 
         Interpreter interpreter = new Interpreter(List.of(assignmentNodeN, assignmentNode1, assignmentNode2, whileNode));
 

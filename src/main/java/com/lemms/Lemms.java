@@ -1,6 +1,7 @@
 package com.lemms;
 
 import com.lemms.interpreter.Interpreter;
+import com.lemms.parser.Parser;
 
 /*
      * Phases of Interpreter
