@@ -282,6 +282,9 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
 
     @Override
     public FlowSignal visitReturnNode(ReturnNode returnNode) {
+        if(returnNode.value == null) {
+            return FlowSignal.returned(null);
+        }
         Object returnValue = returnNode.value.accept(this);
         return FlowSignal.returned(returnValue);
     }

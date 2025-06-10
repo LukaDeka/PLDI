@@ -36,6 +36,8 @@ public class Parser {
     }
 
     private StatementNode parseStatement() {
+        if (match(TokenType.RETURN))
+            return parseReturnStatement();
         if (match(TokenType.IF))
             return parseIfStatement();
         if (match(TokenType.WHILE))
@@ -48,11 +50,23 @@ public class Parser {
                 return parseFunctionCall();
             }
         }
-        if (match(FUNCTION)){
+        if (match(FUNCTION)) {
             return parseFunctionDeclaration();
         }
         // ... other statement types ...
         throw error("Unexpected token: " + peek());
+    }
+
+    private ReturnNode parseReturnStatement() {
+        // 'return' already matched
+        ExpressionNode expr = null;
+        if (!check(TokenType.SEMICOLON)) {
+            expr = parseExpression();
+        }
+        consume(TokenType.SEMICOLON, "Expected ';' after return statement.");
+        ReturnNode returnNode = new ReturnNode();
+        returnNode.value = expr;
+        return returnNode;
     }
 
     private IfNode parseIfStatement() {
@@ -119,19 +133,20 @@ public class Parser {
         return whileNode;
     }
 
-    private FunctionDeclarationNode parseFunctionDeclaration(){
+    private FunctionDeclarationNode parseFunctionDeclaration() {
 
         FunctionDeclarationNode func = new FunctionDeclarationNode();
         ArrayList<String> params = new ArrayList<>();
 
         // read function name
-        func.functionName = consume(IDENTIFIER, "Expected identifier (function name) after 'function' keyword").getValue();
+        func.functionName = consume(IDENTIFIER, "Expected identifier (function name) after 'function' keyword")
+                .getValue();
 
         // read function params
         consume(BRACKET_OPEN, "Expected '(' after function name.");
-        if (!check(BRACKET_CLOSED)){
+        if (!check(BRACKET_CLOSED)) {
             do {
-                params.add(consume(IDENTIFIER,"Expected IDENTIFIER parameters in function").getValue());
+                params.add(consume(IDENTIFIER, "Expected IDENTIFIER parameters in function").getValue());
             } while (match(COMMA));
         }
         consume(BRACKET_CLOSED, "Expected ')' after function arguments");
@@ -157,8 +172,8 @@ public class Parser {
         consume(TokenType.BRACKET_CLOSED, "Expected ')' after function arguments.");
         consume(TokenType.SEMICOLON, "Expected ';' after function call.");
         FunctionCallNode functionCallNode = new FunctionCallNode();
-        
-        functionCallNode.functionName =identifier.getValue();
+
+        functionCallNode.functionName = identifier.getValue();
         functionCallNode.params = params;
         FunctionCallStatementNode functionCallStatementNode = new FunctionCallStatementNode();
         functionCallStatementNode.functionCall = functionCallNode;
