@@ -41,11 +41,15 @@ public class Parser {
         if (match(TokenType.WHILE))
             return parseWhileStatement();
         if (match(TokenType.IDENTIFIER)) {
-            if (peek().getType() == TokenType.ASSIGNMENT) {
+            TokenType type = peek().getType();
+            if (type == TokenType.ASSIGNMENT) {
                 return parseAssignment();
-            } else if (peek().getType() == TokenType.BRACKET_OPEN) {
+            } else if (type == TokenType.BRACKET_OPEN) {
                 return parseFunctionCall();
             }
+        }
+        if (match(FUNCTION)){
+            return parseFunctionDeclaration();
         }
         // ... other statement types ...
         throw error("Unexpected token: " + peek());
@@ -113,6 +117,32 @@ public class Parser {
         whileNode.condition = condition;
         whileNode.whileBody = body;
         return whileNode;
+    }
+
+    private FunctionDeclarationNode parseFunctionDeclaration(){
+
+        FunctionDeclarationNode func = new FunctionDeclarationNode();
+        ArrayList<String> params = new ArrayList<>();
+
+        // read function name
+        func.functionName = consume(IDENTIFIER, "Expected identifier (function name) after 'function' keyword").getValue();
+
+        // read function params
+        consume(BRACKET_OPEN, "Expected '(' after function name.");
+        if (!check(BRACKET_CLOSED)){
+            do {
+                params.add(consume(IDENTIFIER,"Expected IDENTIFIER parameters in function").getValue());
+            } while (match(COMMA));
+        }
+        consume(BRACKET_CLOSED, "Expected ')' after function arguments");
+
+        consume(BRACES_OPEN, "Expected '{' after function header");
+        BlockNode body = parseBlock();
+        consume(BRACES_CLOSED, "Expected '}' after function body");
+
+        func.paramNames = params;
+        func.functionBody = body;
+        return func;
     }
 
     private FunctionCallStatementNode parseFunctionCall() {
