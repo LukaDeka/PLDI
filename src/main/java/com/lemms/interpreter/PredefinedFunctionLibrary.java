@@ -23,9 +23,8 @@ public class PredefinedFunctionLibrary {
         });
 
         functions.put("exit", args -> {
-            Object arg1 = args.get(0);
-            if (arg1 instanceof Integer) {
-                System.exit((Integer) arg1);
+            if (!args.isEmpty() && args.get(0) instanceof Integer) {
+                System.exit((Integer) args.get(0));
             } else {
                 System.exit(0);
             }
