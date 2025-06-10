@@ -57,10 +57,9 @@ public class Tokenizer {
             case '%': addToken(MODULO, null); return;
             case ',': addToken(COMMA, null); return;
             case '#':
+                index++;
                 while (index + 1 < input_file.length() &&
-                        (ch = input_file.charAt(++index)) != '\n') {
-                    System.out.println("Skipping char...");
-                }
+                        (ch = input_file.charAt(index++)) != '\n');
                 return;
         }
 
