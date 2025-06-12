@@ -58,8 +58,14 @@ public class Tokenizer {
             case ',': addToken(COMMA, null); return;
             case '#':
                 index++;
-                while (index + 1 < input_file.length() &&
-                        (ch = input_file.charAt(index++)) != '\n');
+                while (index + 1 <= input_file.length())
+                         {
+                            ch = input_file.charAt(index++);
+                            boolean isEndOfLine = ch == '\n';
+                            if(isEndOfLine) {
+                                break;
+                            }                            
+                        }
                 return;
         }
 
