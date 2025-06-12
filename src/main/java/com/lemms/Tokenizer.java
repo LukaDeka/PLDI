@@ -24,7 +24,7 @@ public class Tokenizer {
     private void addToken(TokenType type, String text) {
         switch (type) {
             case PLUS, MINUS, MULTIPLICATION, DIVISION, MODULO, GT, LT, NOT,
-                 BRACKET_OPEN, BRACKET_CLOSED, BRACES_OPEN, BRACES_CLOSED, SEMICOLON, ASSIGNMENT:
+                 BRACKET_OPEN, BRACKET_CLOSED, BRACES_OPEN, BRACES_CLOSED, SEMICOLON, ASSIGNMENT, COMMA:
                 index++;
                 break;
             case GEQ, LEQ, NEQ, EQ, AND, OR:
