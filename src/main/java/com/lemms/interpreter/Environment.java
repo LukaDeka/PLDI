@@ -1,5 +1,5 @@
-package com.lemms.interpreter;
 
+package com.lemms.interpreter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,7 +48,10 @@ public class Environment {
         } else if (enclosing != null) {
             return enclosing.get(name);
         } else {
-            throw new RuntimeException("Undefined variable '" + name + "'.");
+            //throw new RuntimeException("Undefined variable '" + name + "'.");
+                //PROBLEMATIC: Environment doesn't know the Token/Node -> doesn't know the LINE
+                //instead i returrn and throw the Exception inside the Interpreter
+            return null;
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.lemms.parser;
 
+import com.lemms.Exceptions.LemmsRuntimeException;
 import com.lemms.Token;
 import com.lemms.TokenType;
 import com.lemms.Exceptions.MissingTokenException;
@@ -48,7 +49,7 @@ public class Parser {
             }
         }
         // ... other statement types ...
-        throw error("Unexpected token: " + peek());
+        throw new LemmsRuntimeException(peek(),"Unexpected token: " + peek());
     }
 
     private IfNode parseIfStatement() {
@@ -77,10 +78,10 @@ public class Parser {
 
     private AssignmentNode parseAssignment() {
         Token identifier = previous();
-        consume(TokenType.ASSIGNMENT, "Expected '=' after identifier.");
+        Token equalsToken = consume(TokenType.ASSIGNMENT, "Expected '=' after identifier.");
         ExpressionNode expr = parseExpression();
         consume(TokenType.SEMICOLON, "Expected ';' after assignment.");
-        return new AssignmentNode(new VariableNode(identifier), expr);
+        return new AssignmentNode(new VariableNode(identifier), expr, equalsToken);
     }
 
     private ExpressionNode parseExpression() {
@@ -176,7 +177,7 @@ public class Parser {
     private Token consume(TokenType type, String message) {
         if (check(type))
             return advance();
-        throw error(message);
+        throw new LemmsRuntimeException(peek(), message);
     }
 
     private boolean isExpressionTerminator(Token token) {
