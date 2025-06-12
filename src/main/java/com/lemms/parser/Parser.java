@@ -1,10 +1,8 @@
 package com.lemms.parser;
 
+import com.lemms.Exceptions.*;
 import com.lemms.Token;
 import com.lemms.TokenType;
-import com.lemms.Exceptions.MissingTokenException;
-import com.lemms.Exceptions.SyntaxException;
-import com.lemms.Exceptions.UnexpectedToken;
 import com.lemms.SyntaxNode.*;
 
 import org.slf4j.LoggerFactory;
@@ -35,7 +33,7 @@ public class Parser {
         return statements;
     }
 
-    private StatementNode parseStatement() {
+    private StatementNode parseStatement() throws LemmsParseError {
         if (match(TokenType.IF))
             return parseIfStatement();
         if (match(TokenType.WHILE))
@@ -48,7 +46,7 @@ public class Parser {
             }
         }
         // ... other statement types ...
-        throw error("Unexpected token: " + peek());
+        throw new LemmsParseError(peek(),"Unexpected token: " + peek());
     }
 
     private IfNode parseIfStatement() {
@@ -77,10 +75,10 @@ public class Parser {
 
     private AssignmentNode parseAssignment() {
         Token identifier = previous();
-        consume(TokenType.ASSIGNMENT, "Expected '=' after identifier.");
+        Token equalsToken = consume(TokenType.ASSIGNMENT, "Expected '=' after identifier.");
         ExpressionNode expr = parseExpression();
         consume(TokenType.SEMICOLON, "Expected ';' after assignment.");
-        return new AssignmentNode(new VariableNode(identifier), expr);
+        return new AssignmentNode(new VariableNode(identifier), expr, equalsToken);
     }
 
     private ExpressionNode parseExpression() {
@@ -176,7 +174,7 @@ public class Parser {
     private Token consume(TokenType type, String message) {
         if (check(type))
             return advance();
-        throw error(message);
+        throw new LemmsParseError(peek(), message);
     }
 
     private boolean isExpressionTerminator(Token token) {

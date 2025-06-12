@@ -1,5 +1,7 @@
 package com.lemms;
 
+import com.lemms.Exceptions.LemmsParseError;
+import com.lemms.Exceptions.LemmsRuntimeException;
 import com.lemms.interpreter.Interpreter;
 import com.lemms.parser.Parser;
 
@@ -48,12 +50,19 @@ public class Lemms {
             Tokenizer t = new Tokenizer(sourceFile);
             Parser p = new Parser(t.getTokens());
             Interpreter i = new Interpreter(p.parse());
+
             i.interpret();
 
             //System.out.println(p.getAST());
 
         } catch (ArrayIndexOutOfBoundsException e) {
             System.out.println("no path given");
+        } catch (LemmsRuntimeException error) {
+            System.err.println("Runtime Error: " + error.getMessage());
+            System.err.println("[Line " + error.getToken().getLine() + "]");
+        } catch (LemmsParseError error) {
+            System.err.println("Parse Error: " + error.getMessage());
+            System.err.println("[Line " + error.getToken().getLine() + "]");
         }
     }
 }

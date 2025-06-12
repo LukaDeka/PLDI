@@ -14,127 +14,172 @@ import static java.lang.Character.isDigit;
 public class Tokenizer {
 
     private int index = 0;
-  
+    private int line = 1;
 
     private String input_file;
-
     private ArrayList<Token> tokens = new ArrayList<>();
 
 
     private void addToken(TokenType type, String text) {
-        switch (type) {
-            case PLUS, MINUS, MULTIPLICATION, DIVISION, MODULO, GT, LT, NOT,
-                 BRACKET_OPEN, BRACKET_CLOSED, BRACES_OPEN, BRACES_CLOSED, SEMICOLON, ASSIGNMENT:
-                index++;
-                break;
-            case GEQ, LEQ, NEQ, EQ, AND, OR:
-                index += 2;
-                break;
-            case IDENTIFIER, STRING, INT, BOOL, IF, ELSE, WHILE: // Incrementation happens while reading
-                break;
-            default:
-                throw new Error("Forgot to implement token type: " + type);
-        }
-        tokens.add(new Token(type, text));
 
+        tokens.add(new Token(type, text, line));
+    }
+
+    private void addToken(TokenType type) {
+        addToken(type, null);
     }
 
     private void scanToken() {
-        Character ch = input_file.charAt(index);
+        char ch = input_file.charAt(index);
 
-        // Match single character tokens
+        // 1. Whitespace & Kommentare übverspringen
         switch (ch) {
-            case '(': addToken(BRACKET_OPEN, null); return;
-            case ')': addToken(BRACKET_CLOSED, null); return;
-
-            case '{': addToken(BRACES_OPEN, null); return;
-            case '}': addToken(BRACES_CLOSED, null); return;
-
-            case '-': addToken(MINUS, null); return;
-            case '+': addToken(PLUS, null); return;
-            case ';': addToken(SEMICOLON, null); return;
-            case '*': addToken(MULTIPLICATION, null); return;
-            case '%': addToken(MODULO, null); return;
-            case ',': addToken(COMMA, null); return;
+            case ' ':
+            case '\r':
+            case '\t':
+                index++;
+                return; // einfach überspringen
+            case '\n':
+                this.line++;
+                index++;
+                return; // increment line counter
         }
 
-        // Match multi-char tokens
+//        switch (ch) {
+//            case PLUS, MINUS, MULTIPLICATION, DIVISION, MODULO, GT, LT, NOT,
+//                 BRACKET_OPEN, BRACKET_CLOSED, BRACES_OPEN, BRACES_CLOSED, SEMICOLON, ASSIGNMENT:
+//                index++;
+//                break;
+//            case GEQ, LEQ, NEQ, EQ, AND, OR:
+//                index += 2;
+//                break;
+//            case IDENTIFIER, STRING, INT, BOOL, IF, ELSE, WHILE: // Incrementation happens while reading
+//                break;
+//            default:
+//                throw new Error("Forgot to implement token type: " + type);
+//        }
+
+        // 2. Single Character Tokens
+        switch (ch) {
+            case '(': index++; addToken(BRACKET_OPEN); return;
+            case ')': index++; addToken(BRACKET_CLOSED); return;
+
+            case '{': index++; addToken(BRACES_OPEN); return;
+            case '}': index++; addToken(BRACES_CLOSED); return;
+
+            case '-': index++; addToken(MINUS); return;
+            case '+': index++; addToken(PLUS); return;
+            case ';': index++; addToken(SEMICOLON); return;
+            case '*': index++; addToken(MULTIPLICATION); return;
+            case '/': index++; addToken(DIVISION); return;
+            case '%': index++; addToken(MODULO); return;
+            case ',': index++; addToken(COMMA); return;
+        }
+
+
+
+
+        // 3. Match multi-char tokens
         switch (ch) {
             case '=':
-                if (input_file.charAt(index + 1) == '=') {
-                    addToken(EQ, null);
-                    return;
+                if (input_file.charAt(index + 1) == '=') { // && index + 1 < input_file.length() ?
+                    index += 2;
+                    addToken(EQ);
+                } else {
+                    index++;
+                    addToken(ASSIGNMENT);
                 }
-                addToken(ASSIGNMENT, null);
                 return;
-            case '<':
-                if (input_file.charAt(index + 1) == '=') {
-                    addToken(LEQ, null);
-                    return;
-                }
-                addToken(LT, null);
-                return;
-            case '>':
-                // >=
-                if (input_file.charAt(index + 1) == '=') {
-                    addToken(GEQ, null);
-                    return;
-                }
-                addToken(GT, null);
-                return;
+
             case '!':
                 if (input_file.charAt(index + 1) == '=') {
-                    addToken(NEQ, null);
-                    return;
+                    index += 2;
+                    addToken(NEQ);
+                } else {
+                    index++;
+                    addToken(NOT);
                 }
-                addToken(NOT, null);
                 return;
+
+            case '<':
+                if (input_file.charAt(index + 1) == '=') {
+                    index += 2;
+                    addToken(LEQ);
+                } else {
+                    index++;
+                    addToken(LT);
+                }
+                return;
+
+            case '>': // >=
+                if (input_file.charAt(index + 1) == '=') {
+                    index += 2;
+                    addToken(GEQ);
+                } else {
+                    index++;
+                    addToken(GT);
+                }
+                return;
+
             case '&':
                 if (input_file.charAt(index + 1) == '&') {
-                    addToken(AND, null);
+                    addToken(AND);
                     return;
+                } else {
+                    throw new Error("Illegal '&' in token");
                 }
-                throw new Error("Illegal '&' in token");
             case '|':
                 if (input_file.charAt(index + 1) == '|') {
-                    addToken(OR, null);
+                    index += 2;
+                    addToken(OR);
                     return;
-                }
+                } //what if single "|"
         }
 
-        // Identifier or keyword
+        // 4. Longer Tokens: Strings, Numbers, Identifier
+        // 4.1 Identifier or Keyword
         if (isAlphabetic(ch)) {
-            // Read until alphanumerics or underscores end
             int begin_index = index;
-            char next_char = ch;
+            // Read until alphanumerics or underscores end
             while (index < input_file.length() &&
-                    (isAlphabetic(next_char) ||
-                     isDigit(next_char) ||
-                     next_char == '_')
-            ) {
-                next_char = input_file.charAt(index + 1);
+                    (isAlphabetic(input_file.charAt(index)) ||
+                     isDigit(input_file.charAt(index)) || input_file.charAt(index) == '_')) {
                 index++;
             }
 
-            // Make new String from begin_index to index
             String new_token = input_file.substring(begin_index, index);
 
-            // Check against known keywords: true, false, if, elif, else, while
+            // Keywords or Identifier?
             switch (new_token) {
                 case "true", "false": addToken(BOOL, new_token); return;
-                case "if": addToken(IF, null); return;                
-                case "else": addToken(ELSE, null); return;
-                case "while": addToken(WHILE, null); return;
+                case "if": addToken(IF); return;
+                case "else": addToken(ELSE); return;
+                case "while": addToken(WHILE); return;
+                default: addToken(IDENTIFIER, new_token); return;
+            }
+        }
+
+        // Handle numbers
+        if (isDigit(ch)) {
+            int begin_index = index;
+            while (index < input_file.length() &&
+                    (isDigit(input_file.charAt(index)) ||
+                            input_file.charAt(index) == '_')
+            ) { // Allow formats like 1_000_000 for readability
+                index++;
             }
 
-            // Else, it's an identifier
-            addToken(IDENTIFIER, new_token);
+            String number = input_file
+                    .substring(begin_index, index)
+                    .replace("_", "");
+            addToken(INT, number);
             return;
         }
 
         // Handle strings
         if (ch == '"') {
-            int begin_index = index++;
+            int begin_index = index+1;
+            index++;
             while (index < input_file.length()) {
                 char current_ch = input_file.charAt(index);
                 if (current_ch == '\\') {
@@ -153,27 +198,9 @@ public class Tokenizer {
             return;
         }
 
-        // Handle numbers
-        if (isDigit(ch)) {
-            int begin_index = index;
-            while (index < input_file.length() &&
-                    (isDigit(input_file.charAt(index)) ||
-                     input_file.charAt(index) == '_')
-            ) { // Allow formats like 1_000_000 for readability
-                index++;
-            }
-            String new_token = input_file.substring(begin_index, index);
-            new_token = new_token.replace("_", "");
-            addToken(INT, new_token);
-            return;
-        }
 
-        if (ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n') {
-            index++;
-            return;
-        }
 
-        throw new Error("Illegal character in token: " + ch);
+        throw new Error("Illegal character '" + ch +"' on line " +line);
     }
 
 

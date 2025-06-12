@@ -1,24 +1,26 @@
 package com.lemms;
 
 public class Token {
-    private TokenType type;
-    private String value = null;
-    private int line;
+    private final TokenType type;
+    private final String value;
+    private final int line;
 
-    public Token(TokenType type) {
-        this.type = type;
-    }
-    public Token(TokenType type, String value) {
+//    public Token(TokenType type) {
+//        this.type = type;
+//    }
+
+    public Token(TokenType type, String value, int line) {
         this.type = type;
         this.value = value;
-    }
-
-    public String getValue() {
-        return value;
+        this.line = line;
     }
 
     public TokenType getType() {
         return type;
+    }
+
+    public String getValue() {
+        return value;
     }
 
     public int getLine() {

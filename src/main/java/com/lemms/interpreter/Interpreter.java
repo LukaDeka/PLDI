@@ -1,7 +1,8 @@
 package com.lemms.interpreter;
 
-import static java.lang.Character.reverseBytes;
-import static java.lang.Character.toChars;
+//für Exceptions
+import com.lemms.Token;
+import com.lemms.Exceptions.LemmsRuntimeException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -9,11 +10,7 @@ import java.util.Map;
 
 import com.lemms.SyntaxNode.*;
 import com.lemms.api.NativeFunction;
-
-import ch.qos.logback.core.subst.Token;
-
 import com.lemms.TokenType;
-
 import static com.lemms.TokenType.*;
 
 public class Interpreter implements StatementVisitor, ValueVisitor {
@@ -104,7 +101,10 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
 
     @Override
     public Object visitVariableValue(VariableNode variableNode) {
-        return environment.get(variableNode.name);
+        Object value = environment.get(variableNode.name);
+        if (value == null) //undefined, optional dedicated isDefined if needed?
+            throw new LemmsRuntimeException(variableNode.token, "Undefined variable '" + variableNode.name + "'.");
+        else return value;
     }
 
     @Override
@@ -201,16 +201,19 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
                 return leftValue * rightValue;
             case DIVISION:
                 if (rightValue == 0) {
-                    throw new RuntimeException("Division by zero");
+                    //throw new RuntimeException("Division by zero");
+                    throw new LemmsRuntimeException(operatorNode.operator, "Division by zero.");
                 }
                 return leftValue / rightValue;
             case MODULO:
                 if (rightValue == 0) {
-                    throw new RuntimeException("Division by zero");
+                    //throw new RuntimeException("Division by zero");
+                    throw new LemmsRuntimeException(operatorNode.operator, "Division by zero.");
                 }
                 return leftValue % rightValue;
             default:
-                throw new RuntimeException("Unknown operator: " + operatorNode.operator);
+                //throw new RuntimeException("Unknown operator: " + operatorNode.operator);
+                throw new LemmsRuntimeException(operatorNode.operator, "Unknown operator: " + operatorNode.operator);
 
         }
     }
