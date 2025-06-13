@@ -3,12 +3,12 @@ package com.lemms.parser;
 import com.lemms.Exceptions.MissingTokenException;
 import com.lemms.Exceptions.UnexpectedToken;
 import com.lemms.SyntaxNode.ExpressionNode;
+import com.lemms.SyntaxNode.FunctionCallNode;
 import com.lemms.SyntaxNode.LiteralNode;
 import com.lemms.SyntaxNode.OperatorNode;
 import com.lemms.SyntaxNode.VariableNode;
 import com.lemms.Token;
 import com.lemms.TokenType;
-
 
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -30,7 +30,7 @@ public class ExpressionParser {
             public synchronized String format(LogRecord record) {
                 String green = "\u001B[32m";
                 String reset = "\u001B[0m";
-                return green + record.getMessage() + reset+ "\n"; // z.B. nur die Nachricht ausgeben
+                return green + record.getMessage() + reset + "\n"; // z.B. nur die Nachricht ausgeben
             }
         });
         logger.setUseParentHandlers(false); // verhindert doppelte Logs
@@ -46,31 +46,30 @@ public class ExpressionParser {
     }
 
     // Helfer Function
-    public Token consume(){
+    public Token consume() {
         if (pos < tokens.size()) {
             return tokens.get(pos++);
         }
-        //Spezielles EOF Token statt exception?
+        // Spezielles EOF Token statt exception?
         throw new RuntimeException("Unexpected end of token stream at position " + pos);
     }
 
-    public Token peek(){
-        //Spezielles EOF Token statt null?
+    public Token peek() {
+        // Spezielles EOF Token statt null?
         return pos < tokens.size() ? tokens.get(pos) : null;
     }
 
-
     /*
-    - verschiedene Stufen und Methoden basierend auf PRECEDENCE
-    - ASSOCIATIVITY innerhalb der Stufen von links nach rechts
-        0. parseExpression (entrypoint - public method)
-        1. parseLogicalOrExpression (für OR)
-        2. parseLogicalAndExpression (für AND)
-        3. parseComparisonExpression (für >, <, >=, <=, EQ, NEQ)
-        4. parseAdditiveExpression (für binäres +, -)
-        5. parseMultiplicativeTerm (für *, /, MODULO)
-        6. parseUnaryFactor (für Literale, (), unäres +, unäres -, NOT)*/
-
+     * - verschiedene Stufen und Methoden basierend auf PRECEDENCE
+     * - ASSOCIATIVITY innerhalb der Stufen von links nach rechts
+     * 0. parseExpression (entrypoint - public method)
+     * 1. parseLogicalOrExpression (für OR)
+     * 2. parseLogicalAndExpression (für AND)
+     * 3. parseComparisonExpression (für >, <, >=, <=, EQ, NEQ)
+     * 4. parseAdditiveExpression (für binäres +, -)
+     * 5. parseMultiplicativeTerm (für *, /, MODULO)
+     * 6. parseUnaryFactor (für Literale, (), unäres +, unäres -, NOT)
+     */
 
     // parseExpression - public entry method
     public ExpressionNode parseExpression() {
@@ -78,6 +77,33 @@ public class ExpressionParser {
         ExpressionNode node = parseLogicalOrExpression();
         logger.info("\n===== FINISHED PARSE EXPRESSION =====");
         return node;
+    }
+
+    private FunctionCallNode parseFunctionCall() {
+        // Expect IDENTIFIER (function name)
+        Token identifier = consume();
+        if (identifier.getType() != TokenType.IDENTIFIER) {
+            throw new UnexpectedToken("Expected function name (identifier), found: " + identifier.getType());
+        }
+        // Expect '('
+        Token openParen = consume();
+        if (openParen.getType() != TokenType.BRACKET_OPEN) {
+            throw new MissingTokenException("Expected '(' after function name.");
+        }
+        List<ExpressionNode> params = new ArrayList<>();
+        if (peek() != null && peek().getType() != TokenType.BRACKET_CLOSED) {
+            do {
+                params.add(parseExpression());
+            } while (peek() != null && peek().getType() == TokenType.COMMA && consume() != null);
+        }
+        Token closeParen = consume();
+        if (closeParen.getType() != TokenType.BRACKET_CLOSED) {
+            throw new MissingTokenException("Expected ')' after function arguments.");
+        }
+        FunctionCallNode functionCallNode = new FunctionCallNode();
+        functionCallNode.functionName = identifier.getValue();
+        functionCallNode.params = params;
+        return functionCallNode;
     }
 
     private ExpressionNode parseLogicalOrExpression() {
@@ -97,7 +123,6 @@ public class ExpressionParser {
         logger.info("\n----- LOGICAL OR EXPRESSION PARSING -----");
         return left;
     }
-
 
     private ExpressionNode parseLogicalAndExpression() {
         logger.info("\n+++++ LOGICAL AND EXPRESSION PARSING +++++");
@@ -156,12 +181,12 @@ public class ExpressionParser {
         return lefTerm;
     }
 
-    private ExpressionNode parseMultiplicativeTerm(){
+    private ExpressionNode parseMultiplicativeTerm() {
         EnumSet<TokenType> multiplicationTokenTypes = EnumSet.of(MULTIPLICATION, DIVISION, MODULO);
         logger.info("\n+++++ TERM PARSING +++++");
         ExpressionNode leftFactor = parseUnaryFactor();
 
-        Token current = peek(); 
+        Token current = peek();
         while (current != null && multiplicationTokenTypes.contains(current.getType())) {
             Token operator = consume();
 
@@ -170,7 +195,7 @@ public class ExpressionParser {
 
             logger.info("\n----- (MULTIPLICATIVE) OPERATOR NODE CREATED -----");
             leftFactor = new OperatorNode(leftFactor, operator, rightFactor);
-            current = peek(); //redundant?
+            current = peek(); // redundant?
         }
 
         logger.info("\n----- TERM PARSING -----");
@@ -180,7 +205,7 @@ public class ExpressionParser {
     private ExpressionNode parseUnaryFactor() {
         logger.info("\n+++++ FACTOR PARSING +++++");
         Token current = peek();
-//        logger.info(current + " [current]");
+        // logger.info(current + " [current]");
 
         if (current == null) {
             logger.info("END");
@@ -188,9 +213,9 @@ public class ExpressionParser {
         }
 
         switch (current.getType()) {
-            //UNARY Operator (e.g. +5 or -5 -> 0+5 or 0-5)
+            // UNARY Operator (e.g. +5 or -5 -> 0+5 or 0-5)
             case PLUS -> {
-                //ignore PLUS and continue parsing following factor (because +x is same as  x)
+                // ignore PLUS and continue parsing following factor (because +x is same as x)
                 Token operatorToken = consume();
                 logger.info("\n+++++ UNARY OPERATOR CREATED +++++\n" + operatorToken);
                 return parseUnaryFactor();
@@ -206,29 +231,35 @@ public class ExpressionParser {
                 return new OperatorNode(new LiteralNode(0), operatorToken, parseUnaryFactor());
             }
 
-            //usual case: just a literalNode
+            // usual case: just a literalNode
             case INT, STRING, BOOL -> {
                 Token literalToken = consume();
                 logger.info(current + "\n----- LITERAL NODE CREATED -----");
-                if(current.getType() == TokenType.INT) {
+                if (current.getType() == TokenType.INT) {
                     return new LiteralNode(Integer.parseInt(literalToken.getValue()));
                 } else if (current.getType() == TokenType.BOOL) {
                     return new LiteralNode(Boolean.parseBoolean(literalToken.getValue()));
-                }
-                else if (current.getType() == TokenType.STRING) {
+                } else if (current.getType() == TokenType.STRING) {
                     return new LiteralNode(literalToken.getValue());
                 }
-                
+
                 throw new UnexpectedToken("Unexpected Token: " + current.getType());
             }
 
             case IDENTIFIER -> {
-                Token identifierToken = consume();
-                logger.info(identifierToken + "\n----- IDENTIFIER NODE CREATED -----");
-                return new VariableNode(identifierToken); // Erzeuge einen IdentifierNode
+                Token identifierToken = peek();
+                if (pos + 1 < tokens.size() && tokens.get(pos + 1).getType() == TokenType.BRACKET_OPEN) {
+                    // Parse as function call
+                    return parseFunctionCall();
+                } else {
+                    // Just a variable
+                    consume();
+                    logger.info(identifierToken + "\n----- IDENTIFIER NODE CREATED -----");
+                    return new VariableNode(identifierToken);
+                }                                
             }
 
-            //if bracketed, then parse new Expression (recursive call)
+            // if bracketed, then parse new Expression (recursive call)
             case BRACKET_OPEN -> {
                 logger.info(current + "\n----- [NESTED EXPRESSION] -----");
                 consume();
@@ -237,45 +268,41 @@ public class ExpressionParser {
                 if (consume().getType() != TokenType.BRACKET_CLOSED)
                     throw new MissingTokenException("Expected BRACKET_CLOSED, found " + current.getType());
 
-
-                //consum
+                // consum
                 return expr;
             }
 
-            //if not UNARY operator, nor normal Literal, or bracketed expression --> then exception
+            // if not UNARY operator, nor normal Literal, or bracketed expression --> then
+            // exception
             default -> throw new UnexpectedToken("Unexpected Token: " + current.getType());
         }
     }
 
     public static void main(String[] args) {
         ArrayList<Token> tokens = new ArrayList<>();
-//        tokens.add(new Token(null, 1, TokenType.MINUS));
-//        tokens.add(new Token("1", 1, TokenType.INT));
-//        tokens.add(new Token(null, 1, TokenType.PLUS));
-//        tokens.add(new Token("2", 1, TokenType.INT));
-//        tokens.add(new Token(null, 1, TokenType.PLUS));
-//        tokens.add(new Token("3", 1, TokenType.INT));
-//        tokens.add(new Token(null, 1, TokenType.PLUS));
-//        tokens.add(new Token("4", 1, TokenType.INT));
-//        tokens.add(new Token(null, 1, TokenType.MULTIPLICATION));
-//        tokens.add(new Token("5", 1, TokenType.INT));
-//        tokens.add(new Token(null, 1, TokenType.MINUS));
-//        tokens.add(new Token("6", 1, TokenType.INT));
+        // tokens.add(new Token(null, 1, TokenType.MINUS));
+        // tokens.add(new Token("1", 1, TokenType.INT));
+        // tokens.add(new Token(null, 1, TokenType.PLUS));
+        // tokens.add(new Token("2", 1, TokenType.INT));
+        // tokens.add(new Token(null, 1, TokenType.PLUS));
+        // tokens.add(new Token("3", 1, TokenType.INT));
+        // tokens.add(new Token(null, 1, TokenType.PLUS));
+        // tokens.add(new Token("4", 1, TokenType.INT));
+        // tokens.add(new Token(null, 1, TokenType.MULTIPLICATION));
+        // tokens.add(new Token("5", 1, TokenType.INT));
+        // tokens.add(new Token(null, 1, TokenType.MINUS));
+        // tokens.add(new Token("6", 1, TokenType.INT));
 
-//        tokens.add(new Token(null, 1, TokenType.BRACKET_OPEN));
-//        tokens.add(new Token("funny_var2", 1, TokenType.IDENTIFIER));
-//        tokens.add(new Token(null, 1, TokenType.NEQ));
-//        tokens.add(new Token("100100134", 1, TokenType.INT));
-//        tokens.add(new Token(null, 1, TokenType.BRACKET_CLOSED));
+        // tokens.add(new Token(null, 1, TokenType.BRACKET_OPEN));
+        // tokens.add(new Token("funny_var2", 1, TokenType.IDENTIFIER));
+        // tokens.add(new Token(null, 1, TokenType.NEQ));
+        // tokens.add(new Token("100100134", 1, TokenType.INT));
+        // tokens.add(new Token(null, 1, TokenType.BRACKET_CLOSED));
 
-
-        //[BRACKET_OPEN, IDENTIFIER(funny_var2), NEQ, INT(100100134), BRACKET_CLOSED]
-
-
+        // [BRACKET_OPEN, IDENTIFIER(funny_var2), NEQ, INT(100100134), BRACKET_CLOSED]
 
         ExpressionNode node = new ExpressionParser(tokens).parseExpression();
         System.out.println(node);
-
 
     }
 }

@@ -1,3 +1,11 @@
-x = 6 + 9;
-y = x + 2;
-print(y);
+function printHello(x) {
+    print("returning before hello...");
+    return;
+    print("Hello world!");
+    print(x);
+    
+}
+
+
+
+printHello("test");

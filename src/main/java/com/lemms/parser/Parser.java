@@ -36,19 +36,37 @@ public class Parser {
     }
 
     private StatementNode parseStatement() {
+        if (match(TokenType.RETURN))
+            return parseReturnStatement();
         if (match(TokenType.IF))
             return parseIfStatement();
         if (match(TokenType.WHILE))
             return parseWhileStatement();
         if (match(TokenType.IDENTIFIER)) {
-            if (peek().getType() == TokenType.ASSIGNMENT) {
+            TokenType type = peek().getType();
+            if (type == TokenType.ASSIGNMENT) {
                 return parseAssignment();
-            } else if (peek().getType() == TokenType.BRACKET_OPEN) {
-                return parseFunctionCall();
+            } else if (type == TokenType.BRACKET_OPEN) {
+                return parseFunctionCallStatement();
             }
+        }
+        if (match(FUNCTION)) {
+            return parseFunctionDeclaration();
         }
         // ... other statement types ...
         throw error("Unexpected token: " + peek());
+    }
+
+    private ReturnNode parseReturnStatement() {
+        // 'return' already matched
+        ExpressionNode expr = null;
+        if (!check(TokenType.SEMICOLON)) {
+            expr = parseExpression();
+        }
+        consume(TokenType.SEMICOLON, "Expected ';' after return statement.");
+        ReturnNode returnNode = new ReturnNode();
+        returnNode.value = expr;
+        return returnNode;
     }
 
     private IfNode parseIfStatement() {
@@ -84,9 +102,20 @@ public class Parser {
     }
 
     private ExpressionNode parseExpression() {
-        // Collect tokens for the expression (until a delimiter, e.g., ')', ';', etc.)
         List<Token> exprTokens = new ArrayList<>();
-        while (!isAtEnd() && !isExpressionTerminator(peek())) {
+        int parenDepth = 0;
+        
+        while (!isAtEnd()) {
+            Token token = peek();
+            if (token.getType() == TokenType.BRACKET_OPEN) {
+                parenDepth++;
+            } else if (token.getType() == TokenType.BRACKET_CLOSED) {
+                if (parenDepth == 0)
+                    break; // This is the closing paren for the statement, not the expression
+                parenDepth--;
+            } else if (parenDepth == 0 && isExpressionTerminator(token)) {
+                break;
+            }
             exprTokens.add(advance());
         }
         return new ExpressionParser(exprTokens).parseExpression();
@@ -115,25 +144,58 @@ public class Parser {
         return whileNode;
     }
 
-    private FunctionCallStatementNode parseFunctionCall() {
-        Token identifier = previous(); // The function name (IDENTIFIER) was just matched
-        consume(TokenType.BRACKET_OPEN, "Expected '(' after function name.");
-        List<ExpressionNode> params = new ArrayList<>();
-        if (!check(TokenType.BRACKET_CLOSED)) {
-            do {
-                params.add(parseExpression());
-            } while (match(TokenType.COMMA));
-        }
-        consume(TokenType.BRACKET_CLOSED, "Expected ')' after function arguments.");
-        consume(TokenType.SEMICOLON, "Expected ';' after function call.");
-        FunctionCallNode functionCallNode = new FunctionCallNode();
-        
-        functionCallNode.functionName =identifier.getValue();
-        functionCallNode.params = params;
-        FunctionCallStatementNode functionCallStatementNode = new FunctionCallStatementNode();
-        functionCallStatementNode.functionCall = functionCallNode;
+    private FunctionDeclarationNode parseFunctionDeclaration() {
 
-        return functionCallStatementNode;
+        FunctionDeclarationNode func = new FunctionDeclarationNode();
+        ArrayList<String> params = new ArrayList<>();
+
+        // read function name
+        func.functionName = consume(IDENTIFIER, "Expected identifier (function name) after 'function' keyword")
+                .getValue();
+
+        // read function params
+        consume(BRACKET_OPEN, "Expected '(' after function name.");
+        if (!check(BRACKET_CLOSED)) {
+            do {
+                params.add(consume(IDENTIFIER, "Expected IDENTIFIER parameters in function").getValue());
+            } while (match(COMMA));
+        }
+        consume(BRACKET_CLOSED, "Expected ')' after function arguments");
+
+        consume(BRACES_OPEN, "Expected '{' after function header");
+        BlockNode body = parseBlock();
+        consume(BRACES_CLOSED, "Expected '}' after function body");
+
+        func.paramNames = params;
+        func.functionBody = body;
+        return func;
+    }
+
+    private FunctionCallStatementNode parseFunctionCallStatement() {
+        // The IDENTIFIER was just matched
+        List<Token> exprTokens = new ArrayList<>();
+        exprTokens.add(previous()); // Add the IDENTIFIER
+
+        // Collect tokens until we reach ')'
+        int parenDepth = 0;
+        do {
+            Token token = advance();
+            exprTokens.add(token);
+            if (token.getType() == TokenType.BRACKET_OPEN)
+                parenDepth++;
+            if (token.getType() == TokenType.BRACKET_CLOSED)
+                parenDepth--;
+        } while (parenDepth > 0 && !isAtEnd());
+
+        // Parse the function call as an expression
+        ExpressionNode expr = new ExpressionParser(exprTokens).parseExpression();
+
+        consume(TokenType.SEMICOLON, "Expected ';' after function call.");
+
+        // Wrap in statement node
+        FunctionCallStatementNode stmt = new FunctionCallStatementNode();
+        stmt.functionCall = (FunctionCallNode) expr;
+        return stmt;
     }
 
     // Utility methods:

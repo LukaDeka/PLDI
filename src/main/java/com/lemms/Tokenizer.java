@@ -24,13 +24,13 @@ public class Tokenizer {
     private void addToken(TokenType type, String text) {
         switch (type) {
             case PLUS, MINUS, MULTIPLICATION, DIVISION, MODULO, GT, LT, NOT,
-                 BRACKET_OPEN, BRACKET_CLOSED, BRACES_OPEN, BRACES_CLOSED, SEMICOLON, ASSIGNMENT:
+                 BRACKET_OPEN, BRACKET_CLOSED, BRACES_OPEN, BRACES_CLOSED, SEMICOLON, ASSIGNMENT, COMMA:
                 index++;
                 break;
             case GEQ, LEQ, NEQ, EQ, AND, OR:
                 index += 2;
                 break;
-            case IDENTIFIER, STRING, INT, BOOL, IF, ELSE, WHILE: // Incrementation happens while reading
+            case FUNCTION, IDENTIFIER, STRING, INT, BOOL, IF, ELSE, WHILE, RETURN: // Incrementation happens while reading
                 break;
             default:
                 throw new Error("Forgot to implement token type: " + type);
@@ -56,6 +56,17 @@ public class Tokenizer {
             case '*': addToken(MULTIPLICATION, null); return;
             case '%': addToken(MODULO, null); return;
             case ',': addToken(COMMA, null); return;
+            case '#':
+                index++;
+                while (index + 1 <= input_file.length())
+                         {
+                            ch = input_file.charAt(index++);
+                            boolean isEndOfLine = ch == '\n';
+                            if(isEndOfLine) {
+                                break;
+                            }                            
+                        }
+                return;
         }
 
         // Match multi-char tokens
@@ -125,6 +136,9 @@ public class Tokenizer {
                 case "if": addToken(IF, null); return;                
                 case "else": addToken(ELSE, null); return;
                 case "while": addToken(WHILE, null); return;
+                case "function": addToken(FUNCTION, null); return;
+                case "return": addToken(RETURN, null); return;
+                case "class": addToken(CLASS, null); return;
             }
 
             // Else, it's an identifier

@@ -1,15 +1,16 @@
 package com.lemms.SyntaxNode;
 
+import com.lemms.Token;
 import com.lemms.interpreter.FlowSignal;
 import com.lemms.interpreter.StatementVisitor;
+import com.lemms.interpreter.ValueVisitor;
 
-public class WhileNode extends StatementNode {
-
-    public ExpressionNode condition;
-    public StatementNode whileBody;
+public class ReturnNode extends StatementNode {
+    
+    public ExpressionNode value;
 
     @Override
     public FlowSignal accept(StatementVisitor visitor) {
-        return visitor.visitWhileStatement(this);
+        return visitor.visitReturnNode(this);
     }
 }

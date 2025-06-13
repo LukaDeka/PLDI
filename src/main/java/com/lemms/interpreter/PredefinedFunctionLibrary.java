@@ -22,6 +22,15 @@ public class PredefinedFunctionLibrary {
             throw new RuntimeException("Unsupported type for len function.");
         });
 
+        functions.put("exit", args -> {
+            if (!args.isEmpty() && args.get(0) instanceof Integer) {
+                System.exit((Integer) args.get(0));
+            } else {
+                System.exit(0);
+            }
+            return null;
+        });
+
         return functions;
     }     
 }
