@@ -146,9 +146,6 @@ class LemmsTest {
 
     @Test
     void testThousandCountdown() throws IOException, InterruptedException {
-        makeTest("src/main/resources/successTests/thousandCountdown.semml", "Done!", 0);
+        makeTest("src/main/resources/successTests/hundredCountdown.lemms", "Done!", 0);
     }
-
-
-
 }
