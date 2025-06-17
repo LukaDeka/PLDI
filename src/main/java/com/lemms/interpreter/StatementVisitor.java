@@ -9,5 +9,6 @@ public interface StatementVisitor {
     public FlowSignal visitAssignmentNode(AssignmentNode assignmentNode);
     public FlowSignal visitFunctionCallStatement(FunctionCallStatementNode functionCallStatementNode);
     public void visitFunctionDeclarationStatement(FunctionDeclarationNode functionDeclarationNode);
+    public void visitClassDeclarationStatement(ClassDeclarationNode classDeclarationNode);
     public FlowSignal visitReturnNode(ReturnNode returnNode);
 }
