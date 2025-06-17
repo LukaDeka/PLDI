@@ -1,7 +1,7 @@
 function printHello(x) {
-    print("returning before hello...");
+    println("returning before hello...");
     return;
-    print("Hello world!");
+    println("Hello world!");
     print(x);
     
 }

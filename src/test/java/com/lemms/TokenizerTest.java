@@ -11,7 +11,7 @@ public class TokenizerTest {
 
     @Test
     public void test1() {
-        Tokenizer tokenizer = new Tokenizer(new File("src/main/resources/example1.txt"));
+        Tokenizer tokenizer = new Tokenizer(new File("src/main/resources/example1.lemms"));
         ArrayList<Token> tokens = tokenizer.getTokens();
 
         String expected = """
@@ -37,7 +37,7 @@ public class TokenizerTest {
 
     @Test
     public void test3() {
-        Tokenizer tokenizer = new Tokenizer(new File("src/main/resources/example3.txt"));
+        Tokenizer tokenizer = new Tokenizer(new File("src/main/resources/example3.lemms"));
         ArrayList<Token> tokens = tokenizer.getTokens();
 
         String expected = """

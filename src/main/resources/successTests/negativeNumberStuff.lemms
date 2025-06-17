@@ -1,10 +1,12 @@
 i = -1 + 9;
 
 print(i);
+print(" ");
 
 j = 5;
 
 while (j > -5) {
     print(j);
+    print(" ");
     j = j - 1;
 }

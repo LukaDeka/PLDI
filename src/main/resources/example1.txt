@@ -1,7 +1,0 @@
-funny_var1=100_100_134;funny_var = "epic string\"string";
-
-if(funny_var2!=100100134){print("awman");}
-3<=4;;;
-        whiletrue=true;whilefalse=false;
-
-string____test_____        =          ""

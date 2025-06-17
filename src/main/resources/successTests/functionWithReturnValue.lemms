@@ -23,6 +23,7 @@ while(i <= 3) {
     j = 1;
     while(j <= 4) {
         print(ackermann(i, j));
+        print(" ");
         j = j + 1;
     }    
     i = i + 1;
