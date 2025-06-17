@@ -288,4 +288,10 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
         Object returnValue = returnNode.value.accept(this);
         return FlowSignal.returned(returnValue);
     }
+
+    @Override
+    public void visitClassDeclarationStatement(ClassDeclarationNode classDeclarationNode) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'visitClassDeclarationStatement'");
+    }
 }
