@@ -7,12 +7,10 @@ import com.lemms.interpreter.StatementVisitor;
 public class AssignmentNode extends StatementNode {
     public VariableNode leftHandSide;
     public ExpressionNode rightHandSide;
-    public final Token equalsToken; //Anker-Token repräsentiert den Node, beinhaltet line
 
-    public AssignmentNode(VariableNode identifier, ExpressionNode expression, Token equalsToken) {
+    public AssignmentNode(VariableNode identifier, ExpressionNode expression) {
         this.leftHandSide = identifier;
-        this.rightHandSide = expression;
-        this.equalsToken = equalsToken;
+        this.rightHandSide = expression;        
     }
 
     @Override

@@ -15,6 +15,12 @@ public class Token {
         this.line = line;
     }
 
+    public Token(TokenType type) {
+        this.type = type;
+        this.value = null;
+        this.line = 0;
+    }
+
     public TokenType getType() {
         return type;
     }
@@ -26,13 +32,6 @@ public class Token {
     public int getLine() {
         return line;
     }
-
-    public Token(String value, int line, TokenType type) {
-        this.value = value;
-        this.line = line;
-        this.type = type;
-    }
-
 
     public String toString2() {
         if (value == null)
