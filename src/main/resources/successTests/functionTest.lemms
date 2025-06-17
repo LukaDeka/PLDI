@@ -1,10 +1,18 @@
-function printStuff()
+function multiply( x )
 {
-    print("hello!");
+    return x * x;
 }
 
-function higherOrder(argumentFunction) {
-    argumentFunction();
+function halve( x )
+{
+    return x / 2 ;
 }
 
-higherOrder(printStuff);
+
+function applyFunctions(fA, fB, x) {
+    print(fA(x)+fB(x));
+}
+
+applyFunctions(multiply, halve, 8);
+applyFunctions(multiply, multiply, 8);
+applyFunctions(halve, halve, 500);
