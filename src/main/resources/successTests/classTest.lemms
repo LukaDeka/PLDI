@@ -1,0 +1,10 @@
+print("hallo");
+
+class Human {
+    age;
+    name;
+
+    function printHallo(){
+        print("hallo");
+    }
+}
