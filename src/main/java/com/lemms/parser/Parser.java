@@ -5,14 +5,8 @@ import com.lemms.Token;
 import com.lemms.TokenType;
 import com.lemms.SyntaxNode.*;
 
-import org.slf4j.LoggerFactory;
-
-import static java.lang.Character.reverseBytes;
-
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.logging.*;
 
 import static com.lemms.TokenType.*;
 

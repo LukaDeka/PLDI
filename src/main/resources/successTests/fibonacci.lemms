@@ -8,6 +8,7 @@ while ( i <= 10 ) {
     b = a + b;
     a = temp;
     print(b);
+    print(" ");
     i = i + 1;
 }
 
