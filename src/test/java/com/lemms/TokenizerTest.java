@@ -1,5 +1,5 @@
 package com.lemms;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -15,45 +15,7 @@ public class TokenizerTest {
         ArrayList<Token> tokens = tokenizer.getTokens();
 
         String expected = """
-[
-IDENTIFIER(funny_var1),
-ASSIGNMENT,
-INT(100100134),
-SEMICOLON,
-IDENTIFIER(funny_var),
-ASSIGNMENT,
-STRING("epic string"string"),
-SEMICOLON,
-IF,
-BRACKET_OPEN,
-IDENTIFIER(funny_var2),
-NEQ,
-INT(100100134),
-BRACKET_CLOSED,
-BRACES_OPEN,
-IDENTIFIER(print),
-BRACKET_OPEN,
-STRING("awman"),
-BRACKET_CLOSED,
-SEMICOLON,
-BRACES_CLOSED,
-INT(3),
-LEQ,
-INT(4),
-SEMICOLON,
-SEMICOLON,
-SEMICOLON,
-IDENTIFIER(whiletrue),
-ASSIGNMENT,
-BOOL(true),
-SEMICOLON,
-IDENTIFIER(whilefalse),
-ASSIGNMENT,
-BOOL(false),
-SEMICOLON,
-IDENTIFIER(string____test_____),
-ASSIGNMENT,
-STRING("")]
+[IDENTIFIER(funny_var1), ASSIGNMENT, INT(100100134), SEMICOLON, IDENTIFIER(funny_var), ASSIGNMENT, STRING("epic string"string"), SEMICOLON, IF, BRACKET_OPEN, IDENTIFIER(funny_var2), NEQ, INT(100100134), BRACKET_CLOSED, BRACES_OPEN, IDENTIFIER(print), BRACKET_OPEN, STRING("awman"), BRACKET_CLOSED, SEMICOLON, BRACES_CLOSED, INT(3), LEQ, INT(4), SEMICOLON, SEMICOLON, SEMICOLON, IDENTIFIER(whiletrue), ASSIGNMENT, BOOL(true), SEMICOLON, IDENTIFIER(whilefalse), ASSIGNMENT, BOOL(false), SEMICOLON, IDENTIFIER(string____test_____), ASSIGNMENT, STRING("")]
 """;
         String normalizedExpected = normalize(expected);
         String normalizedActual = normalize(tokens.toString());
@@ -66,10 +28,7 @@ STRING("")]
         ArrayList<Token> tokens = tokenizer.getTokens();
 
         String expected = """
-[
-IDENTIFIER(funny_var1),
-ASSIGNMENT,
-INT(100100134)]
+[IDENTIFIER(funny_var1), ASSIGNMENT, INT(100100134)]
 """;
         String normalizedExpected = normalize(expected);
         String normalizedActual = normalize(tokens.toString());
@@ -82,33 +41,12 @@ INT(100100134)]
         ArrayList<Token> tokens = tokenizer.getTokens();
 
         String expected = """
-[
-IDENTIFIER(ifvar1_),
-ASSIGNMENT,
-MINUS,
-INT(4),
-PLUS,
-INT(23),
-SEMICOLON,
-WHILE,
-BRACKET_OPEN,
-IDENTIFIER(ifvar1_),
-EQ,
-BOOL(false),
-BRACKET_CLOSED,
-BRACES_OPEN,
-IDENTIFIER(print),
-BRACKET_OPEN,
-STRING("
+[IDENTIFIER(ifvar1_), ASSIGNMENT, MINUS, INT(4), PLUS, INT(23), SEMICOLON, WHILE, BRACKET_OPEN, IDENTIFIER(ifvar1_), EQ, BOOL(false), BRACKET_CLOSED, BRACES_OPEN, IDENTIFIER(print), BRACKET_OPEN, STRING("
 w
 "
 o
 "
-w"),
-BRACKET_CLOSED,
-SEMICOLON,
-BRACES_CLOSED,
-SEMICOLON]
+w"), BRACKET_CLOSED, SEMICOLON, BRACES_CLOSED, SEMICOLON]
 """;
         String normalizedExpected = normalize(expected);
         String normalizedActual = normalize(tokens.toString());
@@ -122,6 +60,61 @@ SEMICOLON]
 
         String expected = """
 []
+""";
+        String normalizedExpected = normalize(expected);
+        String normalizedActual = normalize(tokens.toString());
+        assertEquals(normalizedExpected, normalizedActual);
+    }
+
+    @Test
+    public void commentTest1() {
+        Tokenizer tokenizer = new Tokenizer(new String("#cool comment"));
+        ArrayList<Token> tokens = tokenizer.getTokens();
+
+        String expected = """
+[]
+""";
+        String normalizedExpected = normalize(expected);
+        String normalizedActual = normalize(tokens.toString());
+        assertEquals(normalizedExpected, normalizedActual);
+    }
+
+    @Test
+    public void commentTest2() {
+        Tokenizer tokenizer = new Tokenizer(new String("#cool comment#"));
+        ArrayList<Token> tokens = tokenizer.getTokens();
+
+        String expected = """
+[]
+""";
+        String normalizedExpected = normalize(expected);
+        String normalizedActual = normalize(tokens.toString());
+        assertEquals(normalizedExpected, normalizedActual);
+    }
+
+    @Test
+    public void commentTest3() {
+        Tokenizer tokenizer = new Tokenizer(new String("#"));
+        ArrayList<Token> tokens = tokenizer.getTokens();
+
+        String expected = """
+[]
+""";
+        String normalizedExpected = normalize(expected);
+        String normalizedActual = normalize(tokens.toString());
+        assertEquals(normalizedExpected, normalizedActual);
+    }
+
+    @Test
+    public void commentTest4() {
+        Tokenizer tokenizer = new Tokenizer(new String("""
+# this part is ignored
+var1 = 4+3;#
+"""));
+        ArrayList<Token> tokens = tokenizer.getTokens();
+
+        String expected = """
+[IDENTIFIER(var1), ASSIGNMENT, INT(4), PLUS, INT(3), SEMICOLON]
 """;
         String normalizedExpected = normalize(expected);
         String normalizedActual = normalize(tokens.toString());
