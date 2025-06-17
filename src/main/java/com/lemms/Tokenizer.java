@@ -207,8 +207,8 @@ public class Tokenizer {
                     break;
                 }
                 index++;
-            }
-            String new_token = input_file.substring(begin_index, index);
+            }          
+            String new_token = input_file.substring(begin_index, index - 1);
             new_token = new_token.replace("\\", "");
             addToken(STRING, new_token);
             return;

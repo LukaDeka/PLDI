@@ -1,13 +1,15 @@
 package com.lemms;
 
+import static com.lemms.TokenType.STRING;
+
 public class Token {
     private final TokenType type;
     private final String value;
     private final int line;
 
-//    public Token(TokenType type) {
-//        this.type = type;
-//    }
+    // public Token(TokenType type) {
+    // this.type = type;
+    // }
 
     public Token(TokenType type, String value, int line) {
         this.type = type;
@@ -33,15 +35,18 @@ public class Token {
         return line;
     }
 
-    public String toString2() {
-        if (value == null)
-            return String.format("\n%s", type);
-        return String.format("\n%s(%s)", type, value);
-    }
     @Override
     public String toString() {
         if (value == null)
             return String.format("%s", type);
-        return String.format("%s(%s)", type, value);
+
+        String format = "";
+        if (type == STRING) {
+            format = String.format("%s(\"%s\")", type, value);
+        } else {
+            format = String.format("%s(%s)", type, value);
+        }
+
+        return format;
     }
 }

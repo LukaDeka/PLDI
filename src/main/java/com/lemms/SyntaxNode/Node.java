@@ -55,7 +55,7 @@ public abstract class Node {
             if (expectedTypes[i] != null) {
                 //mismatch
                 if (i >= tokens.size() || tokens.get(j).getType() != expectedTypes[i]) {
-                    errors.add(String.format("Error: Token at position %s [%s] does not match the expected type: %s", j, tokens.get(j).toString2(), expectedTypes[i]));
+                    errors.add(String.format("Error: Token at position %s [%s] does not match the expected type: %s", j, tokens.get(j).toString(), expectedTypes[i]));
                     break;
                 }
                 //match
@@ -66,7 +66,7 @@ public abstract class Node {
             } else {
                 j++; //increment here statt weiter unten, weil gerantiert dass mind 1element fillt
                 if (i >= tokens.size()) {
-                    errors.add(String.format("Error: Token at position %s [%s] does not match the expected type: %s", j, tokens.get(j).toString2(), expectedTypes[i + 1]));
+                    errors.add(String.format("Error: Token at position %s [%s] does not match the expected type: %s", j, tokens.get(j).toString(), expectedTypes[i + 1]));
                 } else {
                     if (j >= tokens.size()) {
                         //errors.add(String.format("Error: Token at position %s [%s] does not match the expected type: %s", j, tokens.get(j).toString2(), expectedTypes[i + 1]));
