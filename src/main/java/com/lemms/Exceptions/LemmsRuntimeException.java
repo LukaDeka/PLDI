@@ -10,6 +10,11 @@ public class LemmsRuntimeException extends RuntimeException {
         this.token = token;
     }
 
+    public LemmsRuntimeException(String message) {
+        super(message);        
+        token = null;
+    }
+
     public Token getToken() {
         return token;
     }
