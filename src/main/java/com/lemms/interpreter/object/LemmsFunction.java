@@ -18,4 +18,9 @@ public class LemmsFunction extends LemmsData {
         this.nativeFunction = value;
         isNative = true;
     }
+
+        @Override
+        public String toString() {
+            return isNative ? "NativeFunction" : functionDeclaration.functionName;
+        }
 }

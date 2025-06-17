@@ -1,0 +1,10 @@
+function printStuff()
+{
+    print("hello!");
+}
+
+function higherOrder(argumentFunction) {
+    argumentFunction();
+}
+
+higherOrder(printStuff);

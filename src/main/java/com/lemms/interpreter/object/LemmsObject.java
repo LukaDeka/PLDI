@@ -20,5 +20,16 @@ public class LemmsObject extends LemmsData {
     public void set(String name, LemmsData value) {
         properties.put(name, value);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(classDeclaration.className).append("{\n");
+        for (Map.Entry<String, LemmsData> entry : properties.entrySet()) {
+            sb.append("  ").append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
+        }
+        sb.append("}");
+        return sb.toString();
+    }
     
 }

@@ -5,5 +5,9 @@ public class LemmsInt extends LemmsData {
     public LemmsInt(int value) {
         this.value = value;
     }
+    @Override
+    public String toString() {
+        return String.valueOf(value);
+    }
     
 }
