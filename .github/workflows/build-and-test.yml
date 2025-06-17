@@ -14,10 +14,10 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set up JDK 20 and cache
+    - name: Set up JDK 22 and cache
       uses: actions/setup-java@v4
       with:
-        java-version: '20'
+        java-version: '22'
         distribution: 'temurin'
         cache: maven
 
