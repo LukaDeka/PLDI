@@ -106,7 +106,7 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
     public Object visitVariableValue(VariableNode variableNode) {
         Object value = environment.get(variableNode.name);
         if (value == null) //undefined, optional dedicated isDefined if needed?
-            throw new LemmsRuntimeException(variableNode.token, "Undefined variable '" + variableNode.name + "'.");
+            throw new LemmsRuntimeException("Undefined variable '" + variableNode.name + "'.");
         else return value;
     }
 

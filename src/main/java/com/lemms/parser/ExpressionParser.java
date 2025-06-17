@@ -255,7 +255,7 @@ public class ExpressionParser {
                     // Just a variable
                     consume();
                     logger.info(identifierToken + "\n----- IDENTIFIER NODE CREATED -----");
-                    return new VariableNode(identifierToken);
+                    return new VariableNode(identifierToken.getValue());
                 }                                
             }
 
