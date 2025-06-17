@@ -53,8 +53,6 @@ class InterpreterTest {
         String variableName1 = "var1";
         String variableName2 = "var2";
         int value = 27;
-        
-
 
         VariableNode variableNode = new VariableNode(variableName1);
         ExpressionNode expressionNode = new LiteralNode(value);
@@ -63,7 +61,7 @@ class InterpreterTest {
 
         VariableNode variableNode2 = new VariableNode(variableName2);
         ExpressionNode expressionNode2 = new LiteralNode(value);
-        AssignmentNode assignmentNode2 = new AssignmentNode(variableNode,expressionNode);
+        AssignmentNode assignmentNode2 = new AssignmentNode(variableNode2,expressionNode2);
 
         
         List<StatementNode> program = List.of(assignmentNode, assignmentNode2);
@@ -105,12 +103,6 @@ class InterpreterTest {
         ExpressionNode number2 = new LiteralNode(1);
         OperatorNode condition = new OperatorNode(n2, new Token(TokenType.GEQ), number2);
 
-        StatementNode statementNode = null; //optional
-        WhileNode whileNode = new WhileNode();
-        whileNode.condition = condition;
-        whileNode.whileBody = statementNode; //optional, will be replaced later
-
-
         // temp = a + b
         VariableNode temp1 = new VariableNode("temp");
 
@@ -148,7 +140,7 @@ class InterpreterTest {
         whileBlock.condition = condition;
         whileBlock.whileBody = blockNode;
 
-        Interpreter interpreter = new Interpreter(List.of(assignmentNodeN, assignmentNode1, assignmentNode2, whileNode));
+        Interpreter interpreter = new Interpreter(List.of(assignmentNodeN, assignmentNode1, assignmentNode2, whileBlock));
 
         interpreter.interpret();        
 

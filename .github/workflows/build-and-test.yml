@@ -1,0 +1,26 @@
+name: Java build and tests
+
+on:
+  push:
+    branches: [ "*" ]
+  pull_request:
+    branches: [ "*" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up JDK 20 and cache
+      uses: actions/setup-java@v4
+      with:
+        java-version: '20'
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Build project and run tests
+      run: mvn --batch-mode --update-snapshots verify
+
