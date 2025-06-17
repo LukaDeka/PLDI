@@ -15,7 +15,7 @@ public class TokenizerTest {
         ArrayList<Token> tokens = tokenizer.getTokens();
 
         String expected = """
-[IDENTIFIER(funny_var1), ASSIGNMENT, INT(100100134), SEMICOLON, IDENTIFIER(funny_var), ASSIGNMENT, STRING("epic string"string"), SEMICOLON, IF, BRACKET_OPEN, IDENTIFIER(funny_var2), NEQ, INT(100100134), BRACKET_CLOSED, BRACES_OPEN, IDENTIFIER(print), BRACKET_OPEN, STRING("awman"), BRACKET_CLOSED, SEMICOLON, BRACES_CLOSED, INT(3), LEQ, INT(4), SEMICOLON, SEMICOLON, SEMICOLON, IDENTIFIER(whiletrue), ASSIGNMENT, BOOL(true), SEMICOLON, IDENTIFIER(whilefalse), ASSIGNMENT, BOOL(false), SEMICOLON, IDENTIFIER(string____test_____), ASSIGNMENT, STRING("")]
+[IDENTIFIER(funny_var2), ASSIGNMENT, INT(100100134), SEMICOLON, IDENTIFIER(funny_var), ASSIGNMENT, STRING("epic string"string"), SEMICOLON, IF, BRACKET_OPEN, IDENTIFIER(funny_var2), NEQ, INT(100100134), BRACKET_CLOSED, BRACES_OPEN, IDENTIFIER(print), BRACKET_OPEN, STRING("awman"), BRACKET_CLOSED, SEMICOLON, BRACES_CLOSED, IF, BRACKET_OPEN, INT(3), LEQ, INT(4), BRACKET_CLOSED, BRACES_OPEN, BRACES_CLOSED, IDENTIFIER(whiletrue), ASSIGNMENT, BOOL(true), SEMICOLON, IDENTIFIER(whilefalse), ASSIGNMENT, BOOL(false), SEMICOLON, IDENTIFIER(string____test_____), ASSIGNMENT, STRING("hi"), SEMICOLON, IDENTIFIER(print), BRACKET_OPEN, IDENTIFIER(string____test_____), BRACKET_CLOSED, SEMICOLON]
 """;
         String normalizedExpected = normalize(expected);
         String normalizedActual = normalize(tokens.toString());
@@ -46,7 +46,7 @@ w
 "
 o
 "
-w"), BRACKET_CLOSED, SEMICOLON, BRACES_CLOSED, SEMICOLON]
+w"), BRACKET_CLOSED, SEMICOLON, BRACES_CLOSED, IDENTIFIER(print), BRACKET_OPEN, IDENTIFIER(ifvar1_), BRACKET_CLOSED, SEMICOLON]
 """;
         String normalizedExpected = normalize(expected);
         String normalizedActual = normalize(tokens.toString());
