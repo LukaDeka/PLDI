@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.lemms.api.NativeFunction;
+import com.lemms.interpreter.object.LemmsInt;
+import com.lemms.interpreter.object.LemmsString;
 
 public class PredefinedFunctionLibrary {
 
@@ -16,15 +18,17 @@ public class PredefinedFunctionLibrary {
         });
         
         functions.put("len", args -> {
-            if (args.get(0) instanceof String) {
-                return ((String) args.get(0)).length();
+            if (args.get(0) instanceof LemmsString) {
+                int length = ((LemmsString)args.get(0)).value.length();
+                return new LemmsInt(length);
             } 
             throw new RuntimeException("Unsupported type for len function.");
         });
 
         functions.put("exit", args -> {
-            if (!args.isEmpty() && args.get(0) instanceof Integer) {
-                System.exit((Integer) args.get(0));
+            if (!args.isEmpty() && args.get(0) instanceof LemmsInt) {
+
+                System.exit(((LemmsInt) args.get(0)).value);
             } else {
                 System.exit(0);
             }

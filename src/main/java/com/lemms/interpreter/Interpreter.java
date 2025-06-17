@@ -14,6 +14,7 @@ import com.lemms.api.NativeFunction;
 import com.lemms.interpreter.FlowSignal.SignalType;
 import com.lemms.interpreter.object.LemmsBool;
 import com.lemms.interpreter.object.LemmsData;
+import com.lemms.interpreter.object.LemmsFunction;
 import com.lemms.interpreter.object.LemmsInt;
 import com.lemms.interpreter.object.LemmsObject;
 import com.lemms.interpreter.object.LemmsString;
@@ -167,7 +168,7 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
 
         if (leftValue instanceof LemmsBool && rightValue instanceof LemmsBool) {
             boolean result = evaluateBooleanOperator(((LemmsBool) leftValue).value,
-                        ((LemmsBool) rightValue).value, operatorType);
+                    ((LemmsBool) rightValue).value, operatorType);
             return new LemmsBool(result);
         } else if (leftValue instanceof LemmsInt && rightValue instanceof LemmsInt) {
 
@@ -186,16 +187,16 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
         }
 
         return new LemmsBool(false);
-        
+
     }
 
     private boolean evaluateEqualityOperator(LemmsData leftValue, LemmsData rightValue, TokenType operator) {
 
         boolean result = false;
-        if(leftValue.getClass() != rightValue.getClass()) {
-            result = false; 
+        if (leftValue.getClass() != rightValue.getClass()) {
+            result = false;
         }
-        if(leftValue instanceof LemmsObject && rightValue instanceof LemmsObject) {
+        if (leftValue instanceof LemmsObject && rightValue instanceof LemmsObject) {
             result = leftValue.equals(rightValue);
         } else if (leftValue instanceof LemmsInt && rightValue instanceof LemmsInt) {
             int leftValueInt = ((LemmsInt) leftValue).value;
@@ -205,14 +206,14 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
             String leftString = ((LemmsString) leftValue).value;
             String rightString = ((LemmsString) rightValue).value;
             result = leftString.equals(rightString);
-            
+
         } else if (leftValue instanceof LemmsBool && rightValue instanceof LemmsBool) {
             boolean leftBool = ((LemmsBool) leftValue).value;
             boolean rightBool = ((LemmsBool) rightValue).value;
-            result = leftBool == rightBool;            
+            result = leftBool == rightBool;
         } else {
-            throw new RuntimeException("Unknown equality check for: " 
-            + leftValue.getClass().getSimpleName() + " and " + rightValue.getClass().getSimpleName());
+            throw new RuntimeException("Unknown equality check for: "
+                    + leftValue.getClass().getSimpleName() + " and " + rightValue.getClass().getSimpleName());
         }
         if (operator == EQ) {
             return result;
@@ -242,7 +243,7 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
         throw new RuntimeException("Unknown comparison operator: " + operator);
     }
 
-    private boolean evaluateBooleanOperator(boolean leftValue, boolean rightValue, TokenType operator) {    
+    private boolean evaluateBooleanOperator(boolean leftValue, boolean rightValue, TokenType operator) {
         switch (operator) {
             case AND:
                 return leftValue && rightValue;
@@ -294,31 +295,38 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
     @Override
     public LemmsData visitFunctionCallValue(FunctionCallNode functionNode) {
 
-        if (nativeFunctions.containsKey((functionNode.functionName))) {
-            NativeFunction nativeFunction = nativeFunctions.get(functionNode.functionName);
-            List<LemmsData> args = functionNode.params.stream()
-                    .map(param -> param.accept(this))
-                    .toList();
-            return nativeFunction.apply(args);
+        LemmsData functionValue = environment.get(functionNode.functionName);
+        if (!(functionValue instanceof LemmsFunction)) {
+            throw new LemmsRuntimeException(
+                    "Function '" + functionNode.functionName + "' is not defined or not a function.");
         }
-
-        Object functionValue = environment.get(functionNode.functionName);
-        if (functionValue instanceof FunctionDeclarationNode) {
+        LemmsFunction lemmsFunction = (LemmsFunction) functionValue;
+        if (lemmsFunction.isNative) {
+            if (nativeFunctions.containsKey((functionNode.functionName))) {
+                NativeFunction nativeFunction = lemmsFunction.nativeFunction;
+                List<LemmsData> args = functionNode.params.stream()
+                        .map(param -> param.accept(this))
+                        .toList();
+                return nativeFunction.apply(args);
+            }
+        }
+        else {
+            FunctionDeclarationNode functionDeclaration = lemmsFunction.functionDeclaration;
             List<LemmsData> args = functionNode.params.stream()
                     .map(param -> param.accept(this))
                     .toList();
 
             Environment functionEnvironment = new Environment(globalEnvironment);
             for (int i = 0; i < args.size(); i++) {
-                String argName = ((FunctionDeclarationNode) functionValue).paramNames.get(i);
-                Object argValue = args.get(i);
+                String argName = functionDeclaration.paramNames.get(i);
+                LemmsData argValue = args.get(i);
                 functionEnvironment.assign(argName, argValue);
 
             }
             Environment previousEnvironment = environment;
             environment = functionEnvironment;
 
-            FlowSignal result = ((FunctionDeclarationNode) functionValue).functionBody.accept(this);
+            FlowSignal result = functionDeclaration.functionBody.accept(this);
             if (result.signal == SignalType.RETURN || result.signal == SignalType.NORMAL) {
                 environment = previousEnvironment; // Restore the previous environment
                 return result.value;
@@ -339,7 +347,7 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
     @Override
     public void visitFunctionDeclarationStatement(FunctionDeclarationNode functionDeclarationNode) {
 
-        environment.assign(functionDeclarationNode.functionName, functionDeclarationNode);
+        environment.assign(functionDeclarationNode.functionName, new LemmsFunction(functionDeclarationNode));
     }
 
     @Override
