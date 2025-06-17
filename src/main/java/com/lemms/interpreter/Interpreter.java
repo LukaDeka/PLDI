@@ -346,7 +346,22 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
 
     @Override
     public void visitClassDeclarationStatement(ClassDeclarationNode classDeclarationNode) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'visitClassDeclarationStatement'");
+        
+        NativeFunction constructor = (args) -> {
+            HashMap<String, LemmsData> properties = new HashMap<String, LemmsData>();
+            for (int i = 0; i < classDeclarationNode.localVariables.size(); i++) {
+                String paramName = classDeclarationNode.localVariables.get(i);
+                LemmsData paramValue = args.get(i);
+                properties.put(paramName, paramValue);
+            }
+            for (var functionDeclaration : classDeclarationNode.localFunctions) {
+                properties.put(functionDeclaration.functionName, new LemmsFunction(functionDeclaration));
+            }
+
+            return new LemmsObject(classDeclarationNode, properties);
+        };
+
+        globalEnvironment.assign(classDeclarationNode.className,
+                new LemmsFunction(constructor));
     }
 }
