@@ -3,8 +3,6 @@ package com.lemms.interpreter;
 //für Exceptions
 import com.lemms.Exceptions.LemmsRuntimeException;
 
-import static java.lang.Character.valueOf;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,9 +30,6 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
             TokenType.MULTIPLICATION,
             TokenType.DIVISION,
             TokenType.MODULO);
-
-    private static List<TokenType> booleanOperators = List.of(TokenType.AND,
-            TokenType.OR, TokenType.NOT);
 
     private static List<TokenType> numericComparisonOperators = List.of(
             TokenType.GEQ,
@@ -64,6 +59,10 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
     public void interpret() {
         globalEnvironment = new Environment();
         environment = globalEnvironment;
+        for (var entry : nativeFunctions.entrySet()) {
+            globalEnvironment.assign(entry.getKey(), new LemmsFunction(entry.getValue()));
+        }
+
         for (StatementNode i : program) {
             i.accept(this);
         }
@@ -119,7 +118,7 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
 
     @Override
     public FlowSignal visitAssignmentNode(AssignmentNode assignmentNode) {
-        LemmsData dataValue = assignmentNode.rightHandSide.accept(this);        
+        LemmsData dataValue = assignmentNode.rightHandSide.accept(this);
         environment.assign(assignmentNode.leftHandSide.name, dataValue);
         return FlowSignal.NORMAL;
     }
@@ -275,12 +274,12 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
         }
     }
 
-    private boolean isTrue(Object object) {
+    private boolean isTrue(LemmsData object) {
         if (object == null)
             return false;
-        if (object instanceof Boolean)
-            return (boolean) object;
-        return true;
+        if (object instanceof LemmsBool)
+            return ((LemmsBool) object).value;
+        throw new LemmsRuntimeException("Condition must be a boolean, but was: " + object.getClass().getSimpleName());
     }
 
     @Override
@@ -293,15 +292,12 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
         }
         LemmsFunction lemmsFunction = (LemmsFunction) functionValue;
         if (lemmsFunction.isNative) {
-            if (nativeFunctions.containsKey((functionNode.functionName))) {
-                NativeFunction nativeFunction = lemmsFunction.nativeFunction;
-                List<LemmsData> args = functionNode.params.stream()
-                        .map(param -> param.accept(this))
-                        .toList();
-                return nativeFunction.apply(args);
-            }
-        }
-        else {
+            NativeFunction nativeFunction = lemmsFunction.nativeFunction;
+            List<LemmsData> args = functionNode.params.stream()
+                    .map(param -> param.accept(this))
+                    .toList();
+            return nativeFunction.apply(args);
+        } else {
             FunctionDeclarationNode functionDeclaration = lemmsFunction.functionDeclaration;
             List<LemmsData> args = functionNode.params.stream()
                     .map(param -> param.accept(this))
@@ -325,8 +321,6 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
                 throw new RuntimeException("Function did not return a value: " + functionNode.functionName);
             }
         }
-
-        throw new RuntimeException("Unknown function: " + functionNode.functionName);
     }
 
     @Override

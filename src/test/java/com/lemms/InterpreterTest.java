@@ -146,6 +146,6 @@ class InterpreterTest {
 
         interpreter.interpret();
 
-        assertEquals(interpreter.environment.get(variableName1), FIBONACCI_NUMBER_20TH);
+        assertEquals(FIBONACCI_NUMBER_20TH, ((LemmsInt)interpreter.environment.get(variableName1)).value);
     }
 }
