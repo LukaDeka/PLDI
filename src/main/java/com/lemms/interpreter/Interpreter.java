@@ -119,16 +119,7 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
 
     @Override
     public FlowSignal visitAssignmentNode(AssignmentNode assignmentNode) {
-        Object value = assignmentNode.rightHandSide.accept(this);
-        LemmsData dataValue = null;
-        if (value instanceof Integer) {
-            dataValue = new LemmsInt(((Integer) value));
-        } else if (value instanceof String) {
-            dataValue = new LemmsString(((String) value));
-        } else if (value instanceof LemmsObject) {
-            dataValue = (LemmsObject) value;
-        }
-
+        LemmsData dataValue = assignmentNode.rightHandSide.accept(this);        
         environment.assign(assignmentNode.leftHandSide.name, dataValue);
         return FlowSignal.NORMAL;
     }
