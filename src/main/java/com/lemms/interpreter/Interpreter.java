@@ -26,7 +26,7 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
     public List<StatementNode> program;
     private final Map<String, NativeFunction> nativeFunctions;
 
-        private static List<TokenType> numericOperators = List.of(TokenType.PLUS,
+    private static List<TokenType> numericOperators = List.of(TokenType.PLUS,
             TokenType.MINUS,
             TokenType.MULTIPLICATION,
             TokenType.DIVISION,
@@ -35,8 +35,7 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
     private static List<TokenType> booleanOperators = List.of(TokenType.AND,
             TokenType.OR, TokenType.NOT);
 
-    private static List<TokenType> comparisonOperators = List.of(TokenType.EQ,
-            NEQ,
+    private static List<TokenType> numericComparisonOperators = List.of(
             TokenType.GEQ,
             TokenType.LEQ,
             TokenType.GT,
@@ -121,14 +120,12 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
     public FlowSignal visitAssignmentNode(AssignmentNode assignmentNode) {
         Object value = assignmentNode.rightHandSide.accept(this);
         LemmsData dataValue = null;
-        if(value instanceof Integer) {
-            dataValue = new LemmsInt(((Integer)value));
-        }
-        else if(value instanceof String) {
-            dataValue = new LemmsString(((String)value));
-        }
-        else if(value instanceof LemmsObject) {
-            dataValue = (LemmsObject)value;
+        if (value instanceof Integer) {
+            dataValue = new LemmsInt(((Integer) value));
+        } else if (value instanceof String) {
+            dataValue = new LemmsString(((String) value));
+        } else if (value instanceof LemmsObject) {
+            dataValue = (LemmsObject) value;
         }
 
         environment.assign(assignmentNode.leftHandSide.name, dataValue);
@@ -137,19 +134,20 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
 
     @Override
     public LemmsData visitVariableValue(VariableNode variableNode) {
-        LemmsData  value = environment.get(variableNode.name);
-        if (value == null) //undefined, optional dedicated isDefined if needed?
+        LemmsData value = environment.get(variableNode.name);
+        if (value == null) // undefined, optional dedicated isDefined if needed?
             throw new LemmsRuntimeException("Undefined variable '" + variableNode.name + "'.");
-        else return value;
+        else
+            return value;
     }
 
     @Override
     public LemmsData visitLiteralValue(LiteralNode literalNode) {
-        if(literalNode.value instanceof Integer) {
+        if (literalNode.value instanceof Integer) {
             return new LemmsInt((Integer) literalNode.value);
-        } else if(literalNode.value instanceof String) {
+        } else if (literalNode.value instanceof String) {
             return new LemmsString((String) literalNode.value);
-        } else if(literalNode.value instanceof Boolean) {
+        } else if (literalNode.value instanceof Boolean) {
             return new LemmsBool((Boolean) literalNode.value);
         }
         throw new LemmsRuntimeException("Unknown literal type: " + literalNode.value.getClass().getSimpleName());
@@ -157,36 +155,78 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
 
     @Override
     public LemmsData visitOperatorValue(OperatorNode operatorNode) {
-        
 
-        if (numericOperators.contains(operatorNode.operator.getType())) {
-            return evaluateNumericOperator(operatorNode);
-        } else if (booleanOperators.contains(operatorNode.operator.getType())) {
-            return evaluateBooleanOperator(operatorNode);
-        } else if (comparisonOperators.contains(operatorNode.operator.getType())) {
-            return evaluateComparisonOperators(operatorNode);
+        LemmsData leftValue = operatorNode.leftOperand.accept(this);
+        LemmsData rightValue = operatorNode.rightOperand.accept(this);
+        TokenType operatorType = operatorNode.operator.getType();
+
+        if (operatorType == EQ || operatorType == NEQ) {
+            boolean result = evaluateEqualityOperator(leftValue, rightValue, operatorType);
+            return new LemmsBool(result);
+        }
+
+        if (leftValue instanceof LemmsBool && rightValue instanceof LemmsBool) {
+            boolean result = evaluateBooleanOperator(((LemmsBool) leftValue).value,
+                        ((LemmsBool) rightValue).value, operatorType);
+            return new LemmsBool(result);
+        } else if (leftValue instanceof LemmsInt && rightValue instanceof LemmsInt) {
+
+            if (numericOperators.contains(operatorType)) {
+                int result = evaluateNumericOperator(((LemmsInt) leftValue).value,
+                        ((LemmsInt) rightValue).value, operatorType);
+                return new LemmsInt(result);
+            } else if (numericComparisonOperators.contains(operatorType)) {
+                boolean result = evaluateNumericComparisonOperator(((LemmsInt) leftValue).value,
+                        ((LemmsInt) rightValue).value, operatorType);
+                return new LemmsBool(result);
+            }
+
         } else {
             throw new RuntimeException("Unknown operator: " + operatorNode.operator);
         }
+
+        return new LemmsBool(false);
+        
     }
 
-    private boolean evaluateComparisonOperators(OperatorNode operatorNode) {
-        Object leftValue = operatorNode.leftOperand.accept(this);
-        Object rightValue = operatorNode.rightOperand.accept(this);
+    private boolean evaluateEqualityOperator(LemmsData leftValue, LemmsData rightValue, TokenType operator) {
 
-        switch (operatorNode.operator.getType()) {
-            case EQ:
-                return leftValue.equals(rightValue);
-            case NEQ:
-                return !leftValue.equals(rightValue);
-            default:
-                break;
+        boolean result = false;
+        if(leftValue.getClass() != rightValue.getClass()) {
+            result = false; 
+        }
+        if(leftValue instanceof LemmsObject && rightValue instanceof LemmsObject) {
+            result = leftValue.equals(rightValue);
+        } else if (leftValue instanceof LemmsInt && rightValue instanceof LemmsInt) {
+            int leftValueInt = ((LemmsInt) leftValue).value;
+            int rightValueInt = ((LemmsInt) rightValue).value;
+            result = leftValueInt == rightValueInt;
+        } else if (leftValue instanceof LemmsString && rightValue instanceof LemmsString) {
+            String leftString = ((LemmsString) leftValue).value;
+            String rightString = ((LemmsString) rightValue).value;
+            result = leftString.equals(rightString);
+            
+        } else if (leftValue instanceof LemmsBool && rightValue instanceof LemmsBool) {
+            boolean leftBool = ((LemmsBool) leftValue).value;
+            boolean rightBool = ((LemmsBool) rightValue).value;
+            result = leftBool == rightBool;            
+        } else {
+            throw new RuntimeException("Unknown equality check for: " 
+            + leftValue.getClass().getSimpleName() + " and " + rightValue.getClass().getSimpleName());
+        }
+        if (operator == EQ) {
+            return result;
+        } else if (operator == NEQ) {
+            return !result;
+        } else {
+            throw new RuntimeException("Unknown equality operator: " + operator);
         }
 
-        int leftValueInt = Integer.parseInt(operatorNode.leftOperand.accept(this).toString());
-        int rightValueInt = Integer.parseInt(operatorNode.rightOperand.accept(this).toString());
+    }
 
-        switch (operatorNode.operator.getType()) {
+    private boolean evaluateNumericComparisonOperator(int leftValueInt, int rightValueInt, TokenType operator) {
+
+        switch (operator) {
             case GT:
                 return leftValueInt > rightValueInt;
             case LT:
@@ -199,13 +239,11 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
                 break;
         }
 
-        throw new RuntimeException("Unknown comparison operator: " + operatorNode.operator);
+        throw new RuntimeException("Unknown comparison operator: " + operator);
     }
 
-    private Object evaluateBooleanOperator(OperatorNode operatorNode) {
-        boolean leftValue = isTrue(operatorNode.leftOperand.accept(this));
-        boolean rightValue = isTrue(operatorNode.rightOperand.accept(this));
-        switch (operatorNode.operator.getType()) {
+    private boolean evaluateBooleanOperator(boolean leftValue, boolean rightValue, TokenType operator) {    
+        switch (operator) {
             case AND:
                 return leftValue && rightValue;
             case OR:
@@ -213,14 +251,13 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
             case NOT:
                 return !rightValue;
             default:
-                throw new RuntimeException("Unknown operator: " + operatorNode.operator);
+                throw new RuntimeException("Unknown operator: " + operator);
         }
     }
 
-    private Object evaluateNumericOperator(OperatorNode operatorNode) {
-        int leftValue = Integer.parseInt(operatorNode.leftOperand.accept(this).toString());
-        int rightValue = Integer.parseInt(operatorNode.rightOperand.accept(this).toString());
-        switch (operatorNode.operator.getType()) {
+    private int evaluateNumericOperator(int leftValue, int rightValue, TokenType operator) {
+
+        switch (operator) {
             case PLUS:
                 return leftValue + rightValue;
             case MINUS:
@@ -229,19 +266,19 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
                 return leftValue * rightValue;
             case DIVISION:
                 if (rightValue == 0) {
-                    //throw new RuntimeException("Division by zero");
-                    throw new LemmsRuntimeException(operatorNode.operator, "Division by zero.");
+                    // throw new RuntimeException("Division by zero");
+                    throw new LemmsRuntimeException("Division by zero.");
                 }
                 return leftValue / rightValue;
             case MODULO:
                 if (rightValue == 0) {
-                    //throw new RuntimeException("Division by zero");
-                    throw new LemmsRuntimeException(operatorNode.operator, "Division by zero.");
+                    // throw new RuntimeException("Division by zero");
+                    throw new LemmsRuntimeException("Division by zero.");
                 }
                 return leftValue % rightValue;
             default:
-                //throw new RuntimeException("Unknown operator: " + operatorNode.operator);
-                throw new LemmsRuntimeException(operatorNode.operator, "Unknown operator: " + operatorNode.operator);
+                // throw new RuntimeException("Unknown operator: " + operatorNode.operator);
+                throw new LemmsRuntimeException("Unknown operator: " + operator);
 
         }
     }
@@ -255,11 +292,11 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
     }
 
     @Override
-    public Object visitFunctionCallValue(FunctionCallNode functionNode) {
+    public LemmsData visitFunctionCallValue(FunctionCallNode functionNode) {
 
         if (nativeFunctions.containsKey((functionNode.functionName))) {
             NativeFunction nativeFunction = nativeFunctions.get(functionNode.functionName);
-            List<Object> args = functionNode.params.stream()
+            List<LemmsData> args = functionNode.params.stream()
                     .map(param -> param.accept(this))
                     .toList();
             return nativeFunction.apply(args);
@@ -267,7 +304,7 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
 
         Object functionValue = environment.get(functionNode.functionName);
         if (functionValue instanceof FunctionDeclarationNode) {
-            List<Object> args = functionNode.params.stream()
+            List<LemmsData> args = functionNode.params.stream()
                     .map(param -> param.accept(this))
                     .toList();
 
@@ -307,10 +344,10 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
 
     @Override
     public FlowSignal visitReturnNode(ReturnNode returnNode) {
-        if(returnNode.value == null) {
+        if (returnNode.value == null) {
             return FlowSignal.returned(null);
         }
-        Object returnValue = returnNode.value.accept(this);
+        LemmsData returnValue = returnNode.value.accept(this);
         return FlowSignal.returned(returnValue);
     }
 
