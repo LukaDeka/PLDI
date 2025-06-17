@@ -5,7 +5,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
-import static org.testng.AssertJUnit.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TokenizerTest {
 
