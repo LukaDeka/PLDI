@@ -3,6 +3,8 @@ package com.lemms.interpreter;
 //für Exceptions
 import com.lemms.Exceptions.LemmsRuntimeException;
 
+import static java.lang.Character.valueOf;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,7 +12,11 @@ import java.util.Map;
 import com.lemms.SyntaxNode.*;
 import com.lemms.api.NativeFunction;
 import com.lemms.interpreter.FlowSignal.SignalType;
-
+import com.lemms.interpreter.object.LemmsBool;
+import com.lemms.interpreter.object.LemmsData;
+import com.lemms.interpreter.object.LemmsInt;
+import com.lemms.interpreter.object.LemmsObject;
+import com.lemms.interpreter.object.LemmsString;
 import com.lemms.TokenType;
 import static com.lemms.TokenType.*;
 
@@ -19,6 +25,22 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
     public Environment environment;
     public List<StatementNode> program;
     private final Map<String, NativeFunction> nativeFunctions;
+
+        private static List<TokenType> numericOperators = List.of(TokenType.PLUS,
+            TokenType.MINUS,
+            TokenType.MULTIPLICATION,
+            TokenType.DIVISION,
+            TokenType.MODULO);
+
+    private static List<TokenType> booleanOperators = List.of(TokenType.AND,
+            TokenType.OR, TokenType.NOT);
+
+    private static List<TokenType> comparisonOperators = List.of(TokenType.EQ,
+            NEQ,
+            TokenType.GEQ,
+            TokenType.LEQ,
+            TokenType.GT,
+            TokenType.LT);
 
     public Interpreter(List<StatementNode> program) {
         this.program = program;
@@ -98,42 +120,45 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
     @Override
     public FlowSignal visitAssignmentNode(AssignmentNode assignmentNode) {
         Object value = assignmentNode.rightHandSide.accept(this);
-        environment.assign(assignmentNode.leftHandSide.name, value);
+        LemmsData dataValue = null;
+        if(value instanceof Integer) {
+            dataValue = new LemmsInt(((Integer)value));
+        }
+        else if(value instanceof String) {
+            dataValue = new LemmsString(((String)value));
+        }
+        else if(value instanceof LemmsObject) {
+            dataValue = (LemmsObject)value;
+        }
+
+        environment.assign(assignmentNode.leftHandSide.name, dataValue);
         return FlowSignal.NORMAL;
     }
 
     @Override
-    public Object visitVariableValue(VariableNode variableNode) {
-        Object value = environment.get(variableNode.name);
+    public LemmsData visitVariableValue(VariableNode variableNode) {
+        LemmsData  value = environment.get(variableNode.name);
         if (value == null) //undefined, optional dedicated isDefined if needed?
             throw new LemmsRuntimeException("Undefined variable '" + variableNode.name + "'.");
         else return value;
     }
 
     @Override
-    public Object visitLiteralValue(LiteralNode literalNode) {
-
-        return literalNode.value;
+    public LemmsData visitLiteralValue(LiteralNode literalNode) {
+        if(literalNode.value instanceof Integer) {
+            return new LemmsInt((Integer) literalNode.value);
+        } else if(literalNode.value instanceof String) {
+            return new LemmsString((String) literalNode.value);
+        } else if(literalNode.value instanceof Boolean) {
+            return new LemmsBool((Boolean) literalNode.value);
+        }
+        throw new LemmsRuntimeException("Unknown literal type: " + literalNode.value.getClass().getSimpleName());
     }
 
-    private static List<TokenType> numericOperators = List.of(TokenType.PLUS,
-            TokenType.MINUS,
-            TokenType.MULTIPLICATION,
-            TokenType.DIVISION,
-            TokenType.MODULO);
-
-    private static List<TokenType> booleanOperators = List.of(TokenType.AND,
-            TokenType.OR, TokenType.NOT);
-
-    private static List<TokenType> comparisonOperators = List.of(TokenType.EQ,
-            NEQ,
-            TokenType.GEQ,
-            TokenType.LEQ,
-            TokenType.GT,
-            TokenType.LT);
-
     @Override
-    public Object visitOperatorValue(OperatorNode operatorNode) {
+    public LemmsData visitOperatorValue(OperatorNode operatorNode) {
+        
+
         if (numericOperators.contains(operatorNode.operator.getType())) {
             return evaluateNumericOperator(operatorNode);
         } else if (booleanOperators.contains(operatorNode.operator.getType())) {

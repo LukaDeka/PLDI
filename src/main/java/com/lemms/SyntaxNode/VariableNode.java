@@ -3,8 +3,9 @@ package com.lemms.SyntaxNode;
 import com.lemms.Token;
 import com.lemms.TokenType;
 import com.lemms.interpreter.ValueVisitor;
+import com.lemms.interpreter.object.LemmsData;
 
-public class VariableNode extends ExpressionNode{
+public class VariableNode extends ExpressionNode {
     public String name;
     public VariableNode child;    
 
@@ -18,7 +19,7 @@ public class VariableNode extends ExpressionNode{
     }
 
     @Override
-    public Object accept(ValueVisitor visitor) {
+    public LemmsData accept(ValueVisitor visitor) {
         return visitor.visitVariableValue(this);
     }
 }
