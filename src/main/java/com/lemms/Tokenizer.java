@@ -74,6 +74,17 @@ public class Tokenizer {
             case '/': index++; addToken(DIVISION); return;
             case '%': index++; addToken(MODULO); return;
             case ',': index++; addToken(COMMA); return;
+            case '#':
+                index++; //evtl 2x incremte
+                while (index + 1 <= input_file.length())
+                         {
+                            ch = input_file.charAt(index++);
+                            boolean isEndOfLine = ch == '\n';
+                            if(isEndOfLine) {
+                                break;
+                            }
+                        }
+                return;
         }
 
 
@@ -155,7 +166,12 @@ public class Tokenizer {
                 case "if": addToken(IF); return;
                 case "else": addToken(ELSE); return;
                 case "while": addToken(WHILE); return;
+                case "function": addToken(FUNCTION); return;
+                case "return": addToken(RETURN); return;
+                case "class": addToken(CLASS); return;
                 default: addToken(IDENTIFIER, new_token); return;
+
+
             }
         }
 

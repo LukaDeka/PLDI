@@ -1,6 +1,7 @@
 package com.lemms.SyntaxNode;
 
 import com.lemms.Token;
+import com.lemms.interpreter.FlowSignal;
 import com.lemms.interpreter.StatementVisitor;
 
 public class AssignmentNode extends StatementNode {
@@ -15,7 +16,7 @@ public class AssignmentNode extends StatementNode {
     }
 
     @Override
-    public void accept(StatementVisitor visitor) {
-        visitor.visitAssignmentNode(this);
+    public FlowSignal accept(StatementVisitor visitor) {
+        return visitor.visitAssignmentNode(this);
     }
 }
