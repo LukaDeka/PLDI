@@ -5,6 +5,7 @@ import com.lemms.Exceptions.UnexpectedToken;
 import com.lemms.SyntaxNode.ExpressionNode;
 import com.lemms.SyntaxNode.FunctionCallNode;
 import com.lemms.SyntaxNode.LiteralNode;
+import com.lemms.SyntaxNode.MemberAccessNode;
 import com.lemms.SyntaxNode.OperatorNode;
 import com.lemms.SyntaxNode.VariableNode;
 import com.lemms.Token;
@@ -184,7 +185,7 @@ public class ExpressionParser {
     private ExpressionNode parseMultiplicativeTerm() {
         EnumSet<TokenType> multiplicationTokenTypes = EnumSet.of(MULTIPLICATION, DIVISION, MODULO);
         logger.info("\n+++++ TERM PARSING +++++");
-        ExpressionNode leftFactor = parseUnaryFactor();
+        ExpressionNode leftFactor = parseMemberAccess();
 
         Token current = peek();
         while (current != null && multiplicationTokenTypes.contains(current.getType())) {
@@ -200,6 +201,47 @@ public class ExpressionParser {
 
         logger.info("\n----- TERM PARSING -----");
         return leftFactor;
+    }
+
+    private ExpressionNode parseMemberAccess() {
+        // Parse the base object (variable, function call, or parenthesized expression)
+        ExpressionNode base = parseUnaryFactor();
+
+        MemberAccessNode head = null;
+        MemberAccessNode current = null;
+
+        while (peek() != null && peek().getType() == TokenType.DOT) {
+            consume(); // consume '.'
+
+            // Next must be identifier (possibly a function call)
+            Token next = peek();
+            if (next == null || next.getType() != TokenType.IDENTIFIER) {
+                throw new UnexpectedToken("Expected identifier after '.'");
+            }
+
+            ExpressionNode member;
+            if (pos + 1 < tokens.size() && tokens.get(pos + 1).getType() == TokenType.BRACKET_OPEN) {
+                member = parseFunctionCall();
+            } else {
+                Token memberToken = consume();
+                member = new VariableNode(memberToken.getValue());
+            }
+
+            MemberAccessNode node = new MemberAccessNode(member, null);
+
+            if (head == null) {
+                // First member access: head is created, base is the object
+                head = new MemberAccessNode(base, node);
+                current = head.child;
+            } else {
+                // Chain further accesses
+                current.child = node;
+                current = current.child;
+            }
+        }
+
+        // If there was at least one dot, return the head node, else just the base
+        return head != null ? head : base;
     }
 
     private ExpressionNode parseUnaryFactor() {
@@ -256,7 +298,7 @@ public class ExpressionParser {
                     consume();
                     logger.info(identifierToken + "\n----- IDENTIFIER NODE CREATED -----");
                     return new VariableNode(identifierToken.getValue());
-                }                                
+                }
             }
 
             // if bracketed, then parse new Expression (recursive call)
