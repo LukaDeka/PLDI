@@ -1,4 +1,4 @@
-package com.lemms.GUI;
+package com.lemms.Canvas;
 
 import java.awt.*;
 

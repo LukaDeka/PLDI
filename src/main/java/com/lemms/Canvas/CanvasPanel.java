@@ -1,24 +1,23 @@
-package com.lemms.GUI;
+package com.lemms.Canvas;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 public class CanvasPanel extends JPanel implements KeyListener {
-    private List<Drawable> elements = new ArrayList<>();
-    private HashMap<Integer, ScriptCallback> keyEvents = new HashMap<>();
+    private final List<Drawable> elements = new ArrayList<>();
+    private final HashMap<Integer, ScriptCallback> keyEvents = new HashMap<>();
 
     public CanvasPanel() {
         setFocusable(true);
         requestFocusInWindow();
         addKeyListener(this);
     }
+
     public void addElement(Drawable d) {
         elements.add(d);
     }
@@ -31,6 +30,10 @@ public class CanvasPanel extends JPanel implements KeyListener {
         elements.clear();
     }
 
+    public void addKeyEvent(int key, ScriptCallback callback) {
+        keyEvents.put(key, callback);
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -39,9 +42,6 @@ public class CanvasPanel extends JPanel implements KeyListener {
         }
     }
 
-    public void addKeyEvent(int key, ScriptCallback callback) {
-        keyEvents.put(key, callback);
-    }
     @Override
     public void keyTyped(KeyEvent e) {
     }

@@ -1,4 +1,4 @@
-package com.lemms.GUI;
+package com.lemms.Canvas;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -28,6 +28,8 @@ public class Text implements Drawable {
         this.alignX = alignX;
         this.alignY = alignY;
     }
+
+    // Getter and Setter
 
     public String getText()   { return text; }
     public int    getX()      { return x; }
