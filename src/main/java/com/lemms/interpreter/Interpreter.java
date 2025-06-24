@@ -123,11 +123,10 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
         VariableNode targetNode = assignmentNode.leftHandSide;
         while (targetNode.child != null) {
             LemmsData data = environment.get(targetNode.name);
-            if(data instanceof LemmsObject lo) {
+            if (data instanceof LemmsObject lo) {
                 targetEnvironment = lo.environment;
                 targetNode = targetNode.child;
-            }
-            else {
+            } else {
                 throw new LemmsRuntimeException("Cannot assign to non-object variable '" + targetNode.name + "'.");
             }
         }
@@ -358,7 +357,7 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
 
     @Override
     public void visitClassDeclarationStatement(ClassDeclarationNode classDeclarationNode) {
-        
+
         NativeFunction constructor = (args) -> {
             HashMap<String, LemmsData> properties = new HashMap<String, LemmsData>();
             for (int i = 0; i < classDeclarationNode.localVariables.size(); i++) {
@@ -377,9 +376,17 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
                 new LemmsFunction(constructor));
     }
 
-    @Override
-    public LemmsData visitMemberAccessValue(MemberAccessNode functionNode) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'visitMemberAccessValue'");
+    // Add this method to Interpreter.java
+
+    public LemmsData visitMemberAccessValue(MemberAccessNode node) {
+        LemmsData obj = node.object.accept(this);
+        if (obj instanceof LemmsObject lo) {
+            LemmsData value = lo.environment.get(node.memberName);
+            if (value == null) {
+                throw new LemmsRuntimeException("Undefined member '" + node.memberName + "'.");
+            }
+            return value;
+        }
+        throw new LemmsRuntimeException("Cannot access member '" + node.memberName + "' of non-object.");
     }
 }

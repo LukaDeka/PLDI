@@ -14,7 +14,6 @@ public class MemberAccessNode extends ExpressionNode {
 
     @Override
     public LemmsData accept(ValueVisitor visitor) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'accept'");
+        return visitor.visitMemberAccessValue(this);
     }
 }
