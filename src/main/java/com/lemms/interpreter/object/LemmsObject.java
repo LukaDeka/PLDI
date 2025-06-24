@@ -3,29 +3,30 @@ package com.lemms.interpreter.object;
 import java.util.Map;
 
 import com.lemms.SyntaxNode.ClassDeclarationNode;
+import com.lemms.interpreter.Environment;
 
 public class LemmsObject extends LemmsData {
-    private final Map<String, LemmsData> properties;
+    public final Environment environment;
     public final ClassDeclarationNode classDeclaration;
 
-    public LemmsObject(ClassDeclarationNode classDeclaration, Map<String, LemmsData> properties) {
+    public LemmsObject(ClassDeclarationNode classDeclaration, Environment globalEnvironment) {
         this.classDeclaration = classDeclaration;
-        this.properties = properties;
+        this.environment = new Environment(globalEnvironment);
     }
 
     public LemmsData get(String name) {
-        return properties.get(name);
+        return environment.get(name);
     }
 
     public void set(String name, LemmsData value) {
-        properties.put(name, value);
+        environment.assign(name, value);
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(classDeclaration.className).append("{\n");
-        for (Map.Entry<String, LemmsData> entry : properties.entrySet()) {
+        for (Map.Entry<String, LemmsData> entry : environment.getValues().entrySet()) {
             sb.append("  ").append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
         }
         sb.append("}");

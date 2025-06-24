@@ -119,7 +119,19 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
     @Override
     public FlowSignal visitAssignmentNode(AssignmentNode assignmentNode) {
         LemmsData dataValue = assignmentNode.rightHandSide.accept(this);
-        environment.assign(assignmentNode.leftHandSide.name, dataValue);
+        Environment targetEnvironment = environment;
+        VariableNode targetNode = assignmentNode.leftHandSide;
+        while (targetNode.child != null) {
+            LemmsData data = environment.get(targetNode.name);
+            if(data instanceof LemmsObject lo) {
+                targetEnvironment = lo.environment;
+                targetNode = targetNode.child;
+            }
+            else {
+                throw new LemmsRuntimeException("Cannot assign to non-object variable '" + targetNode.name + "'.");
+            }
+        }
+        targetEnvironment.assign(targetNode.name, dataValue);
         return FlowSignal.NORMAL;
     }
 
@@ -358,7 +370,7 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
                 properties.put(functionDeclaration.functionName, new LemmsFunction(functionDeclaration));
             }
 
-            return new LemmsObject(classDeclarationNode, properties);
+            return new LemmsObject(classDeclarationNode, globalEnvironment);
         };
 
         globalEnvironment.assign(classDeclarationNode.className,
