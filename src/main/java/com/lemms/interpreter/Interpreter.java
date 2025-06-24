@@ -116,6 +116,38 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
         return FlowSignal.NORMAL;
     }
 
+    private static class LValue {
+        public Environment environment;
+        public String propertyName;
+
+        public LValue(Environment env, String name) {
+            this.environment = env;
+            this.propertyName = name;
+        }
+    }
+/*
+    private LValue resolveLValue(ExpressionNode node) {
+        if (node instanceof VariableNode varNode && varNode.child == null) {
+            return new LValue(environment, varNode.name);
+        } else if (node instanceof MemberAccessNode memberNode) {
+            LemmsData obj = memberNode.object.accept(this);
+            if (obj instanceof LemmsObject lo) {
+                return new LValue(lo.environment, memberNode.memberName);
+            } else {
+                throw new LemmsRuntimeException("Cannot assign to non-object member: " + memberNode.memberName);
+            }
+        } else if (node instanceof FunctionCallNode callNode) {
+            LemmsData result = callNode.accept(this);
+            // Next node in chain should be a MemberAccessNode
+            // (e.g., ee().ff)
+            // You may need to store the next node in CallNode or handle accordingly
+            // Example:
+            // return resolveLValue(new MemberAccessNode(result, ...));
+            throw new LemmsRuntimeException("Assignment to function call result not supported directly.");
+        }
+        throw new LemmsRuntimeException("Invalid assignment target.");
+    }
+*/
     @Override
     public FlowSignal visitAssignmentNode(AssignmentNode assignmentNode) {
         LemmsData dataValue = assignmentNode.rightHandSide.accept(this);
@@ -376,17 +408,28 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
                 new LemmsFunction(constructor));
     }
 
-    // Add this method to Interpreter.java
-
+    @Override
     public LemmsData visitMemberAccessValue(MemberAccessNode node) {
-        LemmsData obj = node.object.accept(this);
-        if (obj instanceof LemmsObject lo) {
-            LemmsData value = lo.environment.get(node.memberName);
-            if (value == null) {
-                throw new LemmsRuntimeException("Undefined member '" + node.memberName + "'.");
-            }
-            return value;
+        // Evaluate the current member (could be a variable or function call)
+        LemmsData current = node.object.accept(this);
+
+        // If there is no further child, return the resolved value
+        if (node.child == null) {
+            return current;
         }
-        throw new LemmsRuntimeException("Cannot access member '" + node.memberName + "' of non-object.");
+
+        // If the current value is not an object, we cannot access further members
+        if (!(current instanceof LemmsObject lo)) {
+            throw new LemmsRuntimeException("Cannot access member of non-object.");
+        }
+
+        // Set the environment to the object's environment for the next access in the
+        // chain
+        Environment previousEnvironment = environment;
+        environment = lo.environment;
+        LemmsData result = visitMemberAccessValue(node.child);
+        environment = previousEnvironment;
+        return result;
     }
+
 }

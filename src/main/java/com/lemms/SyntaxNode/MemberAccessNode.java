@@ -4,12 +4,14 @@ import com.lemms.interpreter.ValueVisitor;
 import com.lemms.interpreter.object.LemmsData;
 
 public class MemberAccessNode extends ExpressionNode {
-    public ExpressionNode object;
-    public String memberName;
 
-    public MemberAccessNode(ExpressionNode object, String memberName) {
+    public ExpressionNode object; // The base object (could be another MemberAccessNode, FunctionCallNode,
+                                  // VariableNode, etc.)
+    public MemberAccessNode child; // The next access/call in the chain, or null
+
+    public MemberAccessNode(ExpressionNode object, MemberAccessNode child) {
         this.object = object;
-        this.memberName = memberName;
+        this.child = child;
     }
 
     @Override
