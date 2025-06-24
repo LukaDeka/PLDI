@@ -8,6 +8,7 @@ public interface ValueVisitor {
     public LemmsData visitLiteralValue(LiteralNode literalNode);
     public LemmsData visitOperatorValue(OperatorNode operatorNode);
     public LemmsData visitFunctionCallValue(FunctionCallNode functionNode);    
+    public LemmsData visitMemberAccessValue(MemberAccessNode functionNode);    
     
     
 }

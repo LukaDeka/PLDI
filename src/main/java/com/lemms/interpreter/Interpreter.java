@@ -376,4 +376,10 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
         globalEnvironment.assign(classDeclarationNode.className,
                 new LemmsFunction(constructor));
     }
+
+    @Override
+    public LemmsData visitMemberAccessValue(MemberAccessNode functionNode) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'visitMemberAccessValue'");
+    }
 }
