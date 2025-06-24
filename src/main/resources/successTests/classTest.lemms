@@ -8,3 +8,6 @@ class Human {
         print("hallo");
     }
 }
+
+h = Human(27, "Hon");
+h.printHallo();

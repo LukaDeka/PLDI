@@ -37,6 +37,8 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
             TokenType.GT,
             TokenType.LT);
 
+    private boolean useClassEnvironmentSignal = false;
+
     public Interpreter(List<StatementNode> program) {
         this.program = program;
         nativeFunctions = new HashMap<>();
@@ -346,7 +348,9 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
                     .map(param -> param.accept(this))
                     .toList();
 
-            Environment functionEnvironment = new Environment(globalEnvironment);
+            Environment functionEnvironment = new Environment(useClassEnvironmentSignal ? environment : globalEnvironment);
+            useClassEnvironmentSignal = false;
+                        
             for (int i = 0; i < args.size(); i++) {
                 String argName = functionDeclaration.paramNames.get(i);
                 LemmsData argValue = args.get(i);
@@ -364,6 +368,7 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
                 throw new RuntimeException("Function did not return a value: " + functionNode.functionName);
             }
         }
+    
     }
 
     @Override
@@ -427,6 +432,9 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
         // chain
         Environment previousEnvironment = environment;
         environment = lo.environment;
+        if(node.child.object instanceof FunctionCallNode) {
+            useClassEnvironmentSignal = true;
+        }
         LemmsData result = visitMemberAccessValue(node.child);
         environment = previousEnvironment;
         return result;
