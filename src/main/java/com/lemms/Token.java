@@ -17,6 +17,12 @@ public class Token {
         this.line = line;
     }
 
+    public Token(TokenType type, String value) {
+        this.type = type;
+        this.value = value;
+        this.line = 0;
+    }
+
     public Token(TokenType type) {
         this.type = type;
         this.value = null;
