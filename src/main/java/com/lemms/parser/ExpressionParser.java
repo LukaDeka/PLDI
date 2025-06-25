@@ -185,7 +185,7 @@ public class ExpressionParser {
     private ExpressionNode parseMultiplicativeTerm() {
         EnumSet<TokenType> multiplicationTokenTypes = EnumSet.of(MULTIPLICATION, DIVISION, MODULO);
         logger.info("\n+++++ TERM PARSING +++++");
-        ExpressionNode leftFactor = parseMemberAccess();
+        ExpressionNode leftFactor = parseUnaryFactor();
 
         Token current = peek();
         while (current != null && multiplicationTokenTypes.contains(current.getType())) {

@@ -152,6 +152,7 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
 */
     @Override
     public FlowSignal visitAssignmentNode(AssignmentNode assignmentNode) {
+        /* TODO assignment
         LemmsData dataValue = assignmentNode.rightHandSide.accept(this);
         Environment targetEnvironment = environment;
         VariableNode targetNode = assignmentNode.leftHandSide;
@@ -165,6 +166,7 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
             }
         }
         targetEnvironment.assign(targetNode.name, dataValue);
+        */
         return FlowSignal.NORMAL;
     }
 

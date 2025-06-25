@@ -50,11 +50,8 @@ public class Lemms {
             //Verknüpfung: Tokenizer + Parser + Interpreter
             Tokenizer t = new Tokenizer(sourceFile);
             Parser p = new Parser(t.getTokens());
-            // System.out.println(p.parse());
-            Interpreter i = new Interpreter(p.parse());
-
-            i.interpret();
-
+            
+            System.out.println(p.parse());
 
             //System.out.println(p.getAST());
 
