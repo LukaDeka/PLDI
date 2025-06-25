@@ -1,0 +1,91 @@
+canvas = Canvas(500, 500, 500);
+snake = [Rect(0,0,20,20,"blue")];
+
+grid_w = canvas.width/20;
+grid_h = canvas.height/20;
+
+food_x = randint(grid_w-1)*20;
+food_y = randint(grid_h-1)*20;
+food = Rect(food_x, food_y, 20, 20, "red");
+
+canvas.run();
+canvas.add(snake[0])
+canvas.add(food)
+
+dir = [1, 0]
+
+canvas.on_key_pressed("W", {
+    dir[0] = -1;
+    dir[1] = 0;
+});
+
+canvas.on_key_pressed("A", {
+    dir[0] = -1;
+    dir[1] = 0;
+});
+
+canvas.on_key_pressed("S", {
+    dir[0] = -1;
+    dir[1] = 0;
+});
+
+canvas.on_key_pressed("D", {
+    dir[0] = -1;
+    dir[1] = 0;
+});
+
+canvas.update = {
+    Rect old_head = snake[0];
+    new_x = old_head.x + dir[0]*20;
+    new_y = old_head.y + dir[1]*20;
+    new_head = Rect(new_x, new_y, 20, 20, "blue");
+
+    if(!new_head.inside(canvas.bounds)){
+        game_over();
+    }
+
+    i = 0
+    while(i < snake.size()){
+        if(snake[i].x == new_x && snake[i].x == new_y){
+            game_over();
+        }
+    }
+
+    snake.add(0, new_head)
+    bool ate = new_head.touches(food);
+
+    if(ate) {
+        food_x = randint(grid_w-1)*20;
+        food_y = randint(grid_h-1)*20;
+
+        if(snake.size == grid_h*grid_w){
+            game_won();
+        }
+    }
+
+    if(!ate){
+        tail = snake.remove(snake.size - 1);
+        canvas.remove(tail)
+    }
+
+    canvas.redraw();
+};
+
+function game_over(){
+    canvas.clear();
+    snake.clear();
+    text = Text("Game Over", canvas.width/2, canvas.height/2, 72, "black");
+    canvas.add(text);
+    canvas.redraw();
+    canvas.stop();
+}
+
+function game_won(){
+    canvas.clear();
+    snake.clear();
+    text = Text("Game Won", canvas.width/2, canvas.height/2, 72, "black");
+    canvas.add(text);
+    canvas.redraw();
+    canvas.stop();
+}
+

@@ -1,12 +1,14 @@
 package com.lemms.interpreter;
 
 import com.lemms.SyntaxNode.*;
+import com.lemms.interpreter.object.LemmsData;
 
 public interface ValueVisitor {
-    public Object visitVariableValue(VariableNode variableNode);
-    public Object visitLiteralValue(LiteralNode literalNode);
-    public Object visitOperatorValue(OperatorNode operatorNode);
-    public Object visitFunctionCallValue(FunctionCallNode functionNode);    
+    public LemmsData visitVariableValue(VariableNode variableNode);
+    public LemmsData visitLiteralValue(LiteralNode literalNode);
+    public LemmsData visitOperatorValue(OperatorNode operatorNode);
+    public LemmsData visitFunctionCallValue(FunctionCallNode functionNode);    
+    public LemmsData visitMemberAccessValue(MemberAccessNode functionNode);    
     
     
 }

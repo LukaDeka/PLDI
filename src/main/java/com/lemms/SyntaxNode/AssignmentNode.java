@@ -5,10 +5,10 @@ import com.lemms.interpreter.FlowSignal;
 import com.lemms.interpreter.StatementVisitor;
 
 public class AssignmentNode extends StatementNode {
-    public VariableNode leftHandSide;
+    public ExpressionNode leftHandSide;
     public ExpressionNode rightHandSide;
 
-    public AssignmentNode(VariableNode identifier, ExpressionNode expression) {
+    public AssignmentNode(ExpressionNode identifier, ExpressionNode expression) {
         this.leftHandSide = identifier;
         this.rightHandSide = expression;        
     }

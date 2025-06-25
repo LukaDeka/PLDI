@@ -11,12 +11,13 @@ import java.util.function.Function;
 import com.lemms.Tokenizer;
 import com.lemms.SyntaxNode.StatementNode;
 import com.lemms.interpreter.Interpreter;
+import com.lemms.interpreter.object.LemmsData;
 import com.lemms.parser.Parser;
 
 public class LemmsAPI {
     private HashMap<String, NativeFunction> nativeFunctions;
     private List<StatementNode> program;
-    public void registerFunction(String name, Function<List<Object>, Object> function) {
+    public void registerFunction(String name, Function<List<LemmsData>, LemmsData> function) {
         nativeFunctions.put(name, function::apply);
 
     }

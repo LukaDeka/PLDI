@@ -5,6 +5,7 @@ import com.lemms.Exceptions.UnexpectedToken;
 import com.lemms.SyntaxNode.ExpressionNode;
 import com.lemms.SyntaxNode.FunctionCallNode;
 import com.lemms.SyntaxNode.LiteralNode;
+import com.lemms.SyntaxNode.MemberAccessNode;
 import com.lemms.SyntaxNode.OperatorNode;
 import com.lemms.SyntaxNode.VariableNode;
 import com.lemms.Token;
@@ -202,6 +203,80 @@ public class ExpressionParser {
         return leftFactor;
     }
 
+    private ExpressionNode parseBaseFactor() {
+        Token current = peek();
+        if (current == null) {
+            throw new UnexpectedToken("Unexpected end of input");
+        }
+
+        switch (current.getType()) {
+            case IDENTIFIER -> {
+                if (pos + 1 < tokens.size() && tokens.get(pos + 1).getType() == TokenType.BRACKET_OPEN) {
+                    return parseFunctionCall();
+                } else {
+                    Token token = consume();
+                    return new VariableNode(token.getValue());
+                }
+            }
+            case BRACKET_OPEN -> {
+                consume(); // consume '('
+                ExpressionNode expr = parseExpression();
+                if (peek() == null || peek().getType() != TokenType.BRACKET_CLOSED) {
+                    throw new MissingTokenException("Expected ')'");
+                }
+                consume(); // consume ')'
+                return expr;
+            }
+            default -> throw new UnexpectedToken("Unexpected token: " + current.getType());
+        }
+    }
+
+    private ExpressionNode parseMemberAccess() {
+        ExpressionNode base = parseBaseFactor();
+
+        // If no dot follows, just return the base factor
+        if (peek() == null || peek().getType() != TokenType.DOT) {
+            return base;
+        }
+
+        // Build the member access chain
+        MemberAccessNode root = null;
+        MemberAccessNode current = null;
+
+        while (peek() != null && peek().getType() == TokenType.DOT) {
+            consume(); // consume '.'
+
+            Token memberToken = consume();
+            if (memberToken.getType() != TokenType.IDENTIFIER) {
+                throw new UnexpectedToken("Expected identifier after '.'");
+            }
+
+            ExpressionNode memberExpression;
+            if (peek() != null && peek().getType() == TokenType.BRACKET_OPEN) {
+                // Backtrack and parse as function call
+                pos--;
+                memberExpression = parseFunctionCall();
+            } else {
+                memberExpression = new VariableNode(memberToken.getValue());
+            }
+
+            // Create new MemberAccessNode for this access
+            MemberAccessNode newAccess = new MemberAccessNode(memberExpression, null);
+
+            if (root == null) {
+                // First member access - base becomes the object
+                root = new MemberAccessNode(base, newAccess);
+                current = newAccess; // Fix: current should point to the newAccess, not root
+            } else {
+                // Chain subsequent accesses
+                current.child = newAccess;
+                current = newAccess; // Move current to the new access
+            }
+        }
+
+        return root;
+    }
+
     private ExpressionNode parseUnaryFactor() {
         logger.info("\n+++++ FACTOR PARSING +++++");
         Token current = peek();
@@ -247,16 +322,7 @@ public class ExpressionParser {
             }
 
             case IDENTIFIER -> {
-                Token identifierToken = peek();
-                if (pos + 1 < tokens.size() && tokens.get(pos + 1).getType() == TokenType.BRACKET_OPEN) {
-                    // Parse as function call
-                    return parseFunctionCall();
-                } else {
-                    // Just a variable
-                    consume();
-                    logger.info(identifierToken + "\n----- IDENTIFIER NODE CREATED -----");
-                    return new VariableNode(identifierToken);
-                }                                
+                return parseMemberAccess();
             }
 
             // if bracketed, then parse new Expression (recursive call)
@@ -279,30 +345,18 @@ public class ExpressionParser {
     }
 
     public static void main(String[] args) {
-        ArrayList<Token> tokens = new ArrayList<>();
-        // tokens.add(new Token(null, 1, TokenType.MINUS));
-        // tokens.add(new Token("1", 1, TokenType.INT));
-        // tokens.add(new Token(null, 1, TokenType.PLUS));
-        // tokens.add(new Token("2", 1, TokenType.INT));
-        // tokens.add(new Token(null, 1, TokenType.PLUS));
-        // tokens.add(new Token("3", 1, TokenType.INT));
-        // tokens.add(new Token(null, 1, TokenType.PLUS));
-        // tokens.add(new Token("4", 1, TokenType.INT));
-        // tokens.add(new Token(null, 1, TokenType.MULTIPLICATION));
-        // tokens.add(new Token("5", 1, TokenType.INT));
-        // tokens.add(new Token(null, 1, TokenType.MINUS));
-        // tokens.add(new Token("6", 1, TokenType.INT));
+        // Example usage
+        List<Token> tokens = new ArrayList<>();
+        tokens.add(new Token(TokenType.IDENTIFIER, "human"));
+        tokens.add(new Token(TokenType.DOT));
+        tokens.add(new Token(TokenType.IDENTIFIER, "birthDate"));
+        tokens.add(new Token(TokenType.DOT));
+        tokens.add(new Token(TokenType.IDENTIFIER, "year"));
 
-        // tokens.add(new Token(null, 1, TokenType.BRACKET_OPEN));
-        // tokens.add(new Token("funny_var2", 1, TokenType.IDENTIFIER));
-        // tokens.add(new Token(null, 1, TokenType.NEQ));
-        // tokens.add(new Token("100100134", 1, TokenType.INT));
-        // tokens.add(new Token(null, 1, TokenType.BRACKET_CLOSED));
+        ExpressionParser parser = new ExpressionParser(tokens);
+        ExpressionNode expression = parser.parseExpression();
 
-        // [BRACKET_OPEN, IDENTIFIER(funny_var2), NEQ, INT(100100134), BRACKET_CLOSED]
-
-        ExpressionNode node = new ExpressionParser(tokens).parseExpression();
-        System.out.println(node);
-
+        // Print or process the parsed expression
+        System.out.println(expression);
     }
 }

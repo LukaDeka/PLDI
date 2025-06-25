@@ -2,6 +2,8 @@ package com.lemms.api;
 
 import java.util.List;
 
+import com.lemms.interpreter.object.LemmsData;
+
 @FunctionalInterface
 public interface NativeFunction {
     /**
@@ -10,5 +12,5 @@ public interface NativeFunction {
      * @return       A result object (or null) to return back into the script.
      * @throws RuntimeException if something goes wrong in the host side.
      */
-    Object apply(List<Object> args);
+    LemmsData apply(List<LemmsData> args);
 }

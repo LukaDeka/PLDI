@@ -10,7 +10,12 @@ import java.util.Map;
 import com.lemms.SyntaxNode.*;
 import com.lemms.api.NativeFunction;
 import com.lemms.interpreter.FlowSignal.SignalType;
-
+import com.lemms.interpreter.object.LemmsBool;
+import com.lemms.interpreter.object.LemmsData;
+import com.lemms.interpreter.object.LemmsFunction;
+import com.lemms.interpreter.object.LemmsInt;
+import com.lemms.interpreter.object.LemmsObject;
+import com.lemms.interpreter.object.LemmsString;
 import com.lemms.TokenType;
 import static com.lemms.TokenType.*;
 
@@ -19,6 +24,20 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
     public Environment environment;
     public List<StatementNode> program;
     private final Map<String, NativeFunction> nativeFunctions;
+
+    private static List<TokenType> numericOperators = List.of(TokenType.PLUS,
+            TokenType.MINUS,
+            TokenType.MULTIPLICATION,
+            TokenType.DIVISION,
+            TokenType.MODULO);
+
+    private static List<TokenType> numericComparisonOperators = List.of(
+            TokenType.GEQ,
+            TokenType.LEQ,
+            TokenType.GT,
+            TokenType.LT);
+
+    private boolean useClassEnvironmentSignal = false;
 
     public Interpreter(List<StatementNode> program) {
         this.program = program;
@@ -42,6 +61,10 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
     public void interpret() {
         globalEnvironment = new Environment();
         environment = globalEnvironment;
+        for (var entry : nativeFunctions.entrySet()) {
+            globalEnvironment.assign(entry.getKey(), new LemmsFunction(entry.getValue()));
+        }
+
         for (StatementNode i : program) {
             i.accept(this);
         }
@@ -97,71 +120,143 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
 
     @Override
     public FlowSignal visitAssignmentNode(AssignmentNode assignmentNode) {
-        Object value = assignmentNode.rightHandSide.accept(this);
-        environment.assign(assignmentNode.leftHandSide.name, value);
+        LemmsData rightValue = assignmentNode.rightHandSide.accept(this);
+
+        if (assignmentNode.leftHandSide instanceof VariableNode variableNode) {
+            // Simple variable assignment: x = 5
+            environment.assign(variableNode.name, rightValue);
+        } else if (assignmentNode.leftHandSide instanceof MemberAccessNode memberAccessNode) {
+            // Member access assignment: h.age = 25 or h.name.first = "John"
+            assignToMemberAccess(memberAccessNode, rightValue);
+        } else {
+            throw new LemmsRuntimeException(
+                    "Invalid assignment target: " + assignmentNode.leftHandSide.getClass().getSimpleName());
+        }
+
         return FlowSignal.NORMAL;
     }
 
-    @Override
-    public Object visitVariableValue(VariableNode variableNode) {
-        Object value = environment.get(variableNode.name);
-        if (value == null) //undefined, optional dedicated isDefined if needed?
-            throw new LemmsRuntimeException(variableNode.token, "Undefined variable '" + variableNode.name + "'.");
-        else return value;
+    private void assignToMemberAccess(MemberAccessNode memberAccess, LemmsData value) {
+        if (memberAccess.child == null) {
+            // This is the final property to assign to
+            if (memberAccess.object instanceof VariableNode varNode) {
+                environment.assign(varNode.name, value);                
+            } else {
+                throw new LemmsRuntimeException("Complex member access assignment not yet supported.");
+            }
+        } else {
+            // Navigate through the member access chain
+            LemmsData current = memberAccess.object.accept(this);
+            if (!(current instanceof LemmsObject lemmsObj)) {
+                throw new LemmsRuntimeException("Cannot access member of non-object.");
+            }
+
+            // Switch to the object's environment for the rest of the assignment
+            Environment previousEnv = environment;
+            environment = lemmsObj.environment;
+            try {
+                assignToMemberAccess(memberAccess.child, value);
+            } finally {
+                environment = previousEnv;
+            }
+        }
     }
 
     @Override
-    public Object visitLiteralValue(LiteralNode literalNode) {
-
-        return literalNode.value;
+    public LemmsData visitVariableValue(VariableNode variableNode) {
+        LemmsData value = environment.get(variableNode.name);
+        if (value == null) // undefined, optional dedicated isDefined if needed?
+            throw new LemmsRuntimeException("Undefined variable '" + variableNode.name + "'.");
+        else
+            return value;
     }
 
-    private static List<TokenType> numericOperators = List.of(TokenType.PLUS,
-            TokenType.MINUS,
-            TokenType.MULTIPLICATION,
-            TokenType.DIVISION,
-            TokenType.MODULO);
-
-    private static List<TokenType> booleanOperators = List.of(TokenType.AND,
-            TokenType.OR, TokenType.NOT);
-
-    private static List<TokenType> comparisonOperators = List.of(TokenType.EQ,
-            NEQ,
-            TokenType.GEQ,
-            TokenType.LEQ,
-            TokenType.GT,
-            TokenType.LT);
+    @Override
+    public LemmsData visitLiteralValue(LiteralNode literalNode) {
+        if (literalNode.value instanceof Integer) {
+            return new LemmsInt((Integer) literalNode.value);
+        } else if (literalNode.value instanceof String) {
+            return new LemmsString((String) literalNode.value);
+        } else if (literalNode.value instanceof Boolean) {
+            return new LemmsBool((Boolean) literalNode.value);
+        }
+        throw new LemmsRuntimeException("Unknown literal type: " + literalNode.value.getClass().getSimpleName());
+    }
 
     @Override
-    public Object visitOperatorValue(OperatorNode operatorNode) {
-        if (numericOperators.contains(operatorNode.operator.getType())) {
-            return evaluateNumericOperator(operatorNode);
-        } else if (booleanOperators.contains(operatorNode.operator.getType())) {
-            return evaluateBooleanOperator(operatorNode);
-        } else if (comparisonOperators.contains(operatorNode.operator.getType())) {
-            return evaluateComparisonOperators(operatorNode);
+    public LemmsData visitOperatorValue(OperatorNode operatorNode) {
+
+        LemmsData leftValue = operatorNode.leftOperand.accept(this);
+        LemmsData rightValue = operatorNode.rightOperand.accept(this);
+        TokenType operatorType = operatorNode.operator.getType();
+
+        if (operatorType == EQ || operatorType == NEQ) {
+            boolean result = evaluateEqualityOperator(leftValue, rightValue, operatorType);
+            return new LemmsBool(result);
+        }
+
+        if (leftValue instanceof LemmsBool && rightValue instanceof LemmsBool) {
+            boolean result = evaluateBooleanOperator(((LemmsBool) leftValue).value,
+                    ((LemmsBool) rightValue).value, operatorType);
+            return new LemmsBool(result);
+        } else if (leftValue instanceof LemmsInt && rightValue instanceof LemmsInt) {
+
+            if (numericOperators.contains(operatorType)) {
+                int result = evaluateNumericOperator(((LemmsInt) leftValue).value,
+                        ((LemmsInt) rightValue).value, operatorType);
+                return new LemmsInt(result);
+            } else if (numericComparisonOperators.contains(operatorType)) {
+                boolean result = evaluateNumericComparisonOperator(((LemmsInt) leftValue).value,
+                        ((LemmsInt) rightValue).value, operatorType);
+                return new LemmsBool(result);
+            }
+
         } else {
             throw new RuntimeException("Unknown operator: " + operatorNode.operator);
         }
+
+        return new LemmsBool(false);
+
     }
 
-    private boolean evaluateComparisonOperators(OperatorNode operatorNode) {
-        Object leftValue = operatorNode.leftOperand.accept(this);
-        Object rightValue = operatorNode.rightOperand.accept(this);
+    private boolean evaluateEqualityOperator(LemmsData leftValue, LemmsData rightValue, TokenType operator) {
 
-        switch (operatorNode.operator.getType()) {
-            case EQ:
-                return leftValue.equals(rightValue);
-            case NEQ:
-                return !leftValue.equals(rightValue);
-            default:
-                break;
+        boolean result = false;
+        if (leftValue.getClass() != rightValue.getClass()) {
+            result = false;
+        }
+        if (leftValue instanceof LemmsObject && rightValue instanceof LemmsObject) {
+            result = leftValue.equals(rightValue);
+        } else if (leftValue instanceof LemmsInt && rightValue instanceof LemmsInt) {
+            int leftValueInt = ((LemmsInt) leftValue).value;
+            int rightValueInt = ((LemmsInt) rightValue).value;
+            result = leftValueInt == rightValueInt;
+        } else if (leftValue instanceof LemmsString && rightValue instanceof LemmsString) {
+            String leftString = ((LemmsString) leftValue).value;
+            String rightString = ((LemmsString) rightValue).value;
+            result = leftString.equals(rightString);
+
+        } else if (leftValue instanceof LemmsBool && rightValue instanceof LemmsBool) {
+            boolean leftBool = ((LemmsBool) leftValue).value;
+            boolean rightBool = ((LemmsBool) rightValue).value;
+            result = leftBool == rightBool;
+        } else {
+            throw new RuntimeException("Unknown equality check for: "
+                    + leftValue.getClass().getSimpleName() + " and " + rightValue.getClass().getSimpleName());
+        }
+        if (operator == EQ) {
+            return result;
+        } else if (operator == NEQ) {
+            return !result;
+        } else {
+            throw new RuntimeException("Unknown equality operator: " + operator);
         }
 
-        int leftValueInt = Integer.parseInt(operatorNode.leftOperand.accept(this).toString());
-        int rightValueInt = Integer.parseInt(operatorNode.rightOperand.accept(this).toString());
+    }
 
-        switch (operatorNode.operator.getType()) {
+    private boolean evaluateNumericComparisonOperator(int leftValueInt, int rightValueInt, TokenType operator) {
+
+        switch (operator) {
             case GT:
                 return leftValueInt > rightValueInt;
             case LT:
@@ -174,13 +269,11 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
                 break;
         }
 
-        throw new RuntimeException("Unknown comparison operator: " + operatorNode.operator);
+        throw new RuntimeException("Unknown comparison operator: " + operator);
     }
 
-    private Object evaluateBooleanOperator(OperatorNode operatorNode) {
-        boolean leftValue = isTrue(operatorNode.leftOperand.accept(this));
-        boolean rightValue = isTrue(operatorNode.rightOperand.accept(this));
-        switch (operatorNode.operator.getType()) {
+    private boolean evaluateBooleanOperator(boolean leftValue, boolean rightValue, TokenType operator) {
+        switch (operator) {
             case AND:
                 return leftValue && rightValue;
             case OR:
@@ -188,14 +281,13 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
             case NOT:
                 return !rightValue;
             default:
-                throw new RuntimeException("Unknown operator: " + operatorNode.operator);
+                throw new RuntimeException("Unknown operator: " + operator);
         }
     }
 
-    private Object evaluateNumericOperator(OperatorNode operatorNode) {
-        int leftValue = Integer.parseInt(operatorNode.leftOperand.accept(this).toString());
-        int rightValue = Integer.parseInt(operatorNode.rightOperand.accept(this).toString());
-        switch (operatorNode.operator.getType()) {
+    private int evaluateNumericOperator(int leftValue, int rightValue, TokenType operator) {
+
+        switch (operator) {
             case PLUS:
                 return leftValue + rightValue;
             case MINUS:
@@ -204,59 +296,66 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
                 return leftValue * rightValue;
             case DIVISION:
                 if (rightValue == 0) {
-                    //throw new RuntimeException("Division by zero");
-                    throw new LemmsRuntimeException(operatorNode.operator, "Division by zero.");
+                    // throw new RuntimeException("Division by zero");
+                    throw new LemmsRuntimeException("Division by zero.");
                 }
                 return leftValue / rightValue;
             case MODULO:
                 if (rightValue == 0) {
-                    //throw new RuntimeException("Division by zero");
-                    throw new LemmsRuntimeException(operatorNode.operator, "Division by zero.");
+                    // throw new RuntimeException("Division by zero");
+                    throw new LemmsRuntimeException("Division by zero.");
                 }
                 return leftValue % rightValue;
             default:
-                //throw new RuntimeException("Unknown operator: " + operatorNode.operator);
-                throw new LemmsRuntimeException(operatorNode.operator, "Unknown operator: " + operatorNode.operator);
+                // throw new RuntimeException("Unknown operator: " + operatorNode.operator);
+                throw new LemmsRuntimeException("Unknown operator: " + operator);
 
         }
     }
 
-    private boolean isTrue(Object object) {
+    private boolean isTrue(LemmsData object) {
         if (object == null)
             return false;
-        if (object instanceof Boolean)
-            return (boolean) object;
-        return true;
+        if (object instanceof LemmsBool)
+            return ((LemmsBool) object).value;
+        throw new LemmsRuntimeException("Condition must be a boolean, but was: " + object.getClass().getSimpleName());
     }
 
     @Override
-    public Object visitFunctionCallValue(FunctionCallNode functionNode) {
+    public LemmsData visitFunctionCallValue(FunctionCallNode functionNode) {
 
-        if (nativeFunctions.containsKey((functionNode.functionName))) {
-            NativeFunction nativeFunction = nativeFunctions.get(functionNode.functionName);
-            List<Object> args = functionNode.params.stream()
+        LemmsData functionValue = environment.get(functionNode.functionName);
+        if (!(functionValue instanceof LemmsFunction)) {
+            throw new LemmsRuntimeException(
+                    "Function '" + functionNode.functionName + "' is not defined or not a function.");
+        }
+        LemmsFunction lemmsFunction = (LemmsFunction) functionValue;
+        if (lemmsFunction.isNative) {
+            NativeFunction nativeFunction = lemmsFunction.nativeFunction;
+            List<LemmsData> args = functionNode.params.stream()
                     .map(param -> param.accept(this))
                     .toList();
             return nativeFunction.apply(args);
-        }
-
-        Object functionValue = environment.get(functionNode.functionName);
-        if (functionValue instanceof FunctionDeclarationNode) {
-            List<Object> args = functionNode.params.stream()
+        } else {
+            FunctionDeclarationNode functionDeclaration = lemmsFunction.functionDeclaration;
+            List<LemmsData> args = functionNode.params.stream()
                     .map(param -> param.accept(this))
                     .toList();
 
-            Environment functionEnvironment = new Environment(globalEnvironment);
+            Environment functionEnvironment = new Environment(
+                    useClassEnvironmentSignal ? environment : globalEnvironment);
+            useClassEnvironmentSignal = false;
+
             for (int i = 0; i < args.size(); i++) {
-                String argName = ((FunctionDeclarationNode) functionValue).paramNames.get(i);
-                Object argValue = args.get(i);
+                String argName = functionDeclaration.paramNames.get(i);
+                LemmsData argValue = args.get(i);
                 functionEnvironment.assign(argName, argValue);
 
             }
             Environment previousEnvironment = environment;
             environment = functionEnvironment;
 
-            FlowSignal result = ((FunctionDeclarationNode) functionValue).functionBody.accept(this);
+            FlowSignal result = functionDeclaration.functionBody.accept(this);
             if (result.signal == SignalType.RETURN || result.signal == SignalType.NORMAL) {
                 environment = previousEnvironment; // Restore the previous environment
                 return result.value;
@@ -265,33 +364,82 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
             }
         }
 
-        throw new RuntimeException("Unknown function: " + functionNode.functionName);
     }
 
     @Override
     public FlowSignal visitFunctionCallStatement(FunctionCallStatementNode functionNode) {
-        functionNode.functionCall.accept(this);
+        if (functionNode.functionCall != null) {
+            // Simple function call
+            functionNode.functionCall.accept(this);
+        } else if (functionNode.expression != null) {
+            // Member access function call - this preserves the object context
+            functionNode.expression.accept(this);
+        }
         return FlowSignal.NORMAL;
     }
 
     @Override
     public void visitFunctionDeclarationStatement(FunctionDeclarationNode functionDeclarationNode) {
 
-        environment.assign(functionDeclarationNode.functionName, functionDeclarationNode);
+        environment.assign(functionDeclarationNode.functionName, new LemmsFunction(functionDeclarationNode));
     }
 
     @Override
     public FlowSignal visitReturnNode(ReturnNode returnNode) {
-        if(returnNode.value == null) {
+        if (returnNode.value == null) {
             return FlowSignal.returned(null);
         }
-        Object returnValue = returnNode.value.accept(this);
+        LemmsData returnValue = returnNode.value.accept(this);
         return FlowSignal.returned(returnValue);
     }
 
     @Override
     public void visitClassDeclarationStatement(ClassDeclarationNode classDeclarationNode) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'visitClassDeclarationStatement'");
+
+        NativeFunction constructor = (args) -> {
+            LemmsObject lemmsObject = new LemmsObject(classDeclarationNode, globalEnvironment);
+
+            for (int i = 0; i < classDeclarationNode.localVariables.size(); i++) {
+                String paramName = classDeclarationNode.localVariables.get(i);
+                LemmsData paramValue = args.get(i);
+                lemmsObject.set(paramName, paramValue);
+            }
+            for (var functionDeclaration : classDeclarationNode.localFunctions) {
+                lemmsObject.set(functionDeclaration.functionName, new LemmsFunction(functionDeclaration));
+            }
+
+            return lemmsObject;
+        };
+
+        globalEnvironment.assign(classDeclarationNode.className,
+                new LemmsFunction(constructor));
     }
+
+    @Override
+    public LemmsData visitMemberAccessValue(MemberAccessNode node) {
+        // Evaluate the current member (could be a variable or function call)
+        LemmsData current = node.object.accept(this);
+
+        // If there is no further child, return the resolved value
+        if (node.child == null) {
+            return current;
+        }
+
+        // If the current value is not an object, we cannot access further members
+        if (!(current instanceof LemmsObject lo)) {
+            throw new LemmsRuntimeException("Cannot access member of non-object.");
+        }
+
+        // Set the environment to the object's environment for the next access in the
+        // chain
+        Environment previousEnvironment = environment;
+        environment = lo.environment;
+        if (node.child.object instanceof FunctionCallNode) {
+            useClassEnvironmentSignal = true;
+        }
+        LemmsData result = visitMemberAccessValue(node.child);
+        environment = previousEnvironment;
+        return result;
+    }
+
 }
