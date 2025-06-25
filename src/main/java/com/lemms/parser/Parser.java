@@ -35,11 +35,73 @@ public class Parser {
         if (match(TokenType.WHILE))
             return parseWhileStatement();
         if (match(TokenType.IDENTIFIER)) {
-            TokenType type = peek().getType();
-            if (type == TokenType.ASSIGNMENT) {
-                return parseAssignment();
-            } else if (type == TokenType.BRACKET_OPEN) {
-                return parseFunctionCallStatement();
+            // Look ahead to determine what kind of statement this is
+            List<Token> exprTokens = new ArrayList<>();
+            exprTokens.add(previous()); // Add the IDENTIFIER we just consumed
+
+            // Check if it's a simple function call
+            if (peek().getType() == TokenType.BRACKET_OPEN) {
+                // Collect tokens for the function call
+                int parenDepth = 0;
+                do {
+                    Token token = advance();
+                    exprTokens.add(token);
+                    if (token.getType() == TokenType.BRACKET_OPEN)
+                        parenDepth++;
+                    if (token.getType() == TokenType.BRACKET_CLOSED)
+                        parenDepth--;
+                } while (parenDepth > 0 && !isAtEnd());
+
+                // Check what follows
+                if (peek().getType() == TokenType.SEMICOLON) {
+                    return parseMemberFunctionCallStatement(exprTokens);
+                } else if (peek().getType() == TokenType.DOT) {
+                    // Continue collecting member access chain after function call
+                    while (peek().getType() == TokenType.DOT) {
+                        exprTokens.add(advance()); // Add DOT
+                        exprTokens.add(advance()); // Add IDENTIFIER
+
+                        // If there's another function call, collect it
+                        if (peek().getType() == TokenType.BRACKET_OPEN) {
+                            parenDepth = 0;
+                            do {
+                                Token token = advance();
+                                exprTokens.add(token);
+                                if (token.getType() == TokenType.BRACKET_OPEN)
+                                    parenDepth++;
+                                if (token.getType() == TokenType.BRACKET_CLOSED)
+                                    parenDepth--;
+                            } while (parenDepth > 0 && !isAtEnd());
+                        }
+                    }
+                }
+            } else {
+                // Collect tokens for member access chain (no initial function call)
+                while (peek().getType() == TokenType.DOT) {
+                    exprTokens.add(advance()); // Add DOT
+                    exprTokens.add(advance()); // Add IDENTIFIER
+
+                    // If there's a function call, collect the entire call
+                    if (peek().getType() == TokenType.BRACKET_OPEN) {
+                        int parenDepth = 0;
+                        do {
+                            Token token = advance();
+                            exprTokens.add(token);
+                            if (token.getType() == TokenType.BRACKET_OPEN)
+                                parenDepth++;
+                            if (token.getType() == TokenType.BRACKET_CLOSED)
+                                parenDepth--;
+                        } while (parenDepth > 0 && !isAtEnd());
+                    }
+                }
+            }
+
+            // Now check what follows to determine statement type
+            TokenType nextType = peek().getType();
+            if (nextType == TokenType.ASSIGNMENT) {
+                return parseMemberAssignment(exprTokens);
+            } else if (nextType == TokenType.SEMICOLON) {
+                return parseMemberFunctionCallStatement(exprTokens);
             }
         }
         if (match(FUNCTION)) {
@@ -48,8 +110,7 @@ public class Parser {
         if (match(CLASS)) {
             return parseClassDeclaration();
         }
-        // ... other statement types ...
-        throw new LemmsParseError(peek(),"Unexpected token: " + peek());
+        throw new LemmsParseError(peek(), "Unexpected token: " + peek());
     }
 
     private ReturnNode parseReturnStatement() {
@@ -88,19 +149,22 @@ public class Parser {
         return ifNode;
     }
 
-    private AssignmentNode parseAssignment() {
-        Token identifier = previous();
-        Token equalsToken = consume(TokenType.ASSIGNMENT, "Expected '=' after identifier.");
-        ExpressionNode expr = parseExpression();
+    private AssignmentNode parseMemberAssignment(List<Token> leftSideTokens) {
+        // Parse the left side as an expression (could be member access)
+        ExpressionNode leftExpr = new ExpressionParser(leftSideTokens).parseExpression();
+
+        consume(TokenType.ASSIGNMENT, "Expected '=' after member access.");
+        ExpressionNode rightExpr = parseExpression();
         consume(TokenType.SEMICOLON, "Expected ';' after assignment.");
-        return new AssignmentNode(new VariableNode(identifier.getValue()), expr);
+
+        return new AssignmentNode(leftExpr, rightExpr);
     }
 
     private ExpressionNode parseExpression() {
         // Collect tokens for the expression (until a delimiter, e.g., ')', ';', etc.)
         List<Token> exprTokens = new ArrayList<>();
         int parenDepth = 0;
-        //davor so: while (!isAtEnd() && !isExpressionTerminator(peek())) {
+        // davor so: while (!isAtEnd() && !isExpressionTerminator(peek())) {
         while (!isAtEnd()) {
             Token token = peek();
             if (token.getType() == TokenType.BRACKET_OPEN) {
@@ -140,7 +204,7 @@ public class Parser {
         return whileNode;
     }
 
-    private ClassDeclarationNode parseClassDeclaration(){
+    private ClassDeclarationNode parseClassDeclaration() {
 
         ClassDeclarationNode c = new ClassDeclarationNode();
         List<String> vars = new ArrayList<>();
@@ -149,15 +213,16 @@ public class Parser {
         // read class name
         c.className = consume(IDENTIFIER, "Expected className IDENTIFIER after class keyword").getValue();
 
-        // read class localVariables (localVariables have to be first and after them, only function declarations can exist)
+        // read class localVariables (localVariables have to be first and after them,
+        // only function declarations can exist)
         consume(BRACES_OPEN, "Expected '{' after className IDENTIFIER");
-        while (!check(BRACES_CLOSED) && !check(FUNCTION)){
+        while (!check(BRACES_CLOSED) && !check(FUNCTION)) {
             vars.add(consume(IDENTIFIER, "Expected IDENTIFIER after ';'").getValue());
             consume(SEMICOLON, "Expected ';' after IDENTIFIER");
         }
 
         // read class localFunctions
-        while (!check(BRACES_CLOSED)){
+        while (!check(BRACES_CLOSED)) {
             consume(FUNCTION, "Expected function keyword or '}' after localVariables or previous function");
             funcs.add(parseFunctionDeclaration());
         }
@@ -196,31 +261,40 @@ public class Parser {
         return func;
     }
 
-    private FunctionCallStatementNode parseFunctionCallStatement() {
-        // The IDENTIFIER was just matched
-        List<Token> exprTokens = new ArrayList<>();
-        exprTokens.add(previous()); // Add the IDENTIFIER
-
-        // Collect tokens until we reach ')'
-        int parenDepth = 0;
-        do {
-            Token token = advance();
-            exprTokens.add(token);
-            if (token.getType() == TokenType.BRACKET_OPEN)
-                parenDepth++;
-            if (token.getType() == TokenType.BRACKET_CLOSED)
-                parenDepth--;
-        } while (parenDepth > 0 && !isAtEnd());
-
-        // Parse the function call as an expression
+    private FunctionCallStatementNode parseMemberFunctionCallStatement(List<Token> exprTokens) {
+        // Parse the function call expression
         ExpressionNode expr = new ExpressionParser(exprTokens).parseExpression();
 
         consume(TokenType.SEMICOLON, "Expected ';' after function call.");
 
-        // Wrap in statement node
+        // The expression should be either a FunctionCallNode or MemberAccessNode ending
+        // in a function call
         FunctionCallStatementNode stmt = new FunctionCallStatementNode();
-        stmt.functionCall = (FunctionCallNode) expr;
+        if (expr instanceof FunctionCallNode) {
+            stmt.functionCall = (FunctionCallNode) expr;
+        } else if (expr instanceof MemberAccessNode) {
+            // Extract the function call from the member access chain
+            stmt.functionCall = extractFunctionCallFromMemberAccess((MemberAccessNode) expr);
+        } else {
+            throw new LemmsParseError(peek(), "Expected function call in statement.");
+        }
+
         return stmt;
+    }
+
+    private FunctionCallNode extractFunctionCallFromMemberAccess(MemberAccessNode memberAccess) {
+        // Navigate to the end of the chain to find the function call
+        MemberAccessNode current = memberAccess;
+        while (current.child != null) {
+            current = current.child;
+        }
+
+        // The object at the end should be a FunctionCallNode
+        if (current.object instanceof FunctionCallNode) {
+            return (FunctionCallNode) current.object;
+        }
+
+        throw new RuntimeException("Expected function call at end of member access chain.");
     }
 
     // Utility methods:
