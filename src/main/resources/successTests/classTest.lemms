@@ -12,3 +12,4 @@ class Human {
 h = Human(27, "Hon");
 h.age = h.age + 1;
 h.printHallo();
+print(h.age);
