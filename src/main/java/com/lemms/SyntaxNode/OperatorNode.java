@@ -2,6 +2,7 @@ package com.lemms.SyntaxNode;
 
 import com.lemms.Token;
 import com.lemms.interpreter.ValueVisitor;
+import com.lemms.interpreter.object.LemmsData;
 
 public class OperatorNode extends ExpressionNode {
 
@@ -17,7 +18,7 @@ public class OperatorNode extends ExpressionNode {
     }
 
     @Override
-    public Object accept(ValueVisitor visitor) {
+    public LemmsData accept(ValueVisitor visitor) {
         return visitor.visitOperatorValue(this);
     }
 }

@@ -3,8 +3,10 @@ package com.lemms.interpreter;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.lemms.interpreter.object.LemmsData;
+
 public class Environment {
-    private final Map<String, Object> values = new HashMap<>();
+    private final Map<String, LemmsData> values = new HashMap<>();
     public final Environment enclosing;
 
     // Default constructor for global scope
@@ -17,7 +19,7 @@ public class Environment {
         this.enclosing = enclosing;
     }
 
-    public Map<String, Object> getValues() {
+    public Map<String, LemmsData> getValues() {
         return values;
     }
 
@@ -32,7 +34,7 @@ public class Environment {
         }
     }
 
-    public void assign(String name, Object value) {
+    public void assign(String name, LemmsData value) {
         Environment env = findVariableEnv(name);
         
         if (env == null) {
@@ -42,7 +44,7 @@ public class Environment {
         }
     }
 
-    public Object get(String name) {
+    public LemmsData get(String name) {
         if (values.containsKey(name)) {
             return values.get(name);
         } else if (enclosing != null) {

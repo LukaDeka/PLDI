@@ -74,6 +74,7 @@ public class Tokenizer {
             case '/': index++; addToken(DIVISION); return;
             case '%': index++; addToken(MODULO); return;
             case ',': index++; addToken(COMMA); return;
+            case '.': index++; addToken(DOT); return;
             case '#':
                 index++; //evtl 2x incremte
                 while (index + 1 <= input_file.length())

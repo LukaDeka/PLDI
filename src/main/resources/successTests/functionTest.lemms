@@ -1,0 +1,18 @@
+function multiply( x )
+{
+    return x * x;
+}
+
+function halve( x )
+{
+    return x / 2 ;
+}
+
+
+function applyFunctions(fA, fB, x) {
+    print(fA(x)+fB(x));
+}
+
+applyFunctions(multiply, halve, 8);
+applyFunctions(multiply, multiply, 8);
+applyFunctions(halve, halve, 500);

@@ -41,6 +41,7 @@ public class Lemms {
                         exit(1);
                     }
 
+
                     //Verknüpfung: Tokenizer + Parser + Interpreter
                     Tokenizer t = new Tokenizer(sourceFile);
                     Parser p = new Parser(t.getTokens());

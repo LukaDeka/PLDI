@@ -45,6 +45,9 @@ public class Parser {
         if (match(FUNCTION)) {
             return parseFunctionDeclaration();
         }
+        if (match(CLASS)) {
+            return parseClassDeclaration();
+        }
         // ... other statement types ...
         throw new LemmsParseError(peek(),"Unexpected token: " + peek());
     }
@@ -87,10 +90,9 @@ public class Parser {
 
     private AssignmentNode parseAssignment() {
         Token identifier = previous();
-        Token equalsToken = consume(TokenType.ASSIGNMENT, "Expected '=' after identifier.");
         ExpressionNode expr = parseExpression();
         consume(TokenType.SEMICOLON, "Expected ';' after assignment.");
-        return new AssignmentNode(new VariableNode(identifier), expr);
+        return new AssignmentNode(new VariableNode(identifier.getValue()), expr);
     }
 
     private ExpressionNode parseExpression() {
@@ -135,6 +137,35 @@ public class Parser {
         whileNode.condition = condition;
         whileNode.whileBody = body;
         return whileNode;
+    }
+
+    private ClassDeclarationNode parseClassDeclaration(){
+
+        ClassDeclarationNode c = new ClassDeclarationNode();
+        List<String> vars = new ArrayList<>();
+        List<FunctionDeclarationNode> funcs = new ArrayList<>();
+
+        // read class name
+        c.className = consume(IDENTIFIER, "Expected className IDENTIFIER after class keyword").getValue();
+
+        // read class localVariables (localVariables have to be first and after them, only function declarations can exist)
+        consume(BRACES_OPEN, "Expected '{' after className IDENTIFIER");
+        while (!check(BRACES_CLOSED) && !check(FUNCTION)){
+            vars.add(consume(IDENTIFIER, "Expected IDENTIFIER after ';'").getValue());
+            consume(SEMICOLON, "Expected ';' after IDENTIFIER");
+        }
+
+        // read class localFunctions
+        while (!check(BRACES_CLOSED)){
+            consume(FUNCTION, "Expected function keyword or '}' after localVariables or previous function");
+            funcs.add(parseFunctionDeclaration());
+        }
+
+        consume(BRACES_CLOSED, "Expected '}' class Body");
+
+        c.localVariables = vars;
+        c.localFunctions = funcs;
+        return c;
     }
 
     private FunctionDeclarationNode parseFunctionDeclaration() {

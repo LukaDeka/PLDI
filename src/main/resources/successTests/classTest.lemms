@@ -1,0 +1,13 @@
+print("hallo");
+
+class Human {
+    age;
+    name;
+
+    function printHallo(){
+        print("hallo");
+    }
+}
+
+h = Human(27, "Hon");
+h.printHallo();
