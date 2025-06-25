@@ -23,7 +23,7 @@ public class LemmsAPI {
     }
 
     public void setScript(String scriptFilePath) {        
-        String sourcePath = "src/main/resources/example1.1.txt"; // String sourcePath = args[0];
+        String sourcePath = "src/main/resources/example1.1.lemms"; // String sourcePath = args[0];
         File sourceFile = new File(sourcePath);
         
         Tokenizer t = new Tokenizer(sourceFile);

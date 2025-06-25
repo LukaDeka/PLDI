@@ -247,7 +247,7 @@ public class Tokenizer {
     }
 
     public static void main(String[] args) {
-        Tokenizer tokenizer = new Tokenizer(new File("src/main/resources/example1.txt"));
+        Tokenizer tokenizer = new Tokenizer(new File("src/main/resources/example1.lemms"));
         ArrayList<Token> tokens = tokenizer.getTokens();
         System.out.println(tokens);
     }

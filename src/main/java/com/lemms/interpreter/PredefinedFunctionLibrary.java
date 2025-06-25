@@ -12,11 +12,16 @@ public class PredefinedFunctionLibrary {
     public static Map<String, NativeFunction> getPredefinedFunctions() {
         Map<String, NativeFunction> functions = new HashMap<>();
 
-        functions.put("print", args -> {
+        functions.put("println", args -> {
             System.out.println(args.get(0));
             return null;
         });
-        
+
+        functions.put("print", args -> {
+            System.out.print(args.get(0));
+            return null;
+        });
+
         functions.put("len", args -> {
             if (args.get(0) instanceof LemmsString) {
                 int length = ((LemmsString)args.get(0)).value.length();
