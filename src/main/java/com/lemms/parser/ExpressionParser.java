@@ -266,11 +266,11 @@ public class ExpressionParser {
             if (root == null) {
                 // First member access - base becomes the object
                 root = new MemberAccessNode(base, newAccess);
-                current = root;
+                current = newAccess; // Fix: current should point to the newAccess, not root
             } else {
                 // Chain subsequent accesses
                 current.child = newAccess;
-                current = newAccess;
+                current = newAccess; // Move current to the new access
             }
         }
 
