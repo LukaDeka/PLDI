@@ -96,6 +96,7 @@ public class Parser {
 
     private AssignmentNode parseAssignment() {
         Token identifier = previous();
+        Token equalsToken = consume(TokenType.ASSIGNMENT, "Expected '=' after identifier.");
         ExpressionNode expr = parseExpression();
         consume(TokenType.SEMICOLON, "Expected ';' after assignment.");
         return new AssignmentNode(new VariableNode(identifier.getValue()), expr);
