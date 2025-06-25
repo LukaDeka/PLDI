@@ -9,6 +9,7 @@ import com.lemms.interpreter.ValueVisitor;
 public class FunctionCallStatementNode extends StatementNode {
 
     public FunctionCallNode functionCall;
+    public ExpressionNode expression;
     
     @Override
     public FlowSignal accept(StatementVisitor visitor) {        

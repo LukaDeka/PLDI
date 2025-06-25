@@ -267,34 +267,18 @@ public class Parser {
 
         consume(TokenType.SEMICOLON, "Expected ';' after function call.");
 
-        // The expression should be either a FunctionCallNode or MemberAccessNode ending
-        // in a function call
         FunctionCallStatementNode stmt = new FunctionCallStatementNode();
+
         if (expr instanceof FunctionCallNode) {
+            // Simple function call like print("hello")
             stmt.functionCall = (FunctionCallNode) expr;
-        } else if (expr instanceof MemberAccessNode) {
-            // Extract the function call from the member access chain
-            stmt.functionCall = extractFunctionCallFromMemberAccess((MemberAccessNode) expr);
         } else {
-            throw new LemmsParseError(peek(), "Expected function call in statement.");
+            // Member access function call like h.doSomething() - preserve the full
+            // expression
+            stmt.expression = expr;
         }
 
         return stmt;
-    }
-
-    private FunctionCallNode extractFunctionCallFromMemberAccess(MemberAccessNode memberAccess) {
-        // Navigate to the end of the chain to find the function call
-        MemberAccessNode current = memberAccess;
-        while (current.child != null) {
-            current = current.child;
-        }
-
-        // The object at the end should be a FunctionCallNode
-        if (current.object instanceof FunctionCallNode) {
-            return (FunctionCallNode) current.object;
-        }
-
-        throw new RuntimeException("Expected function call at end of member access chain.");
     }
 
     // Utility methods:

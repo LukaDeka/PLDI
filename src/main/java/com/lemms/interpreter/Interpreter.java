@@ -127,46 +127,52 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
             this.propertyName = name;
         }
     }
-/*
-    private LValue resolveLValue(ExpressionNode node) {
-        if (node instanceof VariableNode varNode && varNode.child == null) {
-            return new LValue(environment, varNode.name);
-        } else if (node instanceof MemberAccessNode memberNode) {
-            LemmsData obj = memberNode.object.accept(this);
-            if (obj instanceof LemmsObject lo) {
-                return new LValue(lo.environment, memberNode.memberName);
-            } else {
-                throw new LemmsRuntimeException("Cannot assign to non-object member: " + memberNode.memberName);
-            }
-        } else if (node instanceof FunctionCallNode callNode) {
-            LemmsData result = callNode.accept(this);
-            // Next node in chain should be a MemberAccessNode
-            // (e.g., ee().ff)
-            // You may need to store the next node in CallNode or handle accordingly
-            // Example:
-            // return resolveLValue(new MemberAccessNode(result, ...));
-            throw new LemmsRuntimeException("Assignment to function call result not supported directly.");
-        }
-        throw new LemmsRuntimeException("Invalid assignment target.");
-    }
-*/
+
+    /*
+     * private LValue resolveLValue(ExpressionNode node) {
+     * if (node instanceof VariableNode varNode && varNode.child == null) {
+     * return new LValue(environment, varNode.name);
+     * } else if (node instanceof MemberAccessNode memberNode) {
+     * LemmsData obj = memberNode.object.accept(this);
+     * if (obj instanceof LemmsObject lo) {
+     * return new LValue(lo.environment, memberNode.memberName);
+     * } else {
+     * throw new LemmsRuntimeException("Cannot assign to non-object member: " +
+     * memberNode.memberName);
+     * }
+     * } else if (node instanceof FunctionCallNode callNode) {
+     * LemmsData result = callNode.accept(this);
+     * // Next node in chain should be a MemberAccessNode
+     * // (e.g., ee().ff)
+     * // You may need to store the next node in CallNode or handle accordingly
+     * // Example:
+     * // return resolveLValue(new MemberAccessNode(result, ...));
+     * throw new
+     * LemmsRuntimeException("Assignment to function call result not supported directly."
+     * );
+     * }
+     * throw new LemmsRuntimeException("Invalid assignment target.");
+     * }
+     */
     @Override
     public FlowSignal visitAssignmentNode(AssignmentNode assignmentNode) {
-        /* TODO assignment
-        LemmsData dataValue = assignmentNode.rightHandSide.accept(this);
-        Environment targetEnvironment = environment;
-        VariableNode targetNode = assignmentNode.leftHandSide;
-        while (targetNode.child != null) {
-            LemmsData data = environment.get(targetNode.name);
-            if (data instanceof LemmsObject lo) {
-                targetEnvironment = lo.environment;
-                targetNode = targetNode.child;
-            } else {
-                throw new LemmsRuntimeException("Cannot assign to non-object variable '" + targetNode.name + "'.");
-            }
-        }
-        targetEnvironment.assign(targetNode.name, dataValue);
-        */
+        /*
+         * TODO assignment
+         * LemmsData dataValue = assignmentNode.rightHandSide.accept(this);
+         * Environment targetEnvironment = environment;
+         * VariableNode targetNode = assignmentNode.leftHandSide;
+         * while (targetNode.child != null) {
+         * LemmsData data = environment.get(targetNode.name);
+         * if (data instanceof LemmsObject lo) {
+         * targetEnvironment = lo.environment;
+         * targetNode = targetNode.child;
+         * } else {
+         * throw new LemmsRuntimeException("Cannot assign to non-object variable '" +
+         * targetNode.name + "'.");
+         * }
+         * }
+         * targetEnvironment.assign(targetNode.name, dataValue);
+         */
         return FlowSignal.NORMAL;
     }
 
@@ -350,9 +356,10 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
                     .map(param -> param.accept(this))
                     .toList();
 
-            Environment functionEnvironment = new Environment(useClassEnvironmentSignal ? environment : globalEnvironment);
+            Environment functionEnvironment = new Environment(
+                    useClassEnvironmentSignal ? environment : globalEnvironment);
             useClassEnvironmentSignal = false;
-                        
+
             for (int i = 0; i < args.size(); i++) {
                 String argName = functionDeclaration.paramNames.get(i);
                 LemmsData argValue = args.get(i);
@@ -370,12 +377,18 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
                 throw new RuntimeException("Function did not return a value: " + functionNode.functionName);
             }
         }
-    
+
     }
 
     @Override
     public FlowSignal visitFunctionCallStatement(FunctionCallStatementNode functionNode) {
-        functionNode.functionCall.accept(this);
+        if (functionNode.functionCall != null) {
+            // Simple function call
+            functionNode.functionCall.accept(this);
+        } else if (functionNode.expression != null) {
+            // Member access function call - this preserves the object context
+            functionNode.expression.accept(this);
+        }
         return FlowSignal.NORMAL;
     }
 
@@ -434,7 +447,7 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
         // chain
         Environment previousEnvironment = environment;
         environment = lo.environment;
-        if(node.child.object instanceof FunctionCallNode) {
+        if (node.child.object instanceof FunctionCallNode) {
             useClassEnvironmentSignal = true;
         }
         LemmsData result = visitMemberAccessValue(node.child);
