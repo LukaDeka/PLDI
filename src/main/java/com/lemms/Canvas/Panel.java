@@ -6,12 +6,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
 
 public class Panel extends JPanel implements KeyListener {
-    private final HashMap<String, CanvasObject> elements = new HashMap<>();
+    private final HashMap<String, CanvasObject> elements = new LinkedHashMap<>();
     private final HashMap<Integer, ScriptCallback> keyEvents = new HashMap<>();
     private final StatementVisitor statementVisitor;
 
@@ -20,6 +19,10 @@ public class Panel extends JPanel implements KeyListener {
         requestFocusInWindow();
         addKeyListener(this);
         this.statementVisitor = statementVisitor;
+    }
+
+    public CanvasObject getElement(String id) {
+        return elements.get(id);
     }
 
     public void addElement(String id, CanvasObject o) {

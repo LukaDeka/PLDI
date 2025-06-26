@@ -34,7 +34,7 @@ public class LemmsAPI {
     public void interpret() {
         Interpreter interpreter = new Interpreter(program);
         StaticCanvas.addPrimitives(this, interpreter);
-        //interpreter.addNativeFunctions(nativeFunctions);
+        interpreter.addNativeFunctions(nativeFunctions);
         interpreter.interpret();
     }
 

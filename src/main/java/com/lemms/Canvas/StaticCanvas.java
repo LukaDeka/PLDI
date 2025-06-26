@@ -2,10 +2,7 @@ package com.lemms.Canvas;
 
 import com.lemms.api.LemmsAPI;
 import com.lemms.interpreter.StatementVisitor;
-import com.lemms.interpreter.object.LemmsFunction;
-import com.lemms.interpreter.object.LemmsInt;
-import com.lemms.interpreter.object.LemmsObject;
-import com.lemms.interpreter.object.LemmsString;
+import com.lemms.interpreter.object.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -35,6 +32,7 @@ public class StaticCanvas implements ActionListener {
     public static void quit()      { get().quitInstance(); }
     public static int getWidth()   { return get().frame.getWidth(); }
     public static int getHeight()  { return get().frame.getHeight(); }
+    public static CanvasObject getElement(String id) {return get().panel.getElement(id);}
     public static void add(String id, CanvasObject o)        { get().panel.addElement(id, o); }
     public static void move(String id, int x, int y) {get().panel.moveElement(id, x, y);}
     public static void move(String id, int x, int y, int w, int h) {get().panel.moveElement(id, x, y, w, h);}
@@ -57,8 +55,8 @@ public class StaticCanvas implements ActionListener {
         });
         api.registerFunction("start_canvas", params -> {run(); return null;});
         api.registerFunction("quit_canvas", params -> {quit(); return null;});
-        api.registerFunction("canvas_width", params -> {getWidth(); return null;});
-        api.registerFunction("canvas_height", params -> {getHeight(); return null;});
+        api.registerFunction("canvas_width", params -> new LemmsInt(getWidth()));
+        api.registerFunction("canvas_height", params -> new LemmsInt(getHeight()));
         api.registerFunction("add_rectangle", params -> {
             LemmsString id = (LemmsString) params.get(0);
             LemmsInt x = (LemmsInt) params.get(1);
@@ -66,7 +64,13 @@ public class StaticCanvas implements ActionListener {
             LemmsInt width = (LemmsInt) params.get(3);
             LemmsInt height = (LemmsInt) params.get(4);
             LemmsString color = (LemmsString) params.get(5);
-            Rect rect = new Rect(x.value, y.value, width.value, height.value, Color.getColor(color.value));
+            Color c = Color.BLACK;
+            try {
+                c = (Color) Color.class.getField(color.value.toUpperCase()).get(null);
+            } catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException ignored) {
+                System.err.println("Can't get color: " + color.value.toUpperCase());
+            }
+            Rect rect = new Rect(x.value, y.value, width.value, height.value, c);
             add(id.value, rect); return null;});
         api.registerFunction("remove_canvas_element", params -> {
             LemmsString id = (LemmsString) params.get(0);
@@ -97,6 +101,20 @@ public class StaticCanvas implements ActionListener {
             LemmsFunction function = (LemmsFunction) params.get(0);
             ScriptCallback cv = function.functionDeclaration.functionBody::accept;
             onTick(cv); return null;
+        });
+        api.registerFunction("elements_collide", params -> {
+            LemmsString id_1 = (LemmsString) params.get(0);
+            LemmsString id_2 = (LemmsString) params.get(1);
+            CanvasObject a = getElement(id_1.value);
+            CanvasObject b = getElement(id_2.value);
+            return new LemmsBool(a.intersects(b));
+        });
+        api.registerFunction("element_contains", params -> {
+            LemmsString id_1 = (LemmsString) params.get(0);
+            LemmsString id_2 = (LemmsString) params.get(1);
+            CanvasObject a = getElement(id_1.value);
+            CanvasObject b = getElement(id_2.value);
+            return new LemmsBool(a.contains(b));
         });
     }
 

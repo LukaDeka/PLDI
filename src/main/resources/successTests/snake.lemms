@@ -1,20 +1,95 @@
-x = 1;
-print(x);
-
 init_canvas(500, 500, 500);
 
-grid_w = get_canvas_width()/20;
-grid_h = get_canvas_height()/20;
+cell_size = 20;
 
-food_x = randint(grid_w-1)*20;
-food_y = randint(grid_h-1)*20;
-food_x = 2;
-print(food_x);
+grid_w = canvas_width()/cell_size;
+grid_h = canvas_height()/cell_size;
+
+snake_x = cell_size;
+snake_y = cell_size;
+
+head = 1;
+tail = 1;
+
+food_x = randint(grid_w-1)*cell_size;
+food_y = randint(grid_h-1)*cell_size;
+
+dir_x = 1;
+dir_y = 0;
 
 start_canvas();
-add_rectangle("food",food_x, food_y, 20, 20, "red");
-add_rectangle("snake",20,20,20,20,"blue");
+add_rectangle("game", 0, 0, grid_w*cell_size, grid_h*cell_size, "black");
+add_rectangle("snake"+head,snake_x,snake_y,cell_size,cell_size,"green");
+add_rectangle("food", food_x, food_y, cell_size, cell_size, "red");
 
-function hello(){print("hello");}
+function move_up(){
+    if(dir_y == 0){dir_x = 0; dir_y = -1;}
+}
+function move_left(){
+    if(dir_x == 0){dir_x = -1; dir_y = 0;}
+}
+function move_down(){
+    if(dir_y == 0){dir_x = 0; dir_y = 1;}
+}
+function move_right(){
+    if(dir_x == 0){dir_x = 1; dir_y = 0;}
+}
 
-on_key_press(65, hello);
+W = 87; A = 65; S = 83; D = 68;
+
+on_key_press(W, move_up);
+on_key_press(A, move_left);
+on_key_press(S, move_down);
+on_key_press(D, move_right);
+
+function update(){
+    head = head+1;
+    snake_x = snake_x + dir_x*cell_size;
+    snake_y = snake_y + dir_y*cell_size;
+    add_rectangle("snake"+head, snake_x, snake_y, cell_size, cell_size, "green");
+
+    if(element_contains("game", "snake"+head) == false){
+        game_over();
+    }
+
+    temp = tail;
+    while(temp < head){
+        if(elements_collide("snake"+head, "snake"+temp)){
+            game_over();
+        }
+        temp = temp+1;
+    }
+
+    ate = elements_collide("snake"+head, "food");
+
+    if(ate){
+        food_x = randint(grid_w-1)*20;
+        food_y = randint(grid_h-1)*20;
+        move_canvas_element("food", food_x, food_y);
+
+        if(head-tail+1 == grid_h*grid_w){
+            game_won();
+        }
+    }else {
+        remove_canvas_element("snake"+tail);
+        tail= tail+1;
+    }
+    repaint_canvas();
+}
+
+function game_over(){
+    print("game over!");
+    clear_canvas();
+    quit_canvas();
+    exit(0);
+}
+
+function game_won(){
+    print("game won!");
+    clear_canvas();
+    quit_canvas();
+    exit(0);
+}
+
+on_tick(update);
+

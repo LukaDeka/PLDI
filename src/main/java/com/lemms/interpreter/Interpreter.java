@@ -57,7 +57,10 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
             nativeFunctions.put(entry.getKey(), entry.getValue());
         }
     }
-
+    
+    public void addNativeFunctions(Map<String, NativeFunction> nativeFunctions) {
+        this.nativeFunctions.putAll(nativeFunctions);
+    }
     public void interpret() {
         globalEnvironment = new Environment();
         environment = globalEnvironment;
