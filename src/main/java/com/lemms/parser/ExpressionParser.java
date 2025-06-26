@@ -203,45 +203,78 @@ public class ExpressionParser {
         return leftFactor;
     }
 
-    private ExpressionNode parseMemberAccess() {
-        // Parse the base object (variable, function call, or parenthesized expression)
-        ExpressionNode base = parseUnaryFactor();
+    private ExpressionNode parseBaseFactor() {
+        Token current = peek();
+        if (current == null) {
+            throw new UnexpectedToken("Unexpected end of input");
+        }
 
-        MemberAccessNode head = null;
+        switch (current.getType()) {
+            case IDENTIFIER -> {
+                if (pos + 1 < tokens.size() && tokens.get(pos + 1).getType() == TokenType.BRACKET_OPEN) {
+                    return parseFunctionCall();
+                } else {
+                    Token token = consume();
+                    return new VariableNode(token.getValue());
+                }
+            }
+            case BRACKET_OPEN -> {
+                consume(); // consume '('
+                ExpressionNode expr = parseExpression();
+                if (peek() == null || peek().getType() != TokenType.BRACKET_CLOSED) {
+                    throw new MissingTokenException("Expected ')'");
+                }
+                consume(); // consume ')'
+                return expr;
+            }
+            default -> throw new UnexpectedToken("Unexpected token: " + current.getType());
+        }
+    }
+
+    private ExpressionNode parseMemberAccess() {
+        ExpressionNode base = parseBaseFactor();
+
+        // If no dot follows, just return the base factor
+        if (peek() == null || peek().getType() != TokenType.DOT) {
+            return base;
+        }
+
+        // Build the member access chain
+        MemberAccessNode root = null;
         MemberAccessNode current = null;
 
         while (peek() != null && peek().getType() == TokenType.DOT) {
             consume(); // consume '.'
 
-            // Next must be identifier (possibly a function call)
-            Token next = peek();
-            if (next == null || next.getType() != TokenType.IDENTIFIER) {
+            Token memberToken = consume();
+            if (memberToken.getType() != TokenType.IDENTIFIER) {
                 throw new UnexpectedToken("Expected identifier after '.'");
             }
 
-            ExpressionNode member;
-            if (pos + 1 < tokens.size() && tokens.get(pos + 1).getType() == TokenType.BRACKET_OPEN) {
-                member = parseFunctionCall();
+            ExpressionNode memberExpression;
+            if (peek() != null && peek().getType() == TokenType.BRACKET_OPEN) {
+                // Backtrack and parse as function call
+                pos--;
+                memberExpression = parseFunctionCall();
             } else {
-                Token memberToken = consume();
-                member = new VariableNode(memberToken.getValue());
+                memberExpression = new VariableNode(memberToken.getValue());
             }
 
-            MemberAccessNode node = new MemberAccessNode(member, null);
+            // Create new MemberAccessNode for this access
+            MemberAccessNode newAccess = new MemberAccessNode(memberExpression, null);
 
-            if (head == null) {
-                // First member access: head is created, base is the object
-                head = new MemberAccessNode(base, node);
-                current = head.child;
+            if (root == null) {
+                // First member access - base becomes the object
+                root = new MemberAccessNode(base, newAccess);
+                current = newAccess; // Fix: current should point to the newAccess, not root
             } else {
-                // Chain further accesses
-                current.child = node;
-                current = current.child;
+                // Chain subsequent accesses
+                current.child = newAccess;
+                current = newAccess; // Move current to the new access
             }
         }
 
-        // If there was at least one dot, return the head node, else just the base
-        return head != null ? head : base;
+        return root;
     }
 
     private ExpressionNode parseUnaryFactor() {
@@ -289,16 +322,7 @@ public class ExpressionParser {
             }
 
             case IDENTIFIER -> {
-                Token identifierToken = peek();
-                if (pos + 1 < tokens.size() && tokens.get(pos + 1).getType() == TokenType.BRACKET_OPEN) {
-                    // Parse as function call
-                    return parseFunctionCall();
-                } else {
-                    // Just a variable
-                    consume();
-                    logger.info(identifierToken + "\n----- IDENTIFIER NODE CREATED -----");
-                    return new VariableNode(identifierToken.getValue());
-                }
+                return parseMemberAccess();
             }
 
             // if bracketed, then parse new Expression (recursive call)
@@ -321,30 +345,18 @@ public class ExpressionParser {
     }
 
     public static void main(String[] args) {
-        ArrayList<Token> tokens = new ArrayList<>();
-        // tokens.add(new Token(null, 1, TokenType.MINUS));
-        // tokens.add(new Token("1", 1, TokenType.INT));
-        // tokens.add(new Token(null, 1, TokenType.PLUS));
-        // tokens.add(new Token("2", 1, TokenType.INT));
-        // tokens.add(new Token(null, 1, TokenType.PLUS));
-        // tokens.add(new Token("3", 1, TokenType.INT));
-        // tokens.add(new Token(null, 1, TokenType.PLUS));
-        // tokens.add(new Token("4", 1, TokenType.INT));
-        // tokens.add(new Token(null, 1, TokenType.MULTIPLICATION));
-        // tokens.add(new Token("5", 1, TokenType.INT));
-        // tokens.add(new Token(null, 1, TokenType.MINUS));
-        // tokens.add(new Token("6", 1, TokenType.INT));
+        // Example usage
+        List<Token> tokens = new ArrayList<>();
+        tokens.add(new Token(TokenType.IDENTIFIER, "human"));
+        tokens.add(new Token(TokenType.DOT));
+        tokens.add(new Token(TokenType.IDENTIFIER, "birthDate"));
+        tokens.add(new Token(TokenType.DOT));
+        tokens.add(new Token(TokenType.IDENTIFIER, "year"));
 
-        // tokens.add(new Token(null, 1, TokenType.BRACKET_OPEN));
-        // tokens.add(new Token("funny_var2", 1, TokenType.IDENTIFIER));
-        // tokens.add(new Token(null, 1, TokenType.NEQ));
-        // tokens.add(new Token("100100134", 1, TokenType.INT));
-        // tokens.add(new Token(null, 1, TokenType.BRACKET_CLOSED));
+        ExpressionParser parser = new ExpressionParser(tokens);
+        ExpressionNode expression = parser.parseExpression();
 
-        // [BRACKET_OPEN, IDENTIFIER(funny_var2), NEQ, INT(100100134), BRACKET_CLOSED]
-
-        ExpressionNode node = new ExpressionParser(tokens).parseExpression();
-        System.out.println(node);
-
+        // Print or process the parsed expression
+        System.out.println(expression);
     }
 }
