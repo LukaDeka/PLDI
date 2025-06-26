@@ -1,0 +1,20 @@
+x = 1;
+print(x);
+
+init_canvas(500, 500, 500);
+
+grid_w = get_canvas_width()/20;
+grid_h = get_canvas_height()/20;
+
+food_x = randint(grid_w-1)*20;
+food_y = randint(grid_h-1)*20;
+food_x = 2;
+print(food_x);
+
+start_canvas();
+add_rectangle("food",food_x, food_y, 20, 20, "red");
+add_rectangle("snake",20,20,20,20,"blue");
+
+function hello(){print("hello");}
+
+on_key_press(65, hello);

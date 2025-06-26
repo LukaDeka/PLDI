@@ -1,0 +1,7 @@
+init_canvas(500, 500, 500);
+
+start_canvas();
+add_rectangle("rect",20,20,20,20,"blue");
+
+function hello(){print("hello");}
+on_key_press(65, hello);

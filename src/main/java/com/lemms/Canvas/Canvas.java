@@ -12,7 +12,7 @@ public class Canvas implements ActionListener {
     private final JFrame frame;
     private final Timer timer;
 
-    public Canvas(int tickRate, int width, int height) {
+    public Canvas(int width, int height, int tickRate) {
         frame = new JFrame();
         panel = new CanvasPanel();
         frame.add(panel);
@@ -21,8 +21,14 @@ public class Canvas implements ActionListener {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(width, height);
         frame.setVisible(true);
-        update = panel::repaint;
+        //update = panel::repaint;
         timer = new Timer(tickRate, this);
+
+        addPrimitives();
+    }
+
+    private void addPrimitives() {
+
     }
 
     public int getWidth() {
@@ -61,7 +67,7 @@ public class Canvas implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         if ( e.getSource() == timer)
         {
-            update.call();
+            //update.call();
         }
     }
 

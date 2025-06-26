@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class Snake {
+    /*
     public static void main(String[] args) {
         //create canvas with single snake cell
         Canvas canvas = new Canvas(500, 500,500);
@@ -89,7 +90,7 @@ public class Snake {
             canvas.repaint();
         };
     }
-
+    */
     private static void GameOver(Canvas canvas, ArrayList<Rect> snake, boolean won) {
         canvas.clear();
         snake.clear();

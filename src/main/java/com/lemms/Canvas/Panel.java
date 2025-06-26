@@ -10,23 +10,36 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class CanvasPanel extends JPanel implements KeyListener {
-    private final List<Drawable> elements = new ArrayList<>();
+public class Panel extends JPanel implements KeyListener {
+    private final HashMap<String, CanvasObject> elements = new HashMap<>();
     private final HashMap<Integer, ScriptCallback> keyEvents = new HashMap<>();
-    //private final StatementVisitor visitor;
+    private final StatementVisitor statementVisitor;
 
-    public CanvasPanel() {
+    public Panel(StatementVisitor statementVisitor) {
         setFocusable(true);
         requestFocusInWindow();
         addKeyListener(this);
+        this.statementVisitor = statementVisitor;
     }
 
-    public void addElement(Drawable d) {
-        elements.add(d);
+    public void addElement(String id, CanvasObject o) {
+        elements.put(id, o);
     }
 
-    public void removeElement(Drawable d) {
-        elements.remove(d);
+    public void moveElement(String id, int x, int y) {
+        elements.get(id).setX(x);
+        elements.get(id).setY(y);
+    }
+
+    public void moveElement(String id, int x, int y, int w, int h) {
+        elements.get(id).setX(x);
+        elements.get(id).setY(y);
+        elements.get(id).setWidth(w);
+        elements.get(id).setHeight(h);
+    }
+
+    public void removeElement(String id) {
+        elements.remove(id);
     }
 
     public void clearElements() {
@@ -40,7 +53,7 @@ public class CanvasPanel extends JPanel implements KeyListener {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        for (Drawable d : elements) {
+        for (Drawable d : elements.values()) {
             d.draw(g);
         }
     }
@@ -52,7 +65,7 @@ public class CanvasPanel extends JPanel implements KeyListener {
     @Override
     public void keyPressed(KeyEvent e) {
         if(keyEvents.containsKey(e.getKeyCode())) {
-            //keyEvents.get(e.getKeyCode()).call();
+            keyEvents.get(e.getKeyCode()).call(statementVisitor);
         }
     }
 

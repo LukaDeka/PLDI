@@ -1,6 +1,9 @@
 package com.lemms;
+import com.lemms.Canvas.Canvas;
+import com.lemms.Canvas.StaticCanvas;
 import com.lemms.Exceptions.LemmsParseError;
 import com.lemms.Exceptions.LemmsRuntimeException;
+import com.lemms.api.LemmsAPI;
 import com.lemms.interpreter.Interpreter;
 import com.lemms.parser.Parser;
 import java.io.File;
@@ -43,12 +46,17 @@ public class Lemms {
 
 
                     //Verknüpfung: Tokenizer + Parser + Interpreter
-                    Tokenizer t = new Tokenizer(sourceFile);
-                    Parser p = new Parser(t.getTokens());
-                    // System.out.println(p.parse());
-                    Interpreter i = new Interpreter(p.parse());
+                    //Tokenizer t = new Tokenizer(sourceFile);
+                    //Parser p = new Parser(t.getTokens());
+                    //StaticCanvas.addPrimitives(api, );
+                    LemmsAPI api = new LemmsAPI();
+                    api.setScript(sourcePath);
+                    api.interpret();
 
-                    i.interpret();
+                    // System.out.println(p.parse());
+                    //Interpreter i = new Interpreter(p.parse());
+
+                    //i.interpret();
                     break;
                 default:
                     System.out.println(

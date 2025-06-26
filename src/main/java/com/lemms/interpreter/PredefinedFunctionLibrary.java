@@ -2,6 +2,7 @@ package com.lemms.interpreter;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import com.lemms.api.NativeFunction;
 import com.lemms.interpreter.object.LemmsInt;
@@ -36,6 +37,18 @@ public class PredefinedFunctionLibrary {
                 System.exit(((LemmsInt) args.get(0)).value);
             } else {
                 System.exit(0);
+            }
+            return null;
+        });
+
+        functions.put("randint", args -> {
+            Random rand = new Random();
+
+            if (args.isEmpty()) {
+                return new LemmsInt(rand.nextInt());
+            }
+            if (args.get(0) instanceof LemmsInt bound) {
+                return new LemmsInt(rand.nextInt(bound.value));
             }
             return null;
         });
