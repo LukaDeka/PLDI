@@ -1,11 +1,8 @@
 package com.lemms;
-import com.lemms.Canvas.Canvas;
-import com.lemms.Canvas.StaticCanvas;
 import com.lemms.Exceptions.LemmsParseError;
 import com.lemms.Exceptions.LemmsRuntimeException;
 import com.lemms.api.LemmsAPI;
-import com.lemms.interpreter.Interpreter;
-import com.lemms.parser.Parser;
+
 import java.io.File;
 import static java.lang.System.exit;
 

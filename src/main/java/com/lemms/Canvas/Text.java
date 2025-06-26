@@ -7,8 +7,6 @@ import java.awt.Graphics;
 
 public class Text extends CanvasObject implements Drawable {
     private String text;
-    private int x;
-    private int y;
     private int size;
     private Color color;
 
@@ -63,7 +61,7 @@ public class Text extends CanvasObject implements Drawable {
         int offsetY = Math.round(fy * textHeight);
 
         // Draw at reference point minus offset
-        g.drawString(text, x - offsetX, y - offsetY);
+        g.drawString(text, getX() - offsetX, getY() - offsetY);
 
         // Restore graphics state
         g.setFont(oldFont);
