@@ -5,10 +5,8 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 
-public class Text implements Drawable {
+public class Text extends CanvasObject implements Drawable {
     private String text;
-    private int x;
-    private int y;
     private int size;
     private Color color;
 
@@ -17,9 +15,8 @@ public class Text implements Drawable {
     private float alignY = -1f;
 
     public Text(String text, int x, int y, int size, Color color) {
+        super(x, y, 0,0);
         this.text  = text;
-        this.x     = x;
-        this.y     = y;
         this.size  = size;
         this.color = color;
     }
@@ -30,16 +27,11 @@ public class Text implements Drawable {
     }
 
     // Getter and Setter
-
     public String getText()   { return text; }
-    public int    getX()      { return x; }
-    public int    getY()      { return y; }
     public int    getSize()   { return size; }
     public Color  getColor()  { return color; }
 
     public void setText(String text)   { this.text = text; }
-    public void setX(int x)            { this.x = x; }
-    public void setY(int y)            { this.y = y; }
     public void setSize(int size)      { this.size = size; }
     public void setColor(Color color)  { this.color = color; }
 
@@ -57,6 +49,11 @@ public class Text implements Drawable {
         int textWidth  = fm.stringWidth(text);
         int textHeight = fm.getHeight();
 
+        if (getWidth() == 0 && getHeight() == 0) {
+            setWidth(textWidth);
+            setHeight(textHeight);
+        }
+
         // Compute offsets: (-1 -> 0, 0 -> 0.5, +1 -> 1)
         float fx = (alignX + 1f) / 2f;
         float fy = (alignY + 1f) / 2f;
@@ -64,7 +61,7 @@ public class Text implements Drawable {
         int offsetY = Math.round(fy * textHeight);
 
         // Draw at reference point minus offset
-        g.drawString(text, x - offsetX, y - offsetY);
+        g.drawString(text, getX() - offsetX, getY() - offsetY);
 
         // Restore graphics state
         g.setFont(oldFont);

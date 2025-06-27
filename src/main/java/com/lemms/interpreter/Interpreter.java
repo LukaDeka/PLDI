@@ -57,7 +57,10 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
             nativeFunctions.put(entry.getKey(), entry.getValue());
         }
     }
-
+    
+    public void addNativeFunctions(Map<String, NativeFunction> nativeFunctions) {
+        this.nativeFunctions.putAll(nativeFunctions);
+    }
     public void interpret() {
         globalEnvironment = new Environment();
         environment = globalEnvironment;
@@ -140,7 +143,7 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
         if (memberAccess.child == null) {
             // This is the final property to assign to
             if (memberAccess.object instanceof VariableNode varNode) {
-                environment.assign(varNode.name, value);                
+                environment.assign(varNode.name, value);
             } else {
                 throw new LemmsRuntimeException("Complex member access assignment not yet supported.");
             }
@@ -211,6 +214,16 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
                 return new LemmsBool(result);
             }
 
+        } else if (leftValue instanceof LemmsString || rightValue instanceof LemmsString) {
+            if (operatorType == PLUS) {
+                String leftString = leftValue instanceof LemmsString ? ((LemmsString) leftValue).value
+                        : leftValue.toString();
+                String rightString = rightValue instanceof LemmsString ? ((LemmsString) rightValue).value
+                        : rightValue.toString();
+                return new LemmsString(leftString + rightString);
+            } else {
+                throw new LemmsRuntimeException("Operator '" + operatorType + "' not supported for strings.");
+            }
         } else {
             throw new RuntimeException("Unknown operator: " + operatorNode.operator);
         }

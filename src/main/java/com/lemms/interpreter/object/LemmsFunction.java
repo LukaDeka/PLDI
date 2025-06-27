@@ -13,7 +13,7 @@ public class LemmsFunction extends LemmsData {
         isNative = false;
     }
 
-        public LemmsFunction(NativeFunction value) {
+    public LemmsFunction(NativeFunction value) {
         this.functionDeclaration = null;
         this.nativeFunction = value;
         isNative = true;
