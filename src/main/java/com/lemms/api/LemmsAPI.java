@@ -1,6 +1,7 @@
 package com.lemms.api;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.Function;
@@ -15,7 +16,7 @@ import com.lemms.parser.Parser;
 
 public class LemmsAPI {
     private HashMap<String, NativeFunction> nativeFunctions;
-    private List<StatementNode> program;
+    private List<StatementNode> program = new ArrayList<>();
     public void registerFunction(String name, Function<List<LemmsData>, LemmsData> function) {
         nativeFunctions.put(name, function::apply);
     }
@@ -31,10 +32,23 @@ public class LemmsAPI {
 
     public void interpret() {
         Interpreter interpreter = new Interpreter(program);
-        Canvas.addPrimitives(this, interpreter);
-        interpreter.addNativeFunctions(nativeFunctions);
+        setupInterpreter(interpreter);
         interpreter.interpret();
     }
+
+    private void setupInterpreter(Interpreter interpreter) {
+        Canvas.addPrimitives(this, interpreter);
+        interpreter.addNativeFunctions(this.nativeFunctions);
+    }
+
+    public Interpreter createInterpreterForRepl() {
+        Interpreter interpreter = new Interpreter(new ArrayList<>());
+        setupInterpreter(interpreter);
+        interpreter.initializeGlobalScope();
+
+        return interpreter;
+    }
+
 
     public LemmsAPI() {
         nativeFunctions = new HashMap<>();

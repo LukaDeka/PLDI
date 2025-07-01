@@ -3,6 +3,7 @@ package com.lemms.interpreter;
 //für Exceptions
 import com.lemms.Exceptions.LemmsRuntimeException;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +23,7 @@ import static com.lemms.TokenType.*;
 public class Interpreter implements StatementVisitor, ValueVisitor {
     public Environment globalEnvironment;
     public Environment environment;
-    public List<StatementNode> program;
+    public List<StatementNode> program;     //mutable
     private final Map<String, NativeFunction> nativeFunctions;
 
     private static List<TokenType> numericOperators = List.of(TokenType.PLUS,
@@ -40,15 +41,55 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
     private boolean useClassEnvironmentSignal = false;
 
     public Interpreter(List<StatementNode> program) {
-        this.program = program;
+        //this.program = program;
+        this.program = new ArrayList<>(program); //mutable for REPL
         nativeFunctions = new HashMap<>();
         addPredefinedFunctions();
     }
 
     public Interpreter(List<StatementNode> program, Map<String, NativeFunction> nativeFunctions) {
-        this.program = program;
+        //this.program = program;
+        this.program = new ArrayList<>(program); //mutable for REPL
         this.nativeFunctions = nativeFunctions;
         addPredefinedFunctions();
+    }
+
+
+    public void initializeGlobalScope() {
+        globalEnvironment = new Environment();
+        environment = globalEnvironment;
+        for (var entry : nativeFunctions.entrySet()) {
+            globalEnvironment.assign(entry.getKey(), new LemmsFunction(entry.getValue()));
+        }
+    }
+
+    public void executeStatements(List<StatementNode> statements) {
+        // reset to the global environment before executing a new top-level line from the REPL
+        this.environment = this.globalEnvironment;
+        try {
+            for (StatementNode statement : statements) {
+                statement.accept(this);
+            }
+        } finally {
+            // global scope for the next REPL input (sicher gehen)
+            this.environment = this.globalEnvironment;
+        }
+    }
+
+    public void interpret() {
+        initializeGlobalScope();
+        executeStatements(this.program);
+    }
+
+    // for interpreter
+    public LemmsData evaluateExpression(ExpressionNode expression) {
+        // Ensure we are in the correct (global) scope for a REPL expression
+        this.environment = this.globalEnvironment;
+        try {
+            return expression.accept(this);
+        } finally {
+            this.environment = this.globalEnvironment;
+        }
     }
 
     private void addPredefinedFunctions() {
@@ -57,21 +98,9 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
             nativeFunctions.put(entry.getKey(), entry.getValue());
         }
     }
-    
+
     public void addNativeFunctions(Map<String, NativeFunction> nativeFunctions) {
         this.nativeFunctions.putAll(nativeFunctions);
-    }
-    public void interpret() {
-        globalEnvironment = new Environment();
-        environment = globalEnvironment;
-        for (var entry : nativeFunctions.entrySet()) {
-            globalEnvironment.assign(entry.getKey(), new LemmsFunction(entry.getValue()));
-        }
-
-        for (StatementNode i : program) {
-            i.accept(this);
-        }
-
     }
 
     @Override

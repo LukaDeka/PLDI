@@ -1,9 +1,16 @@
 package com.lemms;
 import com.lemms.Exceptions.LemmsParseError;
 import com.lemms.Exceptions.LemmsRuntimeException;
+import com.lemms.SyntaxNode.StatementNode;
 import com.lemms.api.LemmsAPI;
+import com.lemms.interpreter.Interpreter;
+import com.lemms.parser.Parser;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
 import static java.lang.System.exit;
 
 /*
@@ -26,12 +33,14 @@ import static java.lang.System.exit;
  * */
 
 public class Lemms {
+    private static boolean hadError = false; // to avoid exiting REPL on mistake
     public static void main(String[] args) {
         try {
             switch (args.length) {
                 case 0:
                     // Launch REPL
-                    System.out.println("REPL not yet implemented. Bye!");
+                    System.out.println("running REPL!");
+                    runRepl();
                     break;
                 case 1:
                     String sourcePath = args[0];
@@ -50,10 +59,8 @@ public class Lemms {
                     api.setScript(sourcePath);
                     api.interpret();
 
-                    // System.out.println(p.parse());
-                    //Interpreter i = new Interpreter(p.parse());
+                    if (hadError) exit(1); //for REPL
 
-                    //i.interpret();
                     break;
                 default:
                     System.out.println(
@@ -72,4 +79,74 @@ public class Lemms {
             System.err.println("[Line " + error.getToken().getLine() + "]");
         }
     }
+
+    private static void runRepl() {
+        System.out.println("Welcome to Lemms REPL v0.1");
+        System.out.println("Type 'exit' to quit.");
+
+        // Create a single, long-lived interpreter for the session
+        Interpreter interpreter = new Interpreter(new ArrayList<>());
+        interpreter.initializeGlobalScope(); // Set up the environment
+
+        Scanner scanner = new Scanner(System.in);
+
+        while (true) {
+            System.out.print("> ");
+            String line = scanner.nextLine();
+
+            // Check for exit condition
+            if (line == null || line.equalsIgnoreCase("exit")) {
+                break;
+            }
+
+            // If the user just hits enter, continue
+            if (line.isBlank()) {
+                continue;
+            }
+
+            // each line is a mini-program.
+            // wwe handle errors inside the loop
+            // to keep the REPL alive.
+            try {
+                Tokenizer tokenizer = new Tokenizer(line);
+                List<Token> tokens = tokenizer.getTokens();
+                Parser parser = new Parser(tokens);
+                List<StatementNode> statements = parser.parse();
+
+                interpreter.executeStatements(statements);
+
+            } catch (IndexOutOfBoundsException e) {
+
+            } catch (LemmsParseError e) {
+                // Report error but don't exit
+                reportParseError(e);
+            } catch (LemmsRuntimeException e) {
+                // Report error but don't exit
+                reportRuntimeError(e);
+            } catch (Exception e) {
+                // Catch any other unexpected errors to keep the REPL from crashing
+                System.err.println("An unexpected error occurred: " + e.getMessage());
+                e.printStackTrace(); // Good for debugging
+            }
+        }
+        System.out.println("Bye!");
+    }
+
+    // helpermethods - consistent error reporting
+    private static void reportRuntimeError(LemmsRuntimeException error) {
+        System.err.println("Runtime Error: " + error.getMessage());
+        if (error.getToken() != null) {
+            System.err.println("[Line " + error.getToken().getLine() + "]");
+        }
+        hadError = true;
+    }
+
+    private static void reportParseError(LemmsParseError error) {
+        System.err.println("Parse Error: " + error.getMessage());
+        if (error.getToken() != null) {
+            System.err.println("[Line " + error.getToken().getLine() + "]");
+        }
+        hadError = true;
+    }
+
 }

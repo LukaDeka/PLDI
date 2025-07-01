@@ -40,6 +40,9 @@ public class Parser {
             exprTokens.add(previous()); // Add the IDENTIFIER we just consumed
 
             // Check if it's a simple function call
+            if (isAtEnd()) {
+                throw new LemmsParseError(null,"unexpected end");
+            }
             if (peek().getType() == TokenType.BRACKET_OPEN) {
                 // Collect tokens for the function call
                 int parenDepth = 0;
@@ -53,6 +56,9 @@ public class Parser {
                 } while (parenDepth > 0 && !isAtEnd());
 
                 // Check what follows
+                if (isAtEnd()) {
+                    throw new LemmsParseError(null,"unexpected end");
+                }
                 if (peek().getType() == TokenType.SEMICOLON) {
                     return parseMemberFunctionCallStatement(exprTokens);
                 } else if (peek().getType() == TokenType.DOT) {
@@ -321,6 +327,9 @@ public class Parser {
     private Token consume(TokenType type, String message) {
         if (check(type))
             return advance();
+        if (isAtEnd()) {
+            throw new LemmsParseError(null, message);
+        }
         throw new LemmsParseError(peek(), message);
     }
 
