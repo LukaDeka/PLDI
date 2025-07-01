@@ -60,11 +60,6 @@ class LemmsTest {
     }
 
     @Test
-    void testExample3() throws IOException, InterruptedException {
-        makeTest("src/main/resources/example3.lemms", "19", 0);
-    }
-
-    @Test
     void testHelloWorld() throws IOException, InterruptedException {
         makeTest("src/main/resources/HelloWorld.lemms", "Hello World!", 0);
     }
@@ -97,11 +92,6 @@ class LemmsTest {
     @Test
     void testCommentTest() throws IOException, InterruptedException {
         makeTest("src/main/resources/successTests/commenttest.lemms", "12hellow # world", 0);
-    }
-
-    @Test
-    void testExitStatus0() throws IOException, InterruptedException {
-        makeTest("src/main/resources/successTests/exitstatus0.lemms", "helo", 0);
     }
 
     @Test

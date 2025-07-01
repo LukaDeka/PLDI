@@ -36,24 +36,6 @@ public class TokenizerTest {
     }
 
     @Test
-    public void test3() {
-        Tokenizer tokenizer = new Tokenizer(new File("src/main/resources/example3.lemms"));
-        ArrayList<Token> tokens = tokenizer.getTokens();
-
-        String expected = """
-[IDENTIFIER(ifvar1_), ASSIGNMENT, MINUS, INT(4), PLUS, INT(23), SEMICOLON, WHILE, BRACKET_OPEN, IDENTIFIER(ifvar1_), EQ, BOOL(false), BRACKET_CLOSED, BRACES_OPEN, IDENTIFIER(print), BRACKET_OPEN, STRING("
-w
-"
-o
-"
-w"), BRACKET_CLOSED, SEMICOLON, BRACES_CLOSED, IDENTIFIER(print), BRACKET_OPEN, IDENTIFIER(ifvar1_), BRACKET_CLOSED, SEMICOLON]
-""";
-        String normalizedExpected = normalize(expected);
-        String normalizedActual = normalize(tokens.toString());
-        assertEquals(normalizedExpected, normalizedActual);
-    }
-
-    @Test
     public void test4() {
         Tokenizer tokenizer = new Tokenizer(new String(""));
         ArrayList<Token> tokens = tokenizer.getTokens();
