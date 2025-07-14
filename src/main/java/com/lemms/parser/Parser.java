@@ -22,9 +22,13 @@ public class Parser {
     public List<StatementNode> parse() {
         List<StatementNode> statements = new ArrayList<>();
         while (!isAtEnd()) {
-            statements.add(parseStatement());
+            statements.add(parseDeclaration());
         }
         return statements;
+    }
+
+    private StatementNode parseDeclaration() {
+        return parseStatement();
     }
 
     private StatementNode parseStatement() throws LemmsParseError {
@@ -310,7 +314,7 @@ public class Parser {
         return tokens.get(position - 1);
     }
 
-    private boolean isAtEnd() {
+    public boolean isAtEnd() {
         return position >= tokens.size();
     }
 

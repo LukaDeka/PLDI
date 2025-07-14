@@ -1,6 +1,7 @@
 package com.lemms.interpreter;
 
 //für Exceptions
+import com.lemms.Exceptions.LemmsParseError;
 import com.lemms.Exceptions.LemmsRuntimeException;
 
 import java.util.HashMap;
@@ -8,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.lemms.SyntaxNode.*;
+import com.lemms.Token;
+import com.lemms.Tokenizer;
 import com.lemms.api.NativeFunction;
 import com.lemms.interpreter.FlowSignal.SignalType;
 import com.lemms.interpreter.object.LemmsBool;
@@ -17,6 +20,9 @@ import com.lemms.interpreter.object.LemmsInt;
 import com.lemms.interpreter.object.LemmsObject;
 import com.lemms.interpreter.object.LemmsString;
 import com.lemms.TokenType;
+import com.lemms.parser.ExpressionParser;
+import com.lemms.parser.Parser;
+
 import static com.lemms.TokenType.*;
 
 public class Interpreter implements StatementVisitor, ValueVisitor {
@@ -49,6 +55,88 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
         this.program = program;
         this.nativeFunctions = nativeFunctions;
         addPredefinedFunctions();
+    }
+
+    public void initializeForRepl() {
+        globalEnvironment = new Environment();
+        environment = globalEnvironment;
+        for (var entry : nativeFunctions.entrySet()) {
+            globalEnvironment.assign(entry.getKey(), new LemmsFunction(entry.getValue()));
+        }
+    }
+
+    //FÜR REPL
+    public void interpretLine(String source) {
+        Tokenizer tokenizer = new Tokenizer(source);
+        List<Token> tokens = tokenizer.getTokens();
+
+        if (tokens.isEmpty()) {
+            return;
+        }
+
+        try {
+            // ATTEMPT 1: als Statement(s) parsen
+            Parser parser = new Parser(tokens);
+            List<StatementNode> statements = parser.parse();
+
+            // alle statements ausführen
+            for (StatementNode stmt : statements) {
+                stmt.accept(this);
+            }
+
+            // eine *kontextabhängige* Bestätigung (nach erfolgreiche Ausführrung).
+            if (!statements.isEmpty()) {
+                StatementNode lastStatement = statements.get(statements.size() - 1);
+
+                // Hat die letzte Anweisung die Ausgabezeile "offen" gelassen?
+                if (isPrintWithoutNewlineCall(lastStatement)) {
+                    System.out.println(); // Ja, also schließe die Zeile mit einem Zeilenumbruch.
+                }
+
+                // Jetzt die normale REPL-Bestätigung ausgeben
+                if (lastStatement instanceof AssignmentNode assignment) {
+                    ExpressionNode assignedExpr = assignment.leftHandSide;
+                    if (assignedExpr instanceof VariableNode varNode) {
+                        System.out.println("=> " + environment.get(varNode.name));
+                    } else {
+                        System.out.println("=> null");
+                    }
+                } else if (lastStatement instanceof FunctionDeclarationNode funcDecl) {
+                    System.out.println("=> [Function: " + funcDecl.functionName + "]");
+                } else {
+                    // alle rrstlichen Statements (if, while, println, etc.)
+                    System.out.println("=> null");
+                }
+            }
+
+        } catch (LemmsParseError statementParseError) {
+            // ATTEMPT 2: als Expression parsen
+            try {
+                ExpressionParser exprParser = new ExpressionParser(tokens);
+                ExpressionNode expression = exprParser.parseExpression();
+
+                LemmsData result = expression.accept(this);
+
+                if (result != null) {
+                    System.out.println("=> " + result);
+                } else {
+                    System.out.println("=> null");
+                }
+
+            } catch (Exception expressionParseError) {
+                throw statementParseError;
+            }
+        }
+    }
+
+    //helperfunction (for clean REPL output)
+    private boolean isPrintWithoutNewlineCall(StatementNode stmt) {
+        if (stmt instanceof FunctionCallStatementNode fcs) {
+            if (fcs.functionCall != null) {
+                return fcs.functionCall.functionName.equals("print");
+            }
+        }
+        return false;
     }
 
     private void addPredefinedFunctions() {
@@ -135,7 +223,6 @@ public class Interpreter implements StatementVisitor, ValueVisitor {
             throw new LemmsRuntimeException(
                     "Invalid assignment target: " + assignmentNode.leftHandSide.getClass().getSimpleName());
         }
-
         return FlowSignal.NORMAL;
     }
 

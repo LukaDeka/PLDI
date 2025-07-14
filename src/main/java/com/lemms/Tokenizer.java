@@ -1,4 +1,6 @@
 package com.lemms;
+import com.lemms.Exceptions.LemmsParseError;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -217,7 +219,9 @@ public class Tokenizer {
 
 
 
-        throw new Error("Illegal character '" + ch +"' on line " +line);
+//        throw new Error("Illegal character '" + ch +"' on line " +line);
+        Token errorToken = new Token(null, String.valueOf(ch), line);
+        throw new LemmsParseError(errorToken, "Illegal character '" + ch + "'");
     }
 
 
