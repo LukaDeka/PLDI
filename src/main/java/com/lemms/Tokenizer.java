@@ -96,7 +96,7 @@ public class Tokenizer {
         // 3. Match multi-char tokens
         switch (ch) {
             case '=':
-                if (input_file.charAt(index + 1) == '=') { // && index + 1 < input_file.length() ?
+                if (index + 1 < input_file.length() && input_file.charAt(index + 1) == '=') { // && index + 1 < input_file.length()  <-- für kein Index Fehler im Tokenizer
                     index += 2;
                     addToken(EQ);
                 } else {

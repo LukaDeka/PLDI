@@ -150,6 +150,8 @@ public class Lemms {
                     try {
                         // ganzen Block zum Interpreter passen
                         interpreter.interpretLine(codeToRun);
+                    } catch (IndexOutOfBoundsException e) {
+                        System.out.println(ANSI_RED + "Syntax Error: Missing semicolon ';' at the end of the statement?" + ANSI_RESET);
                     } catch (LemmsParseError e) {
                         System.out.println(ANSI_RED + "Parse Error: " + e.getMessage() + ANSI_RESET);
                         if (e.getToken() != null) {
